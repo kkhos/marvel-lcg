@@ -75,7 +75,7 @@ export class SelectStep {
             let name = Cards.getSpanText(object_id)
             let effect_name = `${Effect.select_effect_obj.name_with_space}`
             // Select target [
-            UI.prompt.setTempPromptText(`${name} <span class='effect-text'>${effect_name}</span> (${Effect.select_effect_obj.target_num_range[0]}~${Effect.select_effect_obj.target_num_range[1]})<br/>${names.join(", ")}`)
+            UI.prompt.setTempPromptText(`${name} <span class='effect-text'>${effect_name}</span> (목표 ${Effect.select_effect_obj.target_num_range[0]}~${Effect.select_effect_obj.target_num_range[1]}개)<br/>${names.join(", ")}`)
         } else {
             BtnOk.setOk('Targets')
             // UI.resetPromptText()

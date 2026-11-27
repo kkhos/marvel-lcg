@@ -1,42 +1,44 @@
 // Display-only labels; engine commands and card data must never be translated.
+// Terminology: Korean Marvel Champions Rules Reference (June 2023), pp. 2–6, 35.
+// Scheme as an action = 암약; scheme card = 음모; SCH stat = 음모 수치.
 const labels: Record<string, string> = {
   "Initialize": "초기화",
   "Scenario Setup": "시나리오 준비",
   "Resolve Mulligans": "멀리건 처리",
   "Init Finished": "준비 완료",
-  "Player Turn": "플레이어 턴",
-  "Player Turn End": "플레이어 턴 종료",
+  "Player Turn": "플레이어 차례",
+  "Player Turn End": "플레이어 차례 종료",
   "Main Scheme Place Threat": "주요 음모에 위협 놓기",
   "Enemy Activation": "적 활성화",
   "Deal Encounter Cards": "조우 카드 나눠주기",
   "Reveal Encounter Cards": "조우 카드 공개",
-  "End Phase": "단계 종료",
+  "End Phase": "페이즈 종료",
   "End Round": "라운드 종료",
   "Start Round": "라운드 시작",
   "Game Over": "게임 종료",
-  "Player Phase": "플레이어 단계",
-  "Villain Phase": "빌런 단계",
-  "Player Phase End": "플레이어 단계 종료",
-  "Villain Phase End": "빌런 단계 종료",
+  "Player Phase": "플레이어 페이즈",
+  "Villain Phase": "빌런 페이즈",
+  "Player Phase End": "플레이어 페이즈 종료",
+  "Villain Phase End": "빌런 페이즈 종료",
   "Cost": "비용",
-  "Targets": "대상",
+  "Targets": "목표",
   "ChooseAbility": "능력 선택",
   "Choose Ability": "능력 선택",
   "Game Rule": "게임 규칙",
   "Ally Limit": "동료 제한",
-  "Play": "사용",
-  "Play 1": "사용 1",
-  "Play 2": "사용 2",
+  "Play": "플레이",
+  "Play 1": "플레이 1",
+  "Play 2": "플레이 2",
   "Attack": "공격",
   "Thwart": "저지",
   "Defense": "방어",
   "Recover": "회복",
-  "Change Form": "형태 변경",
+  "Change Form": "변신",
   "Action": "행동",
   "Action 1": "행동 1",
   "Hero Action": "히어로 행동",
   "Alter-Ego Action": "일상 행동",
-  "First Player Action": "첫 플레이어 행동",
+  "First Player Action": "시작 플레이어 행동",
   "Forced Action": "강제 행동",
   "Response": "반응",
   "Hero Response": "히어로 반응",
@@ -48,7 +50,7 @@ const labels: Record<string, string> = {
   "Forced Interrupt": "강제 난입",
   "Resource": "자원",
   "Special": "특수",
-  "When Defeated": "쓰러졌을 때",
+  "When Defeated": "격파될 때",
   "When Revealed": "공개될 때",
   "Ask": "선택",
   "Discard": "버리기",
@@ -62,7 +64,7 @@ const labels: Record<string, string> = {
   "End<br/>Response": "반응<br/>종료",
   "End<br/>Interrupt": "난입<br/>종료",
   "End<br/>Defense": "방어<br/>종료",
-  "End<br/>Turn": "턴<br/>종료",
+  "End<br/>Turn": "차례<br/>종료",
   "Cancel<br/>Pay": "지불<br/>취소",
   "Load Crash": "오류 복구",
   "Card Tilt": "카드 기울기",
@@ -80,7 +82,7 @@ const labels: Record<string, string> = {
   "Save 3": "저장 3",
   "Load": "불러오기",
   "Save": "저장",
-  "Auto Targeting": "자동 대상 선택",
+  "Auto Targeting": "자동 목표 선택",
   "Auto Activate": "자동 활성화",
   "Show Auto Activate Checkbox": "자동 활성화 체크 표시",
   "Auto Pause": "자동 일시정지",
@@ -89,7 +91,7 @@ const labels: Record<string, string> = {
   "By Type": "종류순",
   "Sort Area": "영역 정렬",
   "By Name": "이름순",
-  "Restart Turn": "턴 다시 시작",
+  "Restart Turn": "차례 다시 시작",
   "Full Search": "전체 검색",
   "Log": "기록",
   "Pause": "일시정지",
@@ -103,18 +105,18 @@ const labels: Record<string, string> = {
   "Replay complete — VICTORY": "리플레이 완료 — 승리",
   "Replay complete — DEFEAT": "리플레이 완료 — 패배",
   "Please wait": "잠시 기다려 주세요",
-  "First Player Interrupt": "첫 플레이어 난입",
+  "First Player Interrupt": "시작 플레이어 난입",
   "Hero Action 1": "히어로 행동 1",
   "Hero": "히어로",
   "Alter-Ego": "일상",
   "AlterEgo": "일상",
-  "SCH": "암약",
+  "SCH": "음모 수치",
   "Boost": "강화",
   "Scheme": "암약",
   "Stunned": "기절",
   "Confused": "혼란",
   "Tough": "강인함",
-  "Toughness": "강인함",
+  "Toughness": "강인",
   "Steady": "의연",
   "Stalwart": "견고",
   "Piercing": "관통",
@@ -134,7 +136,7 @@ const labels: Record<string, string> = {
   "Victory": "승점",
   "Surge": "쇄도",
   "Peril": "고립",
-  "Incite": "선동",
+  "Incite": "진척",
   "Hinder": "교란",
   "Hazard": "수렁",
   "Acceleration": "가속",
@@ -151,7 +153,7 @@ const labels: Record<string, string> = {
   "Attachment": "장착",
   "Villain": "빌런",
   "Obligation": "의무",
-  "Status": "상태",
+  "Status": "부가 상태",
   "Event": "이벤트",
   "Upgrade": "업그레이드",
   "Support": "지원",
@@ -161,7 +163,61 @@ const labels: Record<string, string> = {
   "Justice": "정의",
   "Protection": "수호",
   "Leadership": "통솔",
-  "Basic": "기본"
+  "Basic": "기본",
+  "Turn": "차례",
+  "End Turn": "차례 종료",
+  "Phase": "페이즈",
+  "First Player": "시작 플레이어",
+  "First Player Response": "시작 플레이어 반응",
+  "Target": "목표",
+  "Select Target": "목표 선택",
+  "Select Targets": "목표 선택",
+  "HP": "생명력",
+  "Hit Points": "생명력",
+  "ATK": "공격 수치",
+  "DEF": "방어 수치",
+  "THW": "저지 수치",
+  "REC": "회복 수치",
+  "Hand Size": "손 크기",
+  "Standard Set": "일반 세트",
+  "Standard Sets": "일반 세트",
+  "Expert Set": "전문가 세트",
+  "Expert Sets": "전문가 세트",
+  "Modular Set": "모듈식 조우 세트",
+  "Modular Sets": "모듈식 조우 세트",
+  "Standard Mode": "일반 모드",
+  "Expert Mode": "전문가 모드",
+  "Heroic Mode": "영웅 모드",
+  "Skirmish Mode": "전초전 모드",
+  "Rookie Mode": "초보자 모드",
+  "Campaign Mode": "캠페인 모드",
+  "Campaign Log": "캠페인 기록지",
+  "When Completed": "달성될 때",
+  "Defeated": "격파",
+  "Defeat": "격파",
+  "Heal": "치료",
+  "Damage": "피해",
+  "Threat": "위협",
+  "Identity": "아이덴티티",
+  "Status Card": "부가 상태 카드",
+  "Alliance": "동맹",
+  "Temporary": "순간",
+  "Setup": "사전 준비",
+  "Teamwork": "팀워크",
+  "Form": "형태",
+  "Physical Resource": "물리력 자원",
+  "Mental Resource": "정신력 자원",
+  "Energy Resource": "에너지 자원",
+  "Wild Resource": "만능 자원",
+  "Encounter Deck": "조우 덱",
+  "Encounter Card": "조우 카드",
+  "Discard Pile": "버린 더미",
+  "Victory Display": "승점 구역",
+  "Engaged": "교전 중",
+  "Consequential Damage": "부수적 피해",
+  "Play Area": "플레이 영역",
+  "Activate": "활성화",
+  "Card Play": "카드 플레이"
 };
 export function koLabel(value: string): string {
     return Object.prototype.hasOwnProperty.call(labels, value) ? labels[value] : value;
@@ -177,19 +233,19 @@ export function koText(value: string): string {
             .replace(/\bRound (\d+) Step (\d+)\b/g, '$1라운드 · $2단계')
             .replace(/\bRound (\d+) Start\b/g, '$1라운드 시작')
             .replace(/\bRound (\d+) End\b/g, '$1라운드 종료')
-            .replace(/'s Turn \((\d+)\)/g, '의 턴 ($1)')
-            .replace(/\bTurn End\b/g, '턴 종료')
-            .replace(/\bEnd Phase\b/g, '단계 종료')
-            .replace(/\bPlayer Phase End\b/g, '플레이어 단계 종료')
-            .replace(/\bVillain Phase End\b/g, '빌런 단계 종료')
-            .replace(/\bPlayer Phase\b/g, '플레이어 단계')
-            .replace(/\bVillain Phase\b/g, '빌런 단계')
+            .replace(/'s Turn \((\d+)\)/g, '의 차례 ($1)')
+            .replace(/\bTurn End\b/g, '차례 종료')
+            .replace(/\bEnd Phase\b/g, '페이즈 종료')
+            .replace(/\bPlayer Phase End\b/g, '플레이어 페이즈 종료')
+            .replace(/\bVillain Phase End\b/g, '빌런 페이즈 종료')
+            .replace(/\bPlayer Phase\b/g, '플레이어 페이즈')
+            .replace(/\bVillain Phase\b/g, '빌런 페이즈')
             .replace(/--- Game Over ---/g, '--- 게임 종료 ---')
             .replace(/\bresolves mulligans\b/g, '멀리건 처리')
             .replace(/\bdraws (\d+) card\(s\)/g, '카드 $1장 뽑기')
             .replace(/\bwould play\b/g, '사용 예정:')
             .replace(/\bselected\b/g, '선택:')
-            .replace(/\benters game area\b/g, '게임 영역에 들어옴')
+            .replace(/\benters game area\b/g, '플레이 영역에 들어옴')
             .replace(/\beliminated\b/g, '탈락');
     });
 }

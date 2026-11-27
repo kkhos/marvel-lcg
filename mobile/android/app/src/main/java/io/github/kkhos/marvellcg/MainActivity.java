@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
     private TextView status;
     private Button start;
     private Button back;
-    private static final String UI_REVISION = "6";
+    private static final String UI_REVISION = "7";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -224,7 +224,7 @@ public class MainActivity extends Activity {
                     || ("/".equals(path) && uri.getQuery() != null);
             if (gamePage) {
                 new AlertDialog.Builder(this).setTitle("게임 화면에서 나갈까요?")
-                        .setMessage("턴 종료나 되돌리기는 실행되지 않습니다. 필요하면 먼저 게임을 저장하세요.")
+                        .setMessage("차례 종료나 되돌리기는 실행되지 않습니다. 필요하면 먼저 게임을 저장하세요.")
                         .setNegativeButton("계속 플레이", null)
                         .setPositiveButton("나가기", (d, w) -> web.loadUrl(loadedUrl)).show();
             } else if (web.canGoBack()) {

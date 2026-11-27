@@ -792,7 +792,7 @@ async function createScenarios() {
 </fieldset>
 
 <fieldset style="flex-direction: column; position: relative;">
-    <legend>표준 세트</legend>
+    <legend>일반 세트</legend>
 
     <fieldset style="gap: 0; padding: 0; border: none">
         <div>
@@ -803,7 +803,7 @@ async function createScenarios() {
 </fieldset>
 
 <fieldset style="flex-direction: column; position: relative;">
-    <legend>모듈 세트</legend>
+    <legend>모듈식 조우 세트</legend>
     <div>
         <button onclick="default_modular()">기본값</button>
         <button id="faction-modular-button" onclick="faction_modular()" hidden></button>
@@ -1059,7 +1059,7 @@ p:has(#timeout_text) {
         <details id="mode" open>
             <summary> 게임 모드</summary>
             <div class="slidecontainer">
-                <p>영웅 난이도: <span id="mode_heroic_text"></span>
+                <p>영웅 모드: <span id="mode_heroic_text"></span>
                 <input class="slider" type="range" min="0" max="8" value="0" step="1" oninput="mode_heroic_update()" id="mode_heroic_slider" style="max-width: 200px;"></p>
                 <script>
                     function mode_heroic_update() {
@@ -1075,9 +1075,9 @@ p:has(#timeout_text) {
             </div>
 
             <label>
-                <input type="checkbox" id="mode_skirmish"> Skirmish
+                <input type="checkbox" id="mode_skirmish"> 전초전 모드
                 <span class="tooltip">
-                    Skirmish mode (also sometimes called Rookie Mode) is a modification of standard mode that allows players to shorten the length of the game.
+                    전초전 모드는 일반 모드를 변형하여 짧은 게임을 즐기는 방식입니다.
 
 <ul><li>To play a standard game modified by skirmish mode, before the game begins, the player group chooses any one version of the villain. During step eight of game setup (Select Scenario), put only the chosen version of the villain into play and remove each other version in the villain deck from the game.</li><li>Skirmish mode can also be combined with expert mode, heroic mode, and/or campaign mode.</li></ul></span>
             </label>
@@ -1085,7 +1085,7 @@ p:has(#timeout_text) {
             <label id="mode_campaign_container" class="hide">
                 Campaign (Experimental):
                 <select id="campaign_selector">
-                    <option value="">없음 (표준 게임)</option>
+                    <option value="">없음 (일반 모드)</option>
                 </select>
             </label>
 
@@ -1287,7 +1287,7 @@ p:has(#timeout_text) {
         </style>
 
         <details id="campaign_log" class="hide" open>
-            <summary>캠페인 기록</summary>
+            <summary>캠페인 기록지</summary>
 
             <style>
                 #campaign_log_container {
@@ -1334,7 +1334,7 @@ p:has(#timeout_text) {
                 <tbody id="campaign_log_container"></tbody>
             </table>
             <div id="campaign_log_actions">
-                <button type="button" id="save_campaign_log_button" onclick="saveCampaignSettings(this)">캠페인 기록 저장</button>
+                <button type="button" id="save_campaign_log_button" onclick="saveCampaignSettings(this)">캠페인 기록지 저장</button>
                 <button type="button" id="clear_campaign_log_button" onclick="clearCampaignSettings(this)">캠페인 초기화</button>
                 <span id="campaign_log_save_status" role="status" aria-live="polite"></span>
             </div>
@@ -1595,7 +1595,7 @@ p:has(#timeout_text) {
                             throw new Error(result.error || `HTTP ${response.status}`)
                         }
                         savedCampaignSettings = result.settings
-                        status.textContent = 'Campaign log saved.'
+                        status.textContent = '캠페인 기록지가 저장되었습니다.'
                     } catch(error) {
                         console.error('Unable to save campaign settings:', error)
                         status.textContent = 'Unable to save campaign log.'
@@ -1632,7 +1632,7 @@ p:has(#timeout_text) {
                         }
                         savedCampaignSettings = result.settings
                         generateInputs("")
-                        status.textContent = 'Campaign log cleared.'
+                        status.textContent = '캠페인 기록지가 초기화되었습니다.'
                     } catch(error) {
                         console.error('Unable to clear campaign settings:', error)
                         status.textContent = 'Unable to clear campaign log.'
@@ -2012,8 +2012,8 @@ p:has(#timeout_text) {
 
         <details id="settings_other" open="">
         <summary>기타</summary>
-        <label><input type="checkbox" id="remove_standard_set_restriction" autocomplete="off" onchange="applyStandardSetRestriction()" >표준 세트 제한 해제
-            <span class="tooltip">Allow any combination of Standard and Expert encounter sets, including none.</span>
+        <label><input type="checkbox" id="remove_standard_set_restriction" autocomplete="off" onchange="applyStandardSetRestriction()" >일반 세트 제한 해제
+            <span class="tooltip">일반 및 전문가 조우 세트의 조합 제한을 해제합니다. 둘 다 선택하지 않아도 됩니다.</span>
         </label>
         <label><input type="checkbox" id="hide_bug_report">오류 메시지 숨기기</label>
         <label><input type="checkbox" id="show_achievement">업적 표시</label>
