@@ -8,6 +8,20 @@ export class Scene {
     static init() {
         const mobile = /Android|iPhone|iPad/i.test(navigator.userAgent) || matchMedia('(pointer: coarse)').matches;
         document.body.classList.toggle('mobile-layout', mobile);
+        if (mobile) {
+            // Keep the existing game controls and handlers, but separate their
+            // layout from the camera so prompts cannot cover selectable cards.
+            const rail = document.createElement('aside');
+            rail.id = 'mobile-action-rail';
+            rail.setAttribute('aria-label', '게임 진행 및 능력 선택');
+            const prompt = document.getElementById('prompt-box-container')!;
+            const options = document.getElementById('option-buttons')!;
+            const controls = document.createElement('div');
+            controls.id = 'mobile-action-confirm';
+            controls.append(document.getElementById('btn-end')!, document.getElementById('btn-ok')!);
+            rail.append(prompt, options, controls);
+            document.body.append(rail);
+        }
         // Layout viewport is stable when transient Android bars or dialogs
         // change only visualViewport. Coalesce genuine resizes to one frame.
         let resizeFrame = 0;
@@ -76,11 +90,16 @@ export function adjustSceneScale() {
     const viewportHeight = mobile ? (document.documentElement.clientHeight || window.innerHeight) : window.innerHeight;
     if (![viewportWidth, viewportHeight, sceneWidth, sceneHeight].every(n => Number.isFinite(n) && n > 0)) return;
 
+    // Reserve one stable action rail, even when no ability is being chosen.
+    // Avoid shifting or resizing the board on each option/prompt update.
+    const railWidth = mobile ? (document.getElementById('mobile-action-rail')?.offsetWidth ?? 0) : 0;
+    const boardWidth = viewportWidth - railWidth;
+    if (boardWidth <= 0) return;
     // Calculate scale factors
-    const scaleX = viewportWidth / sceneWidth;
+    const scaleX = boardWidth / sceneWidth;
     const scaleY = viewportHeight / sceneHeight;
     const nextScale = Math.min(scaleX, scaleY);
-    const left = `${(viewportWidth - sceneWidth * nextScale) / 2}px`;
+    const left = `${(boardWidth - sceneWidth * nextScale) / 2}px`;
     const top = `${(viewportHeight - sceneHeight * nextScale) / 2}px`;
     if (mobile && Scene.scale === nextScale && camera.style.left === left &&
         camera.style.top === top && camera.style.display === "unset") return;

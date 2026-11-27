@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
     private OnBackInvokedCallback systemBackCallback;
     private boolean backPending;
     private AlertDialog leaveDialog;
-    private static final String UI_REVISION = "18";
+    private static final String UI_REVISION = "19";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {

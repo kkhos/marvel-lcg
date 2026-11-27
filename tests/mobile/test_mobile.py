@@ -245,6 +245,39 @@ class MobileRegression(unittest.TestCase):
         expect(selectable).to_have_class(re.compile(r"\bselected\b"))
         self.wait_hand_images()
         self.screenshot("mulligan-selected")
+        # Exercise the actual production layout with synthetic long prompt and
+        # option content (no game action is submitted). Keep real card DOM.
+        self.page.evaluate("""() => {
+            const p = document.getElementById('prompt-box-container');
+            p.classList.remove('hide','display-none','prompt-anime');
+            document.getElementById('prompt-text').textContent =
+                'Nick Fury entered play. Choose an ability. ' + 'Select an enemy or resolve a response. '.repeat(5);
+            const opts = document.getElementById('option-buttons');
+            opts.replaceChildren();
+            for (const label of ['Draw 3 cards','Deal 4 damage to an enemy',
+                'Remove 2 threat from a scheme', 'A long ability description '.repeat(4)]) {
+                const b = document.createElement('button');
+                b.className = 'button'; b.textContent = label; opts.append(b);
+            }
+            opts.children[1].classList.add('clicked');
+            document.getElementById('btn-ok').disabled = false;
+        }""")
+        for width, height in [(915, 412), (740, 360)]:
+            self.page.set_viewport_size({"width": width, "height": height})
+            self.page.wait_for_function("""() => {
+                const b = document.getElementById('camera').getBoundingClientRect();
+                const r = document.getElementById('mobile-action-rail').getBoundingClientRect();
+                return b.width > 0 && b.right <= r.left + 1;
+            }""")
+            prompt = self.page.locator("#prompt-box-container")
+            options = self.page.locator("#option-buttons")
+            ok = self.page.locator("#btn-ok")
+            for element in [prompt, options, ok]:
+                self.bounds(element)
+            p, o, c = prompt.bounding_box(), options.bounding_box(), ok.bounding_box()
+            self.assertLessEqual(p["y"] + p["height"], o["y"] + 1)
+            self.assertLessEqual(o["y"] + o["height"], c["y"] + 1)
+            self.screenshot(f"action-panel-{width}")
         self.assertEqual(self.errors, [])
 
 

@@ -107,3 +107,108 @@ body.mobile-layout #scene .card .face,
 body.mobile-layout #scene .card .face .image {
     will-change: auto;
 }
+
+
+/* Fixed mobile action rail: the camera owns the remaining viewport.
+   Prompt and options stay in flow instead of competing for center-screen
+   absolute coordinates. Keep the confirm/cancel buttons outside scrolling. */
+body.mobile-layout #mobile-action-rail {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: clamp(156px, 23vw, 260px);
+    height: 100%;
+    padding: 8px 8px 58px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: var(--z-index-btn-ok);
+    background: linear-gradient(150deg, #172440, #10192e);
+    border-left: 1px solid #465b91;
+    font: 13px/1.35 system-ui, sans-serif;
+    color: #eff3ff;
+    overflow: hidden;
+}
+body.mobile-layout #mobile-action-rail #prompt-box-container {
+    position: relative !important;
+    inset: auto !important;
+    width: 100%; max-width: none; min-width: 0;
+    flex: 0 1 auto; min-height: 0; max-height: 38%;
+    padding: 8px 16px 8px 8px;
+    margin: 0;
+    font: 12px/1.35 system-ui, sans-serif;
+    overflow: auto;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    text-align: left;
+    background: #111b33;
+    color: #e0e8ff;
+    border: 1px solid #53678e;
+    border-radius: 7px;
+    opacity: 1 !important;
+    transition: none;
+    pointer-events: auto;
+    touch-action: pan-y !important;
+    overscroll-behavior: contain;
+}
+body.mobile-layout #mobile-action-rail #prompt-box-lock { display: none; }
+body.mobile-layout #mobile-action-rail #prompt-box-close {
+    font-size: 16px; width: 18px; height: 18px;
+    line-height: 18px; text-align: center; color: #afbedf;
+}
+body.mobile-layout #mobile-action-rail #option-buttons {
+    position: relative;
+    inset: auto;
+    transform: none;
+    flex: 1 1 auto;
+    min-height: 0; width: 100%; max-width: none; max-height: none;
+    display: flex; flex-direction: column; flex-wrap: nowrap;
+    align-items: stretch; justify-content: flex-start;
+    gap: 5px; margin: 0; padding: 0 1px;
+    overflow-y: auto; overflow-x: hidden;
+    background: none; border-radius: 0;
+    touch-action: pan-y; overscroll-behavior: contain;
+    pointer-events: auto;
+}
+body.mobile-layout #mobile-action-rail #option-buttons:empty { display: none; }
+body.mobile-layout #mobile-action-rail #option-buttons > .button {
+    flex: 0 0 auto;
+    width: 100%; height: auto; min-height: 40px;
+    margin: 0; padding: 7px 6px;
+    font: 700 13px/1.25 system-ui, sans-serif;
+    white-space: normal; overflow-wrap: anywhere; overflow: visible;
+    color: #eef3ff; background: #304574;
+    border: 1px solid #7084bc; border-radius: 7px;
+    touch-action: manipulation;
+}
+body.mobile-layout #mobile-action-rail #option-buttons > .button.clicked {
+    color: white; background: #6643a5; border-color: #c4b1ff;
+}
+body.mobile-layout #mobile-action-rail #option-buttons:has(.button.clicked) > .button:not(.clicked):not(.disable) { opacity: .8; }
+body.mobile-layout #mobile-action-rail #option-buttons > .button.disable {
+    color: #b6bed0; background: #394154; border-color: #606b82; opacity: .65;
+}
+body.mobile-layout #mobile-action-rail #option-buttons > .button:has(img) {
+    height: auto; min-height: 0; display: flex;
+}
+body.mobile-layout #mobile-action-rail #option-buttons > .button img {
+    max-width: 100%; width: auto; height: min(100px, 26dvh); object-fit: contain;
+}
+body.mobile-layout #mobile-action-confirm {
+    margin-top: auto;
+    flex: 0 0 auto;
+    display: flex; flex-direction: column; gap: 5px;
+}
+body.mobile-layout #mobile-action-confirm > .button {
+    position: relative; inset: auto; width: 100%; height: auto; min-height: 38px;
+    margin: 0; padding: 6px; white-space: normal;
+    font: 700 14px/1.25 system-ui, sans-serif; text-shadow: none;
+    box-shadow: none; border-radius: 7px;
+    transition: none;
+}
+body.mobile-layout #mobile-action-confirm > .button:disabled { display: none; }
+@media (max-height: 340px) {
+    body.mobile-layout #mobile-action-rail { gap: 4px; padding-top: 4px; padding-bottom: 48px; }
+    body.mobile-layout #mobile-action-rail #prompt-box-container { max-height: 32%; }
+    body.mobile-layout #mobile-action-confirm > .button { min-height: 32px; }
+}
