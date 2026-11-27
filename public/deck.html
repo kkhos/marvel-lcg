@@ -447,10 +447,12 @@ function create_card(card_id, from_peek) {
     div.appendChild(img)
     div.setAttribute('data-card-id', card_id)
 
+    const openPreview = () => cardPreview?.previewCard(div, {});
     div.onclick = (event) => {
-        cardPreview.previewCard(div, {})
+        openPreview();
         event.preventDefault();
-    }
+    };
+    window.MarvelDeckTouch?.bindPreview(div, openPreview);
 
     if( from_peek ) {
         div.oncontextmenu = (event) => {

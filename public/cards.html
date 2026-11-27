@@ -434,9 +434,9 @@ function createCard(card_id, from_peek) {
         div.classList.add('badge-defeated')
     }
 
-    div.onclick = () => {
-        window.cardPreview.previewCard(div, cardStatistics.statistics_json)
-    }
+    const openPreview = () => window.cardPreview?.previewCard(div, cardStatistics.statistics_json);
+    div.onclick = openPreview;
+    window.MarvelDeckTouch?.bindPreview(div, openPreview);
     if( from_peek ) {
         div.oncontextmenu = (event) => {
             div.parentNode.removeChild(div)

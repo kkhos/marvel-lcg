@@ -35,7 +35,12 @@ export class CardPreview {
         div.id = 'preview';
         div.setAttribute('tabindex', '0'); // Make the div focusable
         div.onkeydown = this.handleKeyDown.bind(this);
-        div.onclick = this.killPreview.bind(this);
+        div.onclick = (event) => {
+            if (event.target === div) this.killPreview();
+        };
+        div.setAttribute('role', 'dialog');
+        div.setAttribute('aria-label', '카드 미리보기');
+        div.setAttribute('aria-modal', 'true');
         document.body.appendChild(div);
 
         const previewContentDiv = document.createElement('div') as HTMLDivElement;
@@ -53,6 +58,15 @@ export class CardPreview {
         div.appendChild(prevButton);
         div.appendChild(previewContentDiv);
         div.appendChild(nextButton);
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'preview-close';
+        closeButton.textContent = '닫기 ×';
+        closeButton.onclick = (event) => {
+            event.stopPropagation();
+            this.killPreview();
+        };
+        div.appendChild(closeButton);
 
         return div;
     }
@@ -61,7 +75,17 @@ export class CardPreview {
         const buttonDiv = document.createElement('div') as HTMLDivElement;
         buttonDiv.id = id;
         buttonDiv.onclick = onClick;
-        buttonDiv.innerHTML = `<i class="fa ${iconClass}" aria-hidden="true"></i>`;
+        buttonDiv.innerHTML = `<span aria-hidden="true">${id === 'prev' ? '‹' : '›'}</span>`;
+        buttonDiv.setAttribute('role', 'button');
+        buttonDiv.setAttribute('aria-label', id === 'prev' ? '이전 카드' : '다음 카드');
+        buttonDiv.tabIndex = 0;
+        buttonDiv.onkeydown = (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                event.stopPropagation();
+                buttonDiv.click();
+            }
+        };
         return buttonDiv;
     }
 
@@ -117,7 +141,7 @@ export class CardPreview {
         return children.indexOf(divElement);
     }
 
-    private previewCard(cardDiv?: HTMLElement, statisticsJson?: Record<string, any>): void {
+    public previewCard(cardDiv?: HTMLElement, statisticsJson?: Record<string, any>): void {
         if( !cardDiv ) {
             return
         }
@@ -127,16 +151,20 @@ export class CardPreview {
             statisticsJson = this.statisticsJson;
         }
         const cardId = cardDiv.getAttribute('data-card-id') as string;
-        const cardName = this.constCardDict[cardId].name;
+        if (!cardId || !cardDiv.parentElement) return;
+        const data = this.constCardDict[cardId];
+        const cardName = data?.name ?? cardId;
         this.lastClickCardDiv = cardDiv;
+        const thumb = cardDiv.querySelector('img');
+        if (thumb?.src) this.previewImg.src = thumb.src;
         CardImages.setImage(this.previewImg, cardId);
-        const fullLinkId = this.constCardDict[cardId].full_link_id;
+        const fullLinkId = data?.full_link_id;
         const index = `${this.getDivIndex(cardDiv) + 1}/${cardDiv.parentNode?.children.length}`;
 
         this.previewCardIdDiv.innerHTML = `
             <span class='preview-key'>(${index})</span><br/>
             <span class='preview-key' id='copy-card-name'>
-                <i class="fa fa-clipboard preview-key" aria-hidden="true" style='padding-right: .4rem'></i>Name</span><br/>
+                <i class="fa fa-clipboard preview-key" aria-hidden="true" style='padding-right: .4rem'></i>이름</span><br/>
             <span id='copy-card-id'>
                 <i class="fa fa-clipboard preview-key" aria-hidden="true" style='padding-right: .4rem'></i>${cardId}</span><br/>
             <br/>
@@ -144,7 +172,7 @@ export class CardPreview {
 
         if (fullLinkId) {
             this.previewCardIdDiv.innerHTML += `
-                <span class='preview-key'>Related</span><br/>
+                <span class='preview-key'>관련 카드</span><br/>
                 ${fullLinkId}<br/>
                 <br/>
             `;
@@ -153,11 +181,11 @@ export class CardPreview {
         if (statisticsJson && cardId in statisticsJson) {
             this.previewCardIdDiv.innerHTML += `
                 <hr style="color: black"/>
-                <span class='preview-key'>Resolve</span><br/>
+                <span class='preview-key'>해결</span><br/>
                 ${statisticsJson[cardId].resolve}<br/>
-                <span class='preview-key'>Play</span><br/>
+                <span class='preview-key'>플레이</span><br/>
                 ${statisticsJson[cardId].play}<br/>
-                <span class='preview-key'>Defeated</span><br/>
+                <span class='preview-key'>격파</span><br/>
                 ${statisticsJson[cardId].defeated}<br/>
             `;
         } else {
@@ -180,10 +208,12 @@ export class CardPreview {
             };
         }
 
-        if (this.constCardDict[cardId].rotate) {
+        if (data?.rotate) {
             this.previewImg.classList.add('rotate');
+            this.previewDiv.classList.add('preview-rotated');
         } else {
             this.previewImg.classList.remove('rotate');
+            this.previewDiv.classList.remove('preview-rotated');
         }
 
         if( this.previewDiv ) {
