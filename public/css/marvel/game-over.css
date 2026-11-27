@@ -139,6 +139,9 @@
 }
 
 #game-over-close {
+    background: transparent;
+    border: 0;
+    padding: 0;
     font-size: 1rem;
     position: absolute;
     right: 20px;

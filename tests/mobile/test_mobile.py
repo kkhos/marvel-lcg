@@ -316,7 +316,11 @@ class MobileRegression(unittest.TestCase):
         self.start_game()
         # Render a deterministic result without ending the actual server game.
         self.page.evaluate("""async () => {
-            const {Message} = await import('/public/js/marvel/message.js');
+            // Use the same versioned module instance already initialized by marvel.js.
+            const url = performance.getEntriesByType('resource')
+                .find(e => new URL(e.name).pathname === '/public/js/marvel/message.js')?.name;
+            if (!url) throw new Error('Game message module not loaded');
+            const {Message} = await import(url);
             Message.showGameOverMessage('The Main Scheme was Completed (The Break-In!)');
             const table = document.getElementById('session-statistics');
             table.replaceChildren();
