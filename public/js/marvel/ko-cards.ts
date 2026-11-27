@@ -8,7 +8,17 @@ import { koAliases } from './ko-aliases.js';
 // Presentation only: never use these names or text as rule identifiers.
 export const koCards: Record<string, {name: string; text?: string}> = {
   "07001a": {
-    "name": "탈옥"
+    "name": "탈옥",
+    "text": "시나리오 구성: 빌런으로 Wrecker A, Thunderball A, Piledriver A, Bulldozer A. (어려운 도전은 B버전.) Wrecker, Thunderball, Piledriver, Bulldozer 조우 덱.\n사전 준비: 응징의 날, 천둥강타, 강화하다!, 길을 비켜라 부가 음모를 플레이 영역에 내려놓습니다. Wrecker에 활성 카운터를 놓습니다. 스테이지 1B로 넘어갑니다."
+  },
+  "07019": {
+    "name": "천둥강타"
+  },
+  "07034": {
+    "name": "강화하다!"
+  },
+  "07048": {
+    "name": "길을 비켜라"
   },
   "07001b": {
     "name": "탈옥",
@@ -301,7 +311,9 @@ const localCards = {...readKoCache(), ...bundledKo};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
-const physicalVerified = new Set(['07001b','07004','01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b']);
+const physicalVerified = new Set(['07001a','07001b','07004','01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b']);
+// Names confirmed by the photographed setup face; effects not physically verified.
+const verifiedNames: Record<string,string> = {'07019':'천둥강타','07034':'강화하다!','07048':'길을 비켜라'};
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
 const draftCards = {...reviewedDrafts, ...koCards};
 const sources: Record<string,'verified'|'community'|'draft'> = Object.create(null);
@@ -310,7 +322,7 @@ for (const id of new Set([...Object.keys(draftCards), ...Object.keys(localCards)
     const community = !verified && Object.prototype.hasOwnProperty.call(localCards,id);
     const entry = (community ? localCards[id] : draftCards[id]) ?? localCards[id];
     if (!entry) continue;
-    normalizedCards[id] = {name:entry.name, text:entry.text === undefined ? undefined : (community ? entry.text : normalizeKoCardText(entry.text))};
+    normalizedCards[id] = {name:verifiedNames[id] ?? entry.name, text:entry.text === undefined ? undefined : (community ? entry.text : normalizeKoCardText(entry.text))};
     sources[id] = verified ? 'verified' : community ? 'community' : 'draft';
 }
 // Reprints inherit the original description only when no exact-ID translation exists.

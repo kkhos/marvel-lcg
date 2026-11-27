@@ -145,6 +145,7 @@ export const koGlossary = {
     'overkill': '압살',
     'guard': '경호',
     'setup': '사전 준비',
+    'scenario contents': '시나리오 구성',
     'mulligan': '멀리건',
     'first player': '시작 플레이어',
     'threat': '위협',
