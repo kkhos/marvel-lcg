@@ -92,3 +92,11 @@ body.mobile-layout #mobile-settings-dialog #interaction-speed-control {
     padding: 8px; border-radius: 7px; font: 14px system-ui, sans-serif;
 }
 body.mobile-layout #mobile-settings-dialog #interaction-speed-control input { touch-action: pan-y; }
+
+/* Solo needs no sidebar. Keep multiplayer controls available without the old
+   mouse-hover pin; retain its DOM node for the client's visibility updates. */
+body.mobile-layout #players-pin { display: none !important; }
+body.mobile-layout #left-side-bar { left: 0; transition: none; }
+body.mobile-layout #left-side-bar:not(:has(> .button:not(.hide):not(#players-pin))) {
+    display: none;
+}

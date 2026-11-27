@@ -710,6 +710,9 @@ export class Button{
         // ], () => {Cards.printCards()});
 
         const parent_div_left = document.getElementById('left-side-bar') as HTMLElement
+        const parent_div_right = document.getElementById('right-side-bar') as HTMLElement
+        const mobile = document.body.classList.contains('mobile-layout')
+        const displaySettingsParent = mobile ? parent_div_right : parent_div_left
         Button.createButtonBase(parent_div_left, {
             text: "P1",
             class_name: "hide",
@@ -751,8 +754,8 @@ export class Button{
             }
         })
 
-        Button.createButtonBase(parent_div_left, {
-            text: "H",
+        Button.createButtonBase(displaySettingsParent, {
+            names: mobile ? ["손패: 현재 플레이어만", "손패: 모든 플레이어"] : ["H", "H"],
             class_name: "hide",
             id: 'all-hand-cards',
             property: 'show_all_hand_cards',
@@ -761,8 +764,8 @@ export class Button{
                 Effect.updateHighLight()
             }
         })
-        Button.createButtonBase(parent_div_left, {
-            names: ["A", "F", "P"],
+        Button.createButtonBase(displaySettingsParent, {
+            names: mobile ? ["카드 표시: 전체", "카드 표시: 행동 중심", "카드 표시: 히어로 중심"] : ["A", "F", "P"],
             class_name: "hide",
             id: 'hide-no-action-cards',
             property: 'hide_no_action_cards',
@@ -780,7 +783,6 @@ export class Button{
             property: 'players_pin'
         })
 
-        const parent_div_right = document.getElementById('right-side-bar') as HTMLElement
         Button.full_search_button = Button.createButtonBase(parent_div_right, {
             text: "Full Search",
             id: "show-deck-during-full-search-btn",
