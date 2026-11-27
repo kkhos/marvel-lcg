@@ -104,7 +104,7 @@ export function adjustSceneScale() {
     const originX = vv ? Math.max(0, vv.offsetLeft) : 0;
     const originY = vv ? Math.max(0, vv.offsetTop) : 0;
     const header = mobile ? document.getElementById('mobile-progress-bar') : null;
-    const rail = mobile ? document.getElementById('mobile-action-rail') : null;
+    
     if (mobile) {
         const body = document.body.style;
         for (const [name, value] of Object.entries({
@@ -116,7 +116,7 @@ export function adjustSceneScale() {
         }
     }
     const headerHeight = header?.offsetHeight ?? 0;
-    const boardWidth = viewportWidth - (rail?.offsetWidth ?? 0);
+    const boardWidth = viewportWidth;
     const boardHeight = viewportHeight - headerHeight;
     if (boardWidth <= 0 || boardHeight <= 0) return;
 

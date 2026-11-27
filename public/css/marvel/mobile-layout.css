@@ -243,3 +243,29 @@ body.mobile-layout #scene .encounter-discard-pile { --y: 232; }
    its attachments begin below it with enough room for a vertical card. */
 body.mobile-layout #scene #area-schemes-main { --y: 250; }
 body.mobile-layout #scene #area-schemes-side { --y: 450; }
+
+/* Floating controls do not reserve a column. Keep the upper-right piles
+   above the action buttons, and leave the transparent container inert. */
+body.mobile-layout #mobile-action-rail {
+    top: auto;
+    bottom: calc(var(--mobile-settings-space) + 4px);
+    height: auto;
+    max-height: calc(var(--mobile-vp-height) * .48);
+    width: var(--mobile-controls-width);
+}
+body.mobile-layout #mobile-action-rail #option-buttons { max-height: 25dvh; }
+body.mobile-layout #mobile-progress-bar #prompt-box-container {
+    max-width: min(65%, 820px);
+    background: rgba(17,27,51,.88);
+}
+body.mobile-layout #player-all-hand-cards .card,
+body.mobile-layout #player-all-hand-cards:hover .card {
+    --top: calc(var(--y) * 1px) !important;
+    transform: translate3d(var(--left),var(--top),var(--t-z)) rotate(var(--hand-angle,0deg)) scale(1.16);
+    transform-origin: center bottom;
+}
+body.mobile-layout #player-all-hand-cards .card.selected {
+    transform: translate3d(var(--left),calc(var(--top) - 42px),var(--t-z)) rotate(0deg) scale(1.16);
+    z-index: 5;
+}
+body.mobile-layout #player-all-area-hero { --y: 650; }

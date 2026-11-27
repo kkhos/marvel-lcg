@@ -186,6 +186,7 @@ class MobileRegression(unittest.TestCase):
         hand = self.page.locator("#player-all-hand-cards .card:not(.hide)")
         for card in hand.all():
             self.bounds(card)
+        self.assertTrue(self.page.evaluate("""() => [...document.querySelectorAll('#player-all-hand-cards .card:not(.hide)')].every(c => c.style.getPropertyValue('--hand-angle') !== '')"""))
         self.screenshot("hand")
         # The desktop top piles deliberately use negative board coordinates.
         # Mobile must put real top cards entirely inside the camera clip.
@@ -309,7 +310,7 @@ class MobileRegression(unittest.TestCase):
                 const b = document.getElementById('camera').getBoundingClientRect();
                 const r = document.getElementById('mobile-action-rail').getBoundingClientRect();
                 const h = document.getElementById('mobile-progress-bar').getBoundingClientRect();
-                return b.width > 0 && b.right <= r.left + 1 &&
+                return b.width > 0 && b.right <= innerWidth + 1 && b.right > r.left &&
                     b.top >= h.bottom - 1 && b.bottom <= innerHeight + 1 &&
                     r.width <= 131 && h.height <= 46;
             }""")
