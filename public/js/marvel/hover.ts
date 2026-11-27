@@ -297,6 +297,7 @@ export class HoverCard{
 
     static set(card_div: HTMLElement|null, is_log=false, forced_bg_image='') {
         let bg_image = ""
+        if (document.body.classList.contains('mobile-layout') && !is_log) card_div = null
         if( UI.hold_ctrl ) {
             card_div = null
         }

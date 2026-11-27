@@ -68,6 +68,48 @@ export class TouchControls {
             CardImages.setImage(img, previewFront);
         }
 
+        const pile = document.createElement('dialog');
+        pile.id = 'touch-pile';
+        pile.style.cssText = 'background:#18222c;color:white;border:1px solid #a0b4c8;border-radius:12px;width:min(80vw,760px);max-height:85dvh;overflow:auto;padding:12px';
+        const pileTitle = document.createElement('h3');
+        const pileList = document.createElement('div');
+        pileList.style.cssText = 'display:flex;gap:10px;overflow-x:auto;touch-action:pan-x;padding:8px';
+        const pileClose = document.createElement('button');
+        pileClose.textContent = '닫기';
+        pileClose.onclick = () => pile.close();
+        pile.append(pileTitle, pileList, pileClose);
+        document.body.append(pile);
+        pile.addEventListener('close', () => {
+            pileList.querySelectorAll('img').forEach(image => CardImages.setImage(image, ''));
+            pileList.replaceChildren();
+        });
+        pile.onclick = e => { if (e.target === pile) pile.close(); };
+        document.addEventListener('click', e => {
+            if (!(e.target instanceof Element)) return;
+            const parent = e.target.closest<HTMLElement>('#nemesis-pool,#removed-pool,#area-removed,#area-advanced');
+            if (!parent || dialog.open || settings.open || pile.open || performance.now() < suppressUntil) return;
+            const cards = Array.from(parent.querySelectorAll<HTMLElement>('.card[data-id]'));
+            if (cards.some(card => selectable(card))) return;
+            const visible = cards.filter(card => Cards.getCard(Number(card.dataset.id))?.isVisible());
+            if (!visible.length) return;
+            e.preventDefault(); e.stopImmediatePropagation();
+            parent.classList.remove('clicked');
+            HoverCard.set(null);
+            pileTitle.textContent = parent.id === 'nemesis-pool' ? '숙적 카드' : '예비 카드';
+            for (const card of visible) {
+                const data = Cards.getCard(Number(card.dataset.id))!;
+                const button = document.createElement('button');
+                button.style.cssText = 'flex:0 0 auto;background:transparent;border:0;padding:2px';
+                const image = document.createElement('img');
+                image.alt = data.name;
+                image.style.cssText = 'height:min(48dvh,230px);width:auto;display:block';
+                button.append(image);
+                CardImages.setImage(image, data.pic_id);
+                button.onclick = () => preview(card);
+                pileList.append(button);
+            }
+            pile.showModal();
+        }, true);
         const ghost = document.createElement('div');
         ghost.id = 'touch-drag-ghost'; ghost.hidden = true;
         const zone = document.createElement('div');
@@ -234,7 +276,7 @@ export class TouchControls {
             // user explicitly opens it, rather than leaving it behind settings.
             sidebar.addEventListener('click', e => {
                 const target = e.target instanceof Element ? e.target.closest('button') : null;
-                if (target?.textContent?.trim() === '기록' && settings.open) settings.close();
+                if (target && (target.textContent?.trim() === '기록' || target.matches('.do-save,.do-load') || target.textContent?.trim() === '빠른 저장') && settings.open) settings.close();
             });
         }
         window.addEventListener('blur', () => { if (gesture) { suppress(gesture.card); stop(); } });
@@ -242,6 +284,7 @@ export class TouchControls {
             back: () => {
                 if (settings.open) { settings.close(); return true; }
                 if (dialog.open) { dialog.close(); return true; }
+                if (pile.open) { pile.close(); return true; }
                 if (gesture) { suppress(gesture.card); stop(); return true; }
                 const sidebar = document.querySelector('#right-side-bar.clicked');
                 if (sidebar) { sidebar.classList.remove('clicked'); return true; }
