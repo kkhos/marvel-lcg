@@ -109,10 +109,12 @@ class MobileRegression(unittest.TestCase):
         result = self.page.evaluate("""async () => {
             const {koCard, koCards} = await import('/public/js/marvel/ko-cards.js');
             return {count:Object.keys(koCards).length, hero:koCard('01001a').name,
-                    text:koCard('01005').text, unknown:koCard('99999') === undefined};
+                    name:koCard('01005').name, text:koCard('01005').text,
+                    unknown:koCard('99999') === undefined};
         }""")
         self.assertEqual(result["count"], 59)
-        self.assertEqual(result["hero"], "스파이더맨")
+        self.assertEqual(result["hero"], "Spider-Man")
+        self.assertEqual(result["name"], "거미줄 날아차기")
         self.assertIn("피해 8", result["text"])
         self.assertTrue(result["unknown"])
 
