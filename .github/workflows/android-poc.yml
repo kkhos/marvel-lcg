@@ -1,4 +1,4 @@
-name: Android runtime PoC
+name: Android APK and mobile UI regression
 
 on:
   workflow_dispatch:
@@ -6,13 +6,58 @@ on:
     branches: ['mobile/android-poc']
     paths:
       - 'mobile/android/**'
+      - 'public/**'
+      - 'engine/**'
+      - 'game/**'
+      - 'cards/**'
+      - 'core/**'
+      - 'data/**'
+      - 'deck/**'
+      - 'assets/**'
+      - 'tests/mobile/**'
+      - 'launch.json'
+      - 'build*.py'
       - '.github/workflows/android-poc.yml'
 
 permissions:
   contents: read
 
 jobs:
+  mobile-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install test dependencies
+        run: |
+          python -m pip install -r mobile/android/requirements-mobile.txt playwright==1.51.0
+          python -m playwright install --with-deps chromium
+          npx --yes --package typescript@5.9.3 tsc -p public/js/tsconfig.json
+      - name: Run mobile-only UI tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p test-results/mobile
+          python -u tests/mobile/server.py >test-results/mobile/server.log 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          python tests/mobile/test_mobile.py
+      - name: Upload mobile regression evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-ui-regression
+          path: test-results/mobile/
+          if-no-files-found: warn
+          retention-days: 7
   assemble:
+    needs: mobile-ui
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
