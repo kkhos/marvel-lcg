@@ -198,17 +198,20 @@ public class MainActivity extends Activity {
         logo.setContentDescription("Marvel Champions: The Card Game");
         logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
         logo.setImageBitmap(splashBitmap("champions.png"));
-        FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(dp(220), dp(116),
+        if (logo.getDrawable() instanceof android.graphics.drawable.BitmapDrawable) {
+            ((android.graphics.drawable.BitmapDrawable) logo.getDrawable()).setFilterBitmap(true);
+        }
+        FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(dp(220), dp(119),
                 Gravity.END | Gravity.CENTER_VERTICAL);
         logoParams.rightMargin = dp(24);
         splash.addView(logo, logoParams);
         splash.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
             int width = r - l, height = b - t;
             if (width <= 0 || height <= 0 || (width == or - ol && height == ob - ot)) return;
-            int logoWidth = Math.round(Math.min(width * .36f, height * .82f));
+            int logoWidth = Math.round(Math.min(width * .32f, height * .72f));
             FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) logo.getLayoutParams();
             lp.width = logoWidth;
-            lp.height = Math.round(logoWidth * 125f / 240f);
+            lp.height = Math.round(logoWidth * 435f / 804f);
             lp.rightMargin = Math.round(width * .06f);
             logo.setLayoutParams(lp);
         });

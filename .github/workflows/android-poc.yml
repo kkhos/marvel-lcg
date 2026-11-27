@@ -133,7 +133,7 @@ jobs:
           done
       - name: Verify bundled splash assets
         run: |
-          python -c 'import zipfile; z=zipfile.ZipFile("mobile/android/app/build/outputs/apk/debug/app-debug.apk"); assert "assets/splash/champions.png" in z.namelist(); print("Doom backdrop bundled:", "assets/splash/doom.webp" in z.namelist())'
+          python -c 'import zipfile,struct,hashlib; z=zipfile.ZipFile("mobile/android/app/build/outputs/apk/debug/app-debug.apk"); p=z.read("assets/splash/champions.png"); assert struct.unpack(">II",p[16:24])==(804,435); assert hashlib.sha256(p).hexdigest()=="490c4c9672cb57fe0e15201096a68aac25bd8c2bbe1703b8e9b2007676d945e2"; print("High-resolution logo verified; Doom backdrop bundled:", "assets/splash/doom.webp" in z.namelist())'
       - name: Verify APK signing certificate
         shell: bash
         run: |
