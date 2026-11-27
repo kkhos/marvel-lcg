@@ -167,7 +167,7 @@ class MobileRegression(unittest.TestCase):
             return ['Take 2 damage', 'Place 1 threat on the main scheme',
                     '<u>하이드라 폭탄마</u> was revealed', 'Draw 3 cards'].map(koHtml);
         }""")
-        self.assertEqual(result, ['피해 2 받기', '주요 음모에 위협 1 놓기',
+        self.assertEqual(result, ['피해 2점 입기', '주요 음모에 위협 1 놓기',
                                   '<u>하이드라 폭탄마</u> 공개됨', '카드 3장 뽑기'])
 
     def test_ko_engine_messages(self):
@@ -187,7 +187,7 @@ class MobileRegression(unittest.TestCase):
         }""")
         self.assertEqual(result, [
             '<a class="log-card" data-id="19">Rhino</a> 공격 예정: <u>Spider-Man</u> (+0)',
-            '<u>Spider-Man</u> 피해 3 받을 예정 · 원인: <u>Rhino</u>',
+            '<u>Spider-Man</u> 피해 3점 입을 예정 · 원인: <u>Rhino</u>',
             '<u>Rhino</u> 격파됨',
             'Encounter Deck 섞음',
             '<u>Spider-Man</u> 준비됨',
@@ -195,6 +195,30 @@ class MobileRegression(unittest.TestCase):
             'Peter Parker 소진 → 퇴거 통지를 게임에서 제거',
             'Unknown future text',
         ])
+
+    def test_ko_verified_glossary(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koCard,koCardSource} = await import('/public/js/marvel/ko-cards.js');
+            const {normalizeKoCardText} = await import('/public/js/marvel/ko-glossary.js');
+            const ids = ['01005','02021','27002'];
+            const text = '히어로 반응 (공격): 기본 능력을 사용한 직후 적에게 피해 6을 줍니다. (기본 능력 사용당 최대 1회.)';
+            const normalized = normalizeKoCardText(text);
+            return {cards:ids.map(koCard), sources:ids.map(koCardSource),
+                duplicate:koCardSource('02034'), normalized,
+                idempotent:normalized === normalizeKoCardText(normalized),
+                unchanged:normalizeKoCardText('반응 능력 1개를 해결합니다. 카드 3장. 피해량만큼 위협을 놓습니다.'),
+                other:koCard('01087').text};
+        }""")
+        self.assertEqual(result["sources"], ["verified"] * 3)
+        self.assertEqual(result["duplicate"], "draft")
+        self.assertEqual(result["cards"][0]["text"], "히어로 행동(공격): 적 하나에게 피해 8점을 입힙니다.")
+        self.assertEqual(result["cards"][1]["text"], "빌런에게 장착합니다.\\n★ 강제 반응: 빌런이 당신을 공격한 후, 호박 폭탄을 버리고 당신은 간접 피해 2점을 입습니다.\\n히어로 행동: 물리력 자원 2개를 소모 → 이 카드를 버림.".replace("\\n", "\n"))
+        self.assertEqual(result["cards"][2]["text"], "히어로 반응(공격): Ghost-Spider가 기본 기능을 사용한 후, 적 하나에게 피해 6점을 입힙니다. (기본 기능 사용마다 최대 1회.)")
+        self.assertEqual(result["normalized"], "히어로 반응(공격): 기본 기능을 사용한 후, 적에게 피해 6점을 입힙니다. (기본 기능 사용마다 최대 1회.)")
+        self.assertTrue(result["idempotent"])
+        self.assertEqual(result["unchanged"], "반응 능력 1개를 해결합니다. 카드 3장. 피해량만큼 위협을 놓습니다.")
+        self.assertIn("피해 3점을 입힙니다", result["other"])
 
     def test_ko_bundled_module(self):
         self.goto("/main")

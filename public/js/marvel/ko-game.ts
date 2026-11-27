@@ -70,6 +70,8 @@ const labels: Record<string, string> = {
   "First Player Action": "시작 플레이어 행동",
   "Forced Action": "강제 행동",
   "Response": "반응",
+  "Basic Power": "기본 기능",
+  "Basic power": "기본 기능",
   "Hero Response": "히어로 반응",
   "Alter-Ego Response": "일상 반응",
   "Forced Response": "강제 반응",
@@ -303,11 +305,11 @@ export function koText(value: string): string {
             .replace(/\bwould play\b/g, '사용 예정:')
             .replace(/\bselected\b/g, '선택:')
             .replace(/\benters game area\b/g, '플레이 영역에 들어옴')
-            .replace(/\bwill take (\d+) damage from\b/g, "피해 $1 받을 예정 · 원인:")
-            .replace(/\bTake (\d+) damage\b/gi, '피해 $1 받기')
+            .replace(/\bwill take (\d+) damage from\b/g, "피해 $1점 입을 예정 · 원인:")
+            .replace(/\bTake (\d+) damage\b/gi, '피해 $1점 입기')
             .replace(/\bPlace (\d+) threat on the main scheme\b/gi, '주요 음모에 위협 $1 놓기')
             .replace(/\bRemove (\d+) threat from (?:a|the) scheme\b/gi, '음모에서 위협 $1 제거하기')
-            .replace(/\bDeal (\d+) damage to an enemy\b/gi, '적에게 피해 $1 주기')
+            .replace(/\bDeal (\d+) damage to an enemy\b/gi, '적에게 피해 $1점 입히기')
             .replace(/\bDraw (\d+) cards?\b/gi, '카드 $1장 뽑기')
             .replace(/\bDiscard (\d+) cards?\b/gi, '카드 $1장 버리기')
             .replace(/\bDiscard (\d+) cards? at random from your hand\b/g, "손에서 무작위 카드 $1장 버리기")
@@ -359,9 +361,9 @@ export function koText(value: string): string {
             .replace(/\bis being attacked by\b/g, "공격받는 중 · 공격자:")
             .replace(/\bdefense against\b/g, "방어 · 공격자:")
             .replace(/\bResolve this attack to\b/g, "이 공격의 대상:")
-            .replace(/\bwould deal (\d+) damage to\b/g, "피해 $1 줄 예정 · 대상:")
+            .replace(/\bwould deal (\d+) damage to\b/g, "피해 $1점 입힐 예정 · 대상:")
             .replace(/\bgains (\d+) additional damage\b/g, "추가 피해 $1 획득")
-            .replace(/\bThis attack deals indirect damage\b/g, "이 공격은 간접 피해를 줌")
+            .replace(/\bThis attack deals indirect damage\b/g, "이 공격은 간접 피해를 입힘")
             .replace(/\bThis damage from attack is prevented\b/g, "이 공격의 피해가 방지됨")
             .replace(/\bPrevented (\d+) of this damage\b/g, "이 피해 중 $1 방지")
             .replace(/\bThe value of this damage has been updated ([+-]\d+)\b/g, "피해량 변경 $1")

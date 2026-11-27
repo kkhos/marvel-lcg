@@ -1,4 +1,5 @@
 import { readKoCache } from './ko-local.js';
+import { normalizeKoCardText } from './ko-glossary.js';
 import { bundledKo } from './ko-bundled.js';
 import { goblinDraft } from './ko-goblin.js';
 // Core Korean display translations, terminology cross-checked against the NamuWiki mirror (Marvel Champions core cards, heroes and villains); not verified against physical Korean cards.
@@ -26,7 +27,7 @@ export const koCards: Record<string, {name: string; text?: string}> = {
   },
   "01005": {
     "name": "거미줄 날아차기",
-    "text": "히어로 행동 (공격): 적 하나에게 피해 8을 줍니다."
+    "text": "히어로 행동(공격): 적 하나에게 피해 8점을 입힙니다."
   },
   "01006": {
     "name": "Aunt May",
@@ -244,7 +245,7 @@ export const koCards: Record<string, {name: string; text?: string}> = {
 const sinisterDraft: Record<string, {name:string; text?:string}> = {
   "27002": {
     "name": "고스트 킥",
-    "text": "히어로 반응 (공격): Ghost-Spider가 기본 능력을 사용한 직후 적 하나에게 피해 6을 줍니다. (기본 능력 사용당 최대 1회.)"
+    "text": "히어로 반응(공격): Ghost-Spider가 기본 기능을 사용한 후, 적 하나에게 피해 6점을 입힙니다. (기본 기능 사용마다 최대 1회.)"
   },
   "27003": {
     "name": "부모로서의 조언",
@@ -286,5 +287,14 @@ const sinisterDraft: Record<string, {name:string; text?:string}> = {
 const localCards = {...readKoCache(), ...bundledKo};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...goblinDraft, ...sinisterDraft};
-export function koCard(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? koCards[id] : Object.prototype.hasOwnProperty.call(reviewedDrafts,id) ? reviewedDrafts[id] : localCards[id]; }
-export function koCardSource(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) || Object.prototype.hasOwnProperty.call(reviewedDrafts,id) ? 'draft' : localCards[id] ? 'community' : undefined; }
+// Only the three photographed faces are marked physically verified.
+const physicalVerified = new Set(['01005','02021','27002']);
+const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
+for (const [id, entry] of Object.entries({...localCards, ...reviewedDrafts, ...koCards})) {
+    normalizedCards[id] = {name:entry.name, text:entry.text === undefined ? undefined : normalizeKoCardText(entry.text)};
+}
+export function koCard(id: string) { return normalizedCards[id]; }
+export function koCardSource(id: string) {
+    if (physicalVerified.has(id)) return 'verified';
+    return Object.prototype.hasOwnProperty.call(koCards,id) || Object.prototype.hasOwnProperty.call(reviewedDrafts,id) ? 'draft' : Object.prototype.hasOwnProperty.call(localCards,id) ? 'community' : undefined;
+}
