@@ -11,6 +11,17 @@ export const koGlossary = {
     'discard': '버림',
     'spend': '소모',
     'damage unit': '점',
+    'threat': '위협',
+    'remove threat': '위협 제거',
+    'pay': '지불',
+    'resource': '자원',
+    'generate': '생성',
+    'scientist': '과학자',
+    'alter-ego': '일상',
+    'recover': '회복',
+    'hand size': '손 크기',
+    'hit points': '생명력',
+    'limit once per round': '라운드마다 1회 제한',
     'spider-sense': '스파이더센스',
     'defense': '방어',
     'thwart': '저지',
@@ -42,6 +53,8 @@ export const koGlossary = {
 export function normalizeKoCardText(value: string): string {
     return value
         .replace(/기본 능력/g, koGlossary['basic power'])
+        .replace(/라운드당 (\d+)회 제한/g, '라운드마다 $1회 제한')
+        .replace(/위협 (\d+)(?:점)?[을를] 제거/g, '위협을 $1만큼 제거')
         .replace(/스파이더 센스/g, koGlossary['spider-sense'])
         .replace(/예비로 둔/g, '따로 놓아둔')
         .replace(/사용 +\(/g, '사용(')

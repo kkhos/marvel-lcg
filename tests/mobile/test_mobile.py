@@ -257,6 +257,24 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["label"], "스파이더센스")
         self.assertEqual(result["status"], ["강인함", "기절", "혼란"])
 
+    def test_ko_justice_and_peter_parker(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koCard,koCardSource} = await import('/public/js/marvel/ko-cards.js');
+            const {normalizeKoCardText,koGlossary} = await import('/public/js/marvel/ko-glossary.js');
+            return {justice:koCard('01060').text, peter:koCard('01001b').text,
+                sources:['01060','01001b'].map(koCardSource),
+                normalized:normalizeKoCardText('위협 3을 제거합니다. (라운드당 1회 제한.)'),
+                unchanged:normalizeKoCardText('위협 3을 놓습니다. 위협을 2만큼 제거합니다.'),
+                recover:koGlossary['recover']};
+        }""")
+        self.assertEqual(result["justice"], "히어로 행동(저지): 음모 하나에서 위협을 3만큼 제거합니다(이 카드에 정신력 자원을 지불했다면 대신 4만큼 제거합니다).")
+        self.assertEqual(result["peter"], "과학자 — 자원: 정신력 자원을 생성합니다(라운드마다 1회 제한).")
+        self.assertEqual(result["sources"], ["verified"] * 2)
+        self.assertEqual(result["normalized"], "위협을 3만큼 제거합니다. (라운드마다 1회 제한.)")
+        self.assertEqual(result["unchanged"], "위협 3을 놓습니다. 위협을 2만큼 제거합니다.")
+        self.assertEqual(result["recover"], "회복")
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

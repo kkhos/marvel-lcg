@@ -11,7 +11,7 @@ export const koCards: Record<string, {name: string; text?: string}> = {
   },
   "01001b": {
     "name": "Peter Parker",
-    "text": "과학자 — 자원: 정신력 자원 1개를 생성합니다. (라운드당 1회 제한.)"
+    "text": "과학자 — 자원: 정신력 자원을 생성합니다(라운드마다 1회 제한)."
   },
   "01002": {
     "name": "Black Cat",
@@ -55,7 +55,7 @@ export const koCards: Record<string, {name: string; text?: string}> = {
   },
   "01060": {
     "name": "정의를 위해!",
-    "text": "히어로 행동 (저지): 음모 하나에서 위협 3을 제거합니다. 이 카드의 비용을 지불할 때 정신력 자원을 사용했다면 대신 위협 4를 제거합니다."
+    "text": "히어로 행동(저지): 음모 하나에서 위협을 3만큼 제거합니다(이 카드에 정신력 자원을 지불했다면 대신 4만큼 제거합니다)."
   },
   "01061": {
     "name": "큰 힘에는 큰 책임이 따른다",
@@ -288,7 +288,7 @@ const localCards = {...readKoCache(), ...bundledKo};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...goblinDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
-const physicalVerified = new Set(['01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a']);
+const physicalVerified = new Set(['01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b']);
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
 for (const [id, entry] of Object.entries({...localCards, ...reviewedDrafts, ...koCards})) {
     normalizedCards[id] = {name:entry.name, text:entry.text === undefined ? undefined : normalizeKoCardText(entry.text)};
