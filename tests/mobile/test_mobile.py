@@ -104,6 +104,28 @@ class MobileRegression(unittest.TestCase):
         self.bounds(self.page.locator(".ml-footer .ml-primary"))
         return rhino
 
+    def test_home_menu_alignment(self):
+        self.goto("/main")
+        logo = self.page.locator(".brand-emblem")
+        self.bounds(logo)
+        self.page.wait_for_function("document.querySelector('.brand-emblem').naturalWidth === 804")
+        buttons = self.page.locator(".main .custom-btn")
+        expect(buttons).to_have_count(8)
+        for button in buttons.all():
+            self.bounds(button)
+            result = button.evaluate("""el => {
+                const b = el.getBoundingClientRect();
+                const s = el.querySelector('span').getBoundingClientRect();
+                return [Math.abs((b.left+b.right-s.left-s.right)/2),
+                        Math.abs((b.top+b.bottom-s.top-s.bottom)/2),
+                        b.height];
+            }""")
+            self.assertLessEqual(result[0], 1)
+            self.assertLessEqual(result[1], 1)
+            self.assertGreaterEqual(result[2], 42)
+        self.assertEqual(self.errors, [])
+        self.screenshot("home-redesign")
+
     def test_ko_dynamic_choices(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

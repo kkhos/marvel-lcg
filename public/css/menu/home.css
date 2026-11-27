@@ -1,0 +1,81 @@
+/* Shared visual identity with the native startup screen. */
+* { box-sizing: border-box; }
+html { min-height: 100%; background: #080e0c; color-scheme: dark; }
+body {
+    min-height: 100vh; min-height: 100dvh; margin: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: clamp(12px, 3vw, 36px);
+    background-color: #0b1612;
+    background-image:
+        linear-gradient(90deg, rgba(5,12,10,.32), rgba(5,12,10,.70) 44%, rgba(5,12,10,.94) 100%),
+        linear-gradient(0deg, rgba(5,12,10,.85), transparent 65%),
+        url('/public/images/home/doom.webp'),
+        radial-gradient(ellipse at 10% 30%, #2a5946, #101e19 58%, #080e0c);
+    background-size: cover; background-position: center;
+    color: #f3f4f3;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+.menu {
+    width: min(100%, 1120px); display: grid;
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+    align-items: center; gap: clamp(20px, 5vw, 64px);
+}
+.brand { min-width: 0; display: flex; flex-direction: column; gap: 20px; align-items: flex-start; }
+.brand-emblem {
+    display: block; width: min(100%, 420px); height: auto;
+    object-fit: contain; filter: drop-shadow(0 4px 12px #000b);
+}
+.brand-meta { color: #c0cdc7; font-size: 11px; line-height: 1.65; text-shadow: 0 1px 4px #000; }
+.brand-meta small { font-size: inherit; }
+.main { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 9px; min-width: 0; }
+.main .custom-btn {
+    appearance: none; -webkit-appearance: none;
+    display: grid; place-items: center;
+    width: 100%; min-width: 0; height: auto; min-height: 46px;
+    margin: 0; padding: 8px 12px;
+    border: 1px solid #536d62; border-radius: 8px;
+    background: linear-gradient(135deg, #263a33ee, #13241fee);
+    color: #f5f7f5; box-shadow: 0 2px 6px #0005;
+    font: 700 15px/1.25 system-ui, sans-serif;
+    letter-spacing: .01em; text-align: center;
+    cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+.main .custom-btn span {
+    display: block; width: auto; height: auto;
+    margin: 0; padding: 0; line-height: inherit; text-align: center;
+}
+.main .custom-btn:first-child {
+    grid-column: 1 / -1; min-height: 60px;
+    background: linear-gradient(110deg, #c61e2c, #8c1522);
+    border-color: #ee7580; color: white;
+    font-size: 21px; font-weight: 850;
+    box-shadow: 0 4px 16px #870e2255;
+}
+.main .custom-btn:last-child { grid-column: 1 / -1; }
+.main .custom-btn:active { filter: brightness(1.25); transform: translateY(1px); }
+.main .custom-btn:focus-visible { outline: 2px solid #a5e5c6; outline-offset: 2px; }
+button:disabled { opacity: .5; cursor: default; }
+#saved-games { color-scheme: dark; background: #172a23 !important; border-color: #637f70 !important; }
+#saved-games::backdrop { background: #050b08b8; }
+#saved-games button {
+    font: 650 14px/1.25 system-ui,sans-serif;
+    min-height: 40px; color: #f2f6f3; background: #30493e;
+    border: 1px solid #759180; border-radius: 6px; padding: 6px 12px;
+}
+@media (orientation: landscape) and (max-height: 420px) {
+    body { padding: 12px clamp(16px, 3vw, 32px); }
+    .menu { gap: clamp(16px, 4vw, 48px); }
+    .main { gap: 7px; }
+    .main .custom-btn { min-height: 42px; padding: 6px 10px; font-size: 14px; }
+    .main .custom-btn:first-child { min-height: 54px; font-size: 20px; }
+    .brand { gap: 14px; }
+}
+@media (orientation: portrait) and (max-width: 600px) {
+    body { padding: 20px 16px; }
+    .menu { grid-template-columns: 1fr; gap: 24px; }
+    .brand { align-items: center; text-align: center; gap: 12px; }
+    .brand-emblem { width: min(70vw, 320px); }
+}
+@media (orientation: landscape) and (max-height: 300px) {
+    body { align-items: flex-start; }
+}

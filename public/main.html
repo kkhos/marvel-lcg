@@ -4,151 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marvel Champions: Digital Edition Community Build</title>
-    <style>
-        body {
-            background-color: rgb(43, 43, 43);
-            color: rgb(198, 198, 198);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            font-family: Arial, sans-serif;
-            margin: 0;
-        }
-
-        .menu {
-            text-align: center;
-        }
-
-        .custom-btn {
-            width: 130px;
-            height: 40px;
-            color: #fff;
-            padding: 10px 25px;
-            font-family: 'Lato', sans-serif;
-            font-weight: 500;
-            background: transparent;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            display: inline-block;
-            box-shadow:inset 2px 2px 2px 0px rgba(255,255,255,.5),
-            7px 7px 20px 0px rgba(0,0,0,.1),
-            4px 4px 5px 0px rgba(0,0,0,.1);
-            outline: none;
-        }
-        /* 3 */
-        .btn-3 {
-            background: rgb(0, 172, 238);
-            background: linear-gradient(0deg, rgba(0, 172, 238, 1) 0%, rgba(2, 126, 251, 1) 100%);
-            width: 130px;
-            height: 40px;
-            line-height: 42px;
-            padding: 0;
-            border: none;
-
-        }
-
-        .btn-3 span {
-            position: relative;
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        .btn-3:before,
-        .btn-3:after {
-            position: absolute;
-            content: "";
-            right: 0;
-            top: 0;
-            background: rgba(2, 126, 251, 1);
-            transition: all 0.3s ease;
-        }
-
-        .btn-3:before {
-            height: 0%;
-            width: 2px;
-        }
-
-        .btn-3:after {
-            width: 0%;
-            height: 2px;
-        }
-
-        .btn-3:hover {
-            background: transparent;
-            box-shadow: none;
-        }
-
-        .btn-3:hover:before {
-            height: 100%;
-        }
-
-        .btn-3:hover:after {
-            width: 100%;
-        }
-
-        .btn-3 span:hover {
-            color: rgba(2, 126, 251, 1);
-        }
-
-        .btn-3 span:before,
-        .btn-3 span:after {
-            position: absolute;
-            content: "";
-            left: 0;
-            bottom: 0;
-            background: rgba(2, 126, 251, 1);
-            transition: all 0.3s ease;
-        }
-
-        .btn-3 span:before {
-            width: 2px;
-            height: 0%;
-        }
-
-        .btn-3 span:after {
-            width: 0%;
-            height: 2px;
-        }
-
-        .btn-3 span:hover:before {
-            height: 100%;
-        }
-
-        .btn-3 span:hover:after {
-            width: 100%;
-        }
-
-        button:disabled {
-            filter: grayscale(1);
-            transition: none;
-        }
-        
-        button:disabled span:before,
-        button:disabled span:after,
-        button:disabled:before,
-        button:disabled:after {
-            transition: none;
-            /* content: unset; */
-        }
-
-        #version {
-            height: 2rem;
-        }
-
-        .wild-mode {
-            background: rgb(161, 129, 0);
-        }
-    </style>
-<style>
-body{background:radial-gradient(ellipse at 20% 35%,#51308d,#192a5b 43%,#080d22 80%);font-family:system-ui,sans-serif;color:#f2f5ff;box-sizing:border-box;padding:12px 24px;min-height:100dvh;height:auto}.menu{display:grid;grid-template-columns:minmax(180px,1fr) minmax(0,1.4fr);align-items:center;gap:22px;width:min(100%,960px);text-align:left}.brand h1{font-size:clamp(30px,5vw,58px);font-weight:950;line-height:.95;letter-spacing:-.06em;margin:8px 0}.brand h2{font-size:16px;color:#b8c6ff}.brand small{color:#a8b8de}.main{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px!important}.custom-btn{width:100%;height:auto;min-height:46px;padding:6px;background:linear-gradient(135deg,#354b86,#242c58);border:1px solid #7285c3;border-radius:10px;box-shadow:0 3px 0 #121c3d;font:800 14px system-ui}.custom-btn:first-child{grid-column:1/-1;min-height:65px;background:linear-gradient(135deg,#a448ed,#3e62e5);font-size:22px;border-color:#c5b4ff}.btn-3::before,.btn-3::after,.btn-3 span::before,.btn-3 span::after{display:none}.btn-3:hover,.btn-3 span:hover{color:white;background:#3c4378}#version{font-size:11px;color:#a9b7e7}.brand .brand-emblem{width:55px;height:55px;display:block}@media(max-width:500px){.menu{grid-template-columns:1fr;text-align:center}body{padding:12px}}
-</style></head>
+    <link rel="stylesheet" href="/public/css/menu/home.css">
+</head>
 
 <body>
     <div class="menu">
-        <div class="brand"><svg class="brand-emblem" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" aria-label="Champions"><rect width="108" height="108" rx="22" fill="#121b3c"/><path fill="#9a6cff" d="M54 9L96 32V76L54 99L12 76V32Z"/><path fill="#233f86" d="M54 18L87 37V71L54 90L21 71V37Z"/><path fill="#f5f4ff" d="M62 24L33 58H52L46 84L77 45H57Z"/></svg><h1>MARVEL<br>CHAMPIONS</h1><h2>디지털 카드게임</h2><div id="version"></div><small>비공식 팬 프로젝트</small></div>
+        <div class="brand">
+            <img class="brand-emblem" src="/public/images/home/champions.png"
+                 width="804" height="435" alt="Marvel Champions: The Card Game">
+            <div class="brand-meta"><div id="version"></div><small>비공식 팬 프로젝트</small></div>
+        </div>
         <script>
             let currentApplicationVersion = null;
 
@@ -162,16 +27,7 @@ body{background:radial-gradient(ellipse at 20% 35%,#51308d,#192a5b 43%,#080d22 8
             }
         </script>
 
-        <style>
-            .main{
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 5px;
-            }
-        </style>
-
-        <div class="main">
+        <nav class="main" aria-label="메인 메뉴">
             <button class="custom-btn btn-3" onclick="Open('scene')">
                 <span>새 게임</span>
             </button>
@@ -194,7 +50,7 @@ body{background:radial-gradient(ellipse at 20% 35%,#51308d,#192a5b 43%,#080d22 8
             <button class="custom-btn btn-3" onclick="Open('artwork')">
                 <span>카드 이미지</span>
             </button>
-        </div>
+        </nav>
 
         <!-- <hr/>
 

@@ -27,8 +27,8 @@ android {
         applicationId 'io.github.kkhos.marvellcg'
         minSdk 24
         targetSdk 35
-        versionCode 40
-        versionName '0.5.31-hires-logo'
+        versionCode 41
+        versionName '0.5.32-home-redesign'
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
     }
     sourceSets.main.assets.srcDir(layout.buildDirectory.dir('generated/gameAssets'))
@@ -52,6 +52,11 @@ def gameBundle = tasks.register('bundleGame', Zip) {
                 'build.py', 'build_marvel.py', 'launch.json', 'ATTRIBUTION.md'
         exclude '**/__pycache__/**', '**/*.pyc', '**/node_modules/**',
                 '**/*.ts', '**/*.js.map', 'assets/pics/**'
+    }
+    // Reuse the optional offline splash background in the home menu.
+    from('src/main/assets/splash') {
+        include 'doom.webp'
+        into 'public/images/home'
     }
     archiveFileName = 'game.zip'
     destinationDirectory = layout.buildDirectory.dir('generated/gameAssets')
