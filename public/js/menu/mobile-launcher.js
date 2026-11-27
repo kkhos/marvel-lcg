@@ -12,10 +12,10 @@
   header.append(back,title,steps);foot.append(msg,next);shell.append(header,body,foot);document.body.prepend(shell);document.body.classList.add('ml-mobile');
   const panels=[0,1,2].map(()=>el('section','ml-panel'));body.append(...panels);
   const left=el('div','ml-scroll'),right=el('aside','ml-scroll ml-detail'),search=el('input','ml-search');search.type='search';search.placeholder='빌런 / 확장팩 검색';
-  const scenarioName=el('h2','','시나리오 선택'),scenarioImage=el('img','ml-big'),mode=el('p','ml-muted');scenarioImage.alt='';
+  const scenarioName=el('h2','ml-scenario-name','시나리오를 선택하세요'),scenarioImage=el('img','ml-big'),mode=el('p','ml-scenario-mode'),scenarioPack=el('p','ml-muted ml-scenario-pack'),scenarioHeading=el('div','ml-scenario-heading');scenarioImage.alt='';scenarioHeading.append(el('span','ml-muted','선택한 시나리오'),scenarioName,mode,scenarioPack);scenarioHeading.setAttribute('aria-live','polite');
   const encounter=el('details','ml-settings');encounter.open=false;encounter.append(el('summary','','조우 세트 설정'),standard,modular);
   const originalFile=q('#scenario-1')?.parentElement;if(originalFile){right.append(originalFile);originalFile.classList.add('ml-file');right.append(button('시나리오 파일 가져오기',()=>q('#scenario-1')?.click()));}
-  const catalogStatus=el('p','ml-muted','확장팩을 불러오는 중…');left.append(search,catalogStatus,sc);right.prepend(scenarioImage,scenarioName,mode);right.append(split,encounter);panels[0].append(left,right);
+  const catalogStatus=el('p','ml-muted','확장팩을 불러오는 중…');left.append(search,catalogStatus,sc);right.prepend(scenarioHeading,scenarioImage);right.append(split,encounter);panels[0].append(left,right);
   function image(img,id){if(id){img.hidden=false;const name=get_name(id);if(img.getAttribute('src')!==name)img.src=name;}else{img.hidden=true;img.removeAttribute('src');}}
   function filter(){const term=search.value.trim().toLowerCase();document.querySelectorAll('#set-images>.set').forEach(p=>{p.classList.toggle('ml-filter',!!term&&!((p.dataset.package||'').toLowerCase().includes(term)||[...p.querySelectorAll('button[data-scenario]')].some(b=>(b.title+' '+b.value).toLowerCase().includes(term))));});document.querySelectorAll('#set-content button[data-scenario]').forEach(b=>{b.classList.toggle('ml-filter',!!term&&!(q('#set-images>.set.click')?.dataset.package||'').toLowerCase().includes(term)&&!(b.title+' '+b.value).toLowerCase().includes(term));});}
   function annotate(){document.querySelectorAll('#set-content button[data-scenario],#split-scenarios button[data-scenario]').forEach(b=>{try{const d=JSON.parse(b.dataset.scenario);b.dataset.caption=d.name||b.value;b.dataset.mode=d.expert?'전문가':'일반';b.setAttribute('aria-label',b.dataset.caption+' '+b.dataset.mode);}catch{}});filter();}
@@ -32,7 +32,13 @@
   function cardTile(name,id,sub){const box=el('div','ml-tile'),img=el('img');img.alt='';image(img,id);box.append(img,el('strong','',name),el('small','ml-muted',sub));return box;}
   function refresh(){
     const s=scenario||selected_underling;
-    scenarioName.textContent=s?.name||'시나리오 선택';mode.textContent=s?(s.expert?'전문가 모드':'일반 모드')+(scenario?'':' · 주요 음모 선택 필요'):'확장팩과 빌런을 선택하세요.';
+    const active=q('#set-content button.click[data-scenario]');
+    const pack=q('#set-images>.set.click');
+    scenarioName.textContent=s?.name||active?.dataset.caption||active?.title||'시나리오를 선택하세요';
+    mode.textContent=s?(s.expert?'전문가 모드':'일반 모드')+(scenario?'':' · 주요 음모 선택 필요'):active?'선택 확인 중…':'확장팩과 빌런을 선택하세요.';
+    mode.classList.toggle('ml-expert',!!s?.expert);
+    scenarioPack.textContent=pack?.dataset.package||'';
+    scenarioPack.hidden=!scenarioPack.textContent;
     image(scenarioImage,s?.villain?.[0]||s?.schemes?.[0]||s?.set_aside?.[0]);
     slots.replaceChildren();for(let i=1;i<=4;i++){const row=el('div','ml-slot'),b=button('P'+i+' · '+(heroes[i]?.name||'선택 안 함'),()=>{slot=i;refresh();},slot===i?'ml-active':'');row.append(b);if(heroes[i])row.append(button('×',()=>{SetHero({},i);refresh();}));slots.append(row);}
     add.textContent='플레이어 '+slot+'에 '+(heroes[slot]?'교체':'추가');
@@ -40,7 +46,7 @@
     const count=Object.values(heroes).filter(Boolean).length;Object.entries(heroes).filter(([,d])=>d).forEach(([i,d])=>finalCards.append(cardTile(d.name,d.hero?.[0],'플레이어 '+i)));
     finalInfo.textContent='조우 세트 '+document.querySelectorAll('#encounter-sets button.click,#modular-sets button.click').length+'개 · 플레이어 '+count+'명';
     next.disabled=stage===0?!catalogReady||!scenario:!count||!scenario;
-    msg.textContent=stage===0?(catalogReady?'빌런과 난이도를 선택하세요.':'시나리오 불러오는 중…'):stage===1?'히어로와 덱을 선택하세요.':'선택한 구성으로 게임을 시작합니다.';
+    msg.textContent=stage===0?(scenario?(scenario.name||active?.title||'시나리오 선택 완료')+' · '+(scenario.expert?'전문가 모드':'일반 모드'):catalogReady?'빌런과 난이도를 선택하세요.':'시나리오 불러오는 중…'):stage===1?'히어로와 덱을 선택하세요.':'선택한 구성으로 게임을 시작합니다.';
   }
   function go(n){stage=n;panels.forEach((p,i)=>p.hidden=i!==n);title.textContent=['시나리오 선택','히어로 선택','게임 준비'][n];steps.textContent=(n+1)+' / 3';next.textContent=['히어로 선택 →','게임 준비 →','게임 시작'][n];if(n===1&&!loaded)load();refresh();}
   function render(){
