@@ -1,4 +1,5 @@
 import { Setting } from './settings.js'
+import { koHtml, koLabel, koStatistic } from './ko-game.js'
 // @ts-ignore
 import { Notifications } from '../lib/notifications.js'
 
@@ -66,9 +67,9 @@ export class Notify {
         clickFunction = undefined,
     ) {
         Notify.notis.create(
-            title,
+            koLabel(title),
             ex_class_name,
-            description,
+            koHtml(description),
             duration,
             destroyOnClick,
             clickFunction
@@ -96,7 +97,7 @@ export class Notify {
         //     text = "Defeated"
         // }
 
-        let notify_text = `<img class='statistics-notify-img' style='--bg-image-true: url("${card_id}")'></img>  ${text} x${count}`
+        let notify_text = `<img class='statistics-notify-img' style='--bg-image-true: url("${card_id}")'></img>  ${koStatistic(text)} ${count}회`
 
         Notify.showStatisticsText(notify_text)
     }

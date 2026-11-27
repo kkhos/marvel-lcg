@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
     private LinearLayout failurePanel;
     private ProgressBar loadingBar;
     private boolean splashFading;
-    private static final String UI_REVISION = "31";
+    private static final String UI_REVISION = "32";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {

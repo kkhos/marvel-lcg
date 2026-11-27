@@ -3,6 +3,24 @@
 // Scheme as an action = 암약; scheme card = 음모; SCH stat = 음모 수치.
 const labels: Record<string, string> = {
   "Assign": "배분",
+  "STATISTIC": "통계",
+  "Statistic": "통계",
+  "Statistics": "통계",
+  "RESPONSE": "반응",
+  "COMMAND": "명령",
+  "Resolve": "효과 처리",
+  "Resolved": "효과 처리 완료",
+  "Enters Play": "플레이 영역에 들어옴",
+  "Entered Play": "플레이 영역에 들어옴",
+  "PutIntoPlay": "플레이 영역에 들어옴",
+  "Attached": "장착됨",
+  "Played": "플레이 완료",
+  "Revealed": "공개됨",
+  "Reveal": "공개",
+  "Discarded": "버려짐",
+  "Canceled": "취소됨",
+  "Cancelled": "취소됨",
+  "GameOver": "게임 종료",
   "Otherwise": "그 외의 경우",
   "Yes": "예",
   "No": "아니요",
@@ -233,6 +251,18 @@ const labels: Record<string, string> = {
 export function koLabel(value: string): string {
     return Object.prototype.hasOwnProperty.call(labels, value) ? labels[value] : value;
 }
+// Statistics event codes are presentation labels, not engine commands.
+export function koStatistic(value: string): string {
+    const events: Record<string,string> = {
+        Resolve: '효과 처리', Resolved: '효과 처리 완료',
+        Play: '플레이', Played: '플레이 완료', Resource: '자원으로 사용',
+        Reveal: '공개', Revealed: '공개됨', PutIntoPlay: '플레이 영역에 들어옴',
+        Attached: '장착됨', Hero: '플레이 영역에 들어옴',
+        Defeated: '격파', Discard: '버려짐', Cancel: '취소',
+        GameOver: '게임 종료'
+    };
+    return Object.prototype.hasOwnProperty.call(events, value) ? events[value] : koLabel(value);
+}
 export function koText(value: string): string {
     const direct = koLabel(value);
     if (direct !== value) return direct;
@@ -241,6 +271,7 @@ export function koText(value: string): string {
         const mapped = koLabel(trimmed);
         if (mapped !== trimmed) return line.replace(trimmed, mapped);
         return line
+            .replace(/\b(?:Resolve|Resolved|Play|Played|Resource|Reveal|Revealed|PutIntoPlay|Attached|Hero|Defeated|Discard|Cancel|GameOver|Enters Play)\s+x(\d+)\b/g, (match, count) => koStatistic(match.replace(/\s+x\d+$/, '')) + ' ' + count + '회')
             .replace(/\bRound (\d+) Step (\d+)\b/g, '$1라운드 · $2단계')
             .replace(/\bRound (\d+) Start\b/g, '$1라운드 시작')
             .replace(/\bRound (\d+) End\b/g, '$1라운드 종료')

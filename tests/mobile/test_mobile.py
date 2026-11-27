@@ -142,6 +142,24 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(self.errors, [])
         self.screenshot("home-redesign")
 
+    def test_ko_status_and_statistics(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koStatusCard} = await import('/public/js/marvel/ko-status.js');
+            const {koLabel, koStatistic, koHtml} = await import('/public/js/marvel/ko-game.js');
+            return {cards:['Tough','Stunned','Confused'].map(n=>koStatusCard('StatusCard',n)),
+                other:koStatusCard('Event','Tough') === undefined,
+                title:koLabel('STATISTIC'),
+                events:['Resolve','Resolved','Enters Play','Resource','Defeated'].map(koStatistic),
+                html:koHtml('<span data-id="Resolved">Resolved x2</span>')};
+        }""")
+        self.assertEqual([c["name"] for c in result["cards"]], ["강인함", "기절", "혼란"])
+        self.assertTrue(all("버립니다" in c["text"] for c in result["cards"]))
+        self.assertTrue(result["other"])
+        self.assertEqual(result["title"], "통계")
+        self.assertEqual(result["events"], ["효과 처리", "효과 처리 완료", "플레이 영역에 들어옴", "자원으로 사용", "격파"])
+        self.assertEqual(result["html"], '<span data-id="Resolved">효과 처리 완료 2회</span>')
+
     def test_ko_dynamic_choices(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

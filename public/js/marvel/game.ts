@@ -49,7 +49,7 @@ class GameStatistics {
             // Display an error message in the table area
             const table = document.getElementById('session-statistics');
             if (table) {
-                table.innerHTML = '<tr><td colspan="4">Error loading statistics.</td></tr>';
+                table.innerHTML = '<tr><td colspan="4">통계를 불러오지 못했습니다.</td></tr>';
             }
         }
     }
@@ -57,7 +57,7 @@ class GameStatistics {
     static renderTable() {
         
         if (!GameStatistics.tableElement || GameStatistics.currentStats.length === 0) {
-            if (GameStatistics.tableElement) GameStatistics.tableElement.innerHTML = '<tr><td>No statistics available.</td></tr>';
+            if (GameStatistics.tableElement) GameStatistics.tableElement.innerHTML = '<tr><td>표시할 통계가 없습니다.</td></tr>';
             return;
         }
 
@@ -104,7 +104,7 @@ class GameStatistics {
                             HoverCard.showLogImage(stats.id, card.pic_id)
                         }
                     } else {
-                        cell.textContent = 'No Image'; // Handle cases where card or pic_id is missing
+                        cell.textContent = '이미지 없음'; // Handle cases where card or pic_id is missing
                     }
                 } else {
                     cell.textContent = stats[key].toString();
@@ -117,6 +117,8 @@ class GameStatistics {
      * Utility function to format the header text (e.g., 'damage_dealt' to 'Damage Dealt').
      */
     static formatHeader(text: string): string {
+        const names: Record<string,string> = {id:'카드', damage_dealt:'준 피해', damage_taken:'받은 피해', thwarted_threat:'제거한 위협', entered_play:'플레이 영역 진입 횟수'};
+        if (Object.prototype.hasOwnProperty.call(names, text)) return names[text];
         return text.replace(/_/g, ' ')
                 .replace(/\b\w/g, char => char.toUpperCase());
     }

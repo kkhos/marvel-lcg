@@ -1,4 +1,5 @@
 import { koCard } from './ko-cards.js';
+import { koStatusCard } from './ko-status.js';
 import { Cards } from './cards.js';
 import { ClassName } from './class_name.js';
 import { Effect } from './effect.js';
@@ -24,7 +25,8 @@ export class TouchControls {
         style.textContent = `
             #scene .card { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
             #touch-preview { background: #172a23; color: white; border: 1px solid #83b79a; border-radius: 12px;
-                max-width: 90vw; max-height: 90vh; padding: 10px; overflow: auto; }
+                position: fixed; inset: 0; margin: auto; box-sizing: border-box; width: fit-content;
+                height: fit-content; max-width: 90vw; max-height: 90dvh; padding: 10px; overflow: auto; }
             #touch-preview::backdrop { background: #000b; }
             #touch-preview img { display: block; height: min(74vh, 600px); max-width: 78vw; object-fit: contain; margin: auto; }
             #touch-preview .touch-card-body { display:flex; gap:16px; align-items:center; }
@@ -33,7 +35,10 @@ export class TouchControls {
             #touch-preview .touch-card-title { display:block; font-size:19px; margin-bottom:8px; }
             #touch-preview .touch-card-source { display:block; color:#b9d4c3; font-size:11px; margin-top:10px; }
             #touch-preview .touch-buttons { display: flex; gap: 8px; justify-content: center; margin-top: 6px; }
-            #touch-preview button { min-height: 44px; padding: 5px 16px; font-size: 16px; }
+            #touch-preview button, #touch-pile > button { min-height: 44px; padding: 5px 16px;
+                font: 700 15px/1.25 system-ui,sans-serif; color: #f1f6f3; background: #30493e;
+                border: 1px solid #83b79a; border-radius: 7px; }
+            #touch-preview button[hidden] { display: none !important; }
             #touch-drag-ghost { position: fixed; pointer-events: none; z-index: 2147483646; width: 86px; height: 120px;
                 background: #263e33 center / contain no-repeat; border: 2px solid #a5e5c6; border-radius: 6px; opacity: .86;
                 transform: translate(-50%, -70%); }
@@ -68,16 +73,17 @@ export class TouchControls {
         dialog.append(body, controls);
         document.body.append(dialog);
         let previewFront = '', previewBack = '', showingBack = false;
-        let previewId = '', previewName = '';
+        let previewId = '', previewName = '', previewType = '';
         function updateDescription() {
             const id = showingBack ? previewBack : previewId;
             // Never infer or reveal a hidden card's name from its object ID.
-            const translated = koCard(id);
+            const status = showingBack ? undefined : koStatusCard(previewType, previewName);
+            const translated = status ?? koCard(id);
             name.textContent = translated?.name ?? (showingBack ? '뒷면' : previewName);
             const raw = translated?.text ?? (showingBack ? '' : Cards.getText(id));
             const plain = raw.replace(/<hr\s*\/?\s*>/gi,'\n────\n').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'');
             text.textContent = plain || (translated ? '추가 능력 설명 없음' : '표시할 설명 없음');
-            source.textContent = translated?.text !== undefined ? '한국어 번역 초안 · 원본 카드와 대조 권장' : '원문 / 미번역';
+            source.textContent = status ? '부가 상태 카드 · 한국어 설명' : translated?.text !== undefined ? '한국어 번역 초안 · 원본 카드와 대조 권장' : '원문 / 미번역';
         }
         close.onclick = () => dialog.close();
         dialog.onclick = e => { if (e.target === dialog) dialog.close(); };
@@ -92,10 +98,12 @@ export class TouchControls {
             if (!data || !data.isVisible() || !data.pic_id) return;
             previewId = data.card_id;
             previewName = data.name;
+            previewType = data.card_type;
             previewFront = data.pic_id;
             previewBack = data.down_card_id;
             showingBack = false;
-            flip.disabled = !previewBack || previewBack === previewFront;
+            flip.hidden = previewType === 'StatusCard' || !previewBack || previewBack === previewFront;
+            flip.disabled = flip.hidden;
             if (!dialog.open) dialog.showModal();
             CardImages.setImage(img, previewFront);
             updateDescription();
@@ -103,7 +111,7 @@ export class TouchControls {
 
         const pile = document.createElement('dialog');
         pile.id = 'touch-pile';
-        pile.style.cssText = 'background:#172a23;color:white;border:1px solid #83b79a;border-radius:12px;width:min(80vw,760px);max-height:85dvh;overflow:auto;padding:12px';
+        pile.style.cssText = 'position:fixed;inset:0;margin:auto;box-sizing:border-box;height:fit-content;background:#172a23;color:white;border:1px solid #83b79a;border-radius:12px;width:min(80vw,760px);max-height:85dvh;overflow:auto;padding:12px';
         const pileTitle = document.createElement('h3');
         const pileList = document.createElement('div');
         pileList.style.cssText = 'display:flex;gap:10px;overflow-x:auto;touch-action:pan-x;padding:8px';
