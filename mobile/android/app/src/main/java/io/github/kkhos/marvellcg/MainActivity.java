@@ -19,6 +19,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
+import android.content.res.ColorStateList;
+import android.view.Gravity;
 import com.chaquo.python.Python;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.android.AndroidPlatform;
@@ -40,23 +48,17 @@ public class MainActivity extends Activity {
     private WebView web;
     private TextView status;
     private Button start;
-    private static final String UI_REVISION = "27";
+    private FrameLayout splash;
+    private LinearLayout failurePanel;
+    private ProgressBar loadingBar;
+    private boolean splashFading;
+    private static final String UI_REVISION = "28";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        status = new TextView(this);
-        status.setText("Marvel Champions\n게임 로딩 중…");
-        status.setGravity(android.view.Gravity.CENTER);
-        status.setTextSize(20);
-        layout.addView(status);
-        start = new Button(this);
-        start.setText("앱 종료 후 다시 실행");
-        start.setVisibility(View.GONE);
-        start.setEnabled(false);
-        layout.addView(start);
+        FrameLayout layout = new FrameLayout(this);
+        layout.setBackgroundColor(0xff0a1511);
         web = new WebView(this);
         web.getSettings().setUseWideViewPort(true);
         // Use the existing wizard's native-app marker to suppress its Back button.
@@ -66,15 +68,20 @@ public class MainActivity extends Activity {
         web.getSettings().setAllowFileAccess(false);
         web.getSettings().setAllowContentAccess(false);
         web.setWebViewClient(new WebViewClient() {
+            @Override public void onPageCommitVisible(WebView view, String url) {
+                super.onPageCommitVisible(view, url);
+                if (!loadedUrl.isEmpty() && failurePanel != null &&
+                        failurePanel.getVisibility() != View.VISIBLE) hideSplash();
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri u = request.getUrl();
                 return !("http".equals(u.getScheme()) && "127.0.0.1".equals(u.getHost()) && u.getPort() == 2345);
             }
         });
         web.setVisibility(View.GONE);
-        FrameLayout content = new FrameLayout(this);
-        content.addView(web, new FrameLayout.LayoutParams(-1, -1));
-        layout.addView(content, new LinearLayout.LayoutParams(-1, 0, 1));
+        web.setBackgroundColor(0xff0a1511);
+        layout.addView(web, new FrameLayout.LayoutParams(-1, -1));
+        createSplash(layout);
         setContentView(layout);
         // Android 15+ enforces edge-to-edge for targetSdk 35. Keep the
         // WebView outside system bars/cutouts until fullscreen is applied.
@@ -151,6 +158,111 @@ public class MainActivity extends Activity {
         handler.post(poll);
     }
 
+    private int dp(float n) {
+        return Math.round(n * getResources().getDisplayMetrics().density);
+    }
+
+    private Bitmap splashBitmap(String name) {
+        try (InputStream in = getAssets().open("splash/" + name)) {
+            return BitmapFactory.decodeStream(in);
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private void createSplash(FrameLayout root) {
+        splash = new FrameLayout(this);
+        splash.setBackground(new GradientDrawable(GradientDrawable.Orientation.TL_BR,
+                new int[]{0xff223f32, 0xff091510, 0xff050a08}));
+        splash.setClickable(true);
+        root.addView(splash, new FrameLayout.LayoutParams(-1, -1));
+
+        Bitmap background = splashBitmap("doom.webp");
+        if (background != null) {
+            ImageView image = new ImageView(this);
+            image.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            image.setImageBitmap(background);
+            splash.addView(image, new FrameLayout.LayoutParams(-1, -1));
+        }
+
+        View shade = new View(this);
+        shade.setBackground(new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT,
+                new int[]{0x05000000, 0x20000000, 0xc008110d}));
+        splash.addView(shade, new FrameLayout.LayoutParams(-1, -1));
+        View bottomShade = new View(this);
+        bottomShade.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM,
+                new int[]{0x00000000, 0xc0050a08}));
+        splash.addView(bottomShade, new FrameLayout.LayoutParams(-1, dp(76), Gravity.BOTTOM));
+
+        ImageView logo = new ImageView(this);
+        logo.setContentDescription("Marvel Champions: The Card Game");
+        logo.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        logo.setImageBitmap(splashBitmap("champions.png"));
+        FrameLayout.LayoutParams logoParams = new FrameLayout.LayoutParams(dp(220), dp(116),
+                Gravity.END | Gravity.CENTER_VERTICAL);
+        logoParams.rightMargin = dp(24);
+        splash.addView(logo, logoParams);
+        splash.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            int width = r - l, height = b - t;
+            if (width <= 0 || height <= 0 || (width == or - ol && height == ob - ot)) return;
+            int logoWidth = Math.round(Math.min(width * .36f, height * .82f));
+            FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) logo.getLayoutParams();
+            lp.width = logoWidth;
+            lp.height = Math.round(logoWidth * 125f / 240f);
+            lp.rightMargin = Math.round(width * .06f);
+            logo.setLayoutParams(lp);
+        });
+
+        loadingBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+        loadingBar.setIndeterminate(true);
+        loadingBar.setIndeterminateTintList(ColorStateList.valueOf(0xff72d7a3));
+        loadingBar.setContentDescription("게임 로딩 중");
+        FrameLayout.LayoutParams barParams = new FrameLayout.LayoutParams(-1, dp(4), Gravity.BOTTOM);
+        barParams.setMargins(dp(24), 0, dp(24), dp(18));
+        loadingBar.setPadding(0, 0, 0, 0);
+        loadingBar.setBackgroundColor(0x66478b70);
+        splash.addView(loadingBar, barParams);
+
+        // Only actual failures show diagnostic text and a restart action.
+        failurePanel = new LinearLayout(this);
+        failurePanel.setOrientation(LinearLayout.VERTICAL);
+        failurePanel.setGravity(Gravity.CENTER);
+        failurePanel.setPadding(dp(16), dp(12), dp(16), dp(12));
+        failurePanel.setBackgroundColor(0xe6111b19);
+        failurePanel.setVisibility(View.GONE);
+        FrameLayout.LayoutParams errorParams = new FrameLayout.LayoutParams(-1, -2, Gravity.CENTER);
+        errorParams.setMargins(dp(24), dp(12), dp(24), dp(12));
+        splash.addView(failurePanel, errorParams);
+        status = new TextView(this);
+        status.setTextColor(Color.WHITE);
+        status.setTextSize(12);
+        status.setMaxLines(7);
+        status.setMovementMethod(new android.text.method.ScrollingMovementMethod());
+        failurePanel.addView(status, new LinearLayout.LayoutParams(-1, -2));
+        start = new Button(this);
+        start.setText("앱 종료 후 다시 실행");
+        failurePanel.addView(start);
+    }
+
+    private void showSplash() {
+        splash.animate().cancel();
+        splashFading = false;
+        splash.setAlpha(1f);
+        splash.setVisibility(View.VISIBLE);
+        loadingBar.setVisibility(View.VISIBLE);
+        failurePanel.setVisibility(View.GONE);
+    }
+
+    private void hideSplash() {
+        if (splash.getVisibility() != View.VISIBLE || splashFading) return;
+        splashFading = true;
+        splash.animate().alpha(0f).setDuration(220).withEndAction(() -> {
+            splash.setVisibility(View.GONE);
+            loadingBar.setVisibility(View.GONE);
+            splashFading = false;
+        }).start();
+    }
+
     private final Runnable poll = new Runnable() {
         public void run() {
             if (isFinishing() || isDestroyed()) return;
@@ -171,9 +283,8 @@ public class MainActivity extends Activity {
                                 runOnUiThread(() -> {
                                     if (isDestroyed() || url.equals(loadedUrl)) return;
                                     loadedUrl = url;
+                                    showSplash();
                                     web.setVisibility(View.VISIBLE);
-                                    status.setVisibility(View.GONE);
-                                    start.setVisibility(View.GONE);
                                     web.loadUrl(url);
                                 });
                             } catch (IOException ignored) {}
@@ -181,7 +292,7 @@ public class MainActivity extends Activity {
                     }
                     if (launching && url.isEmpty() && !loadedUrl.isEmpty()) {
                         web.setVisibility(View.GONE);
-                        status.setVisibility(View.VISIBLE);
+                        showSplash();
                         loadedUrl = "";
                     }
                 } catch (Throwable e) {
@@ -191,12 +302,12 @@ public class MainActivity extends Activity {
             }
             if (failed) {
                 web.setVisibility(View.GONE);
-                status.setVisibility(View.VISIBLE);
-                start.setVisibility(View.VISIBLE);
-                start.setEnabled(true);
+                showSplash();
+                loadingBar.setVisibility(View.GONE);
+                failurePanel.setVisibility(View.VISIBLE);
                 if (!launching) message = diagnostic;
+                status.setText(message);
             }
-            status.setText(message);
             handler.postDelayed(this, 1000);
         }
     };
@@ -245,7 +356,7 @@ public class MainActivity extends Activity {
     }
 
     private void handleBack() {
-        if (web.getVisibility() != View.VISIBLE) {
+        if (web.getVisibility() != View.VISIBLE || splash.getVisibility() == View.VISIBLE) {
             new AlertDialog.Builder(this).setTitle("게임을 종료할까요?")
                     .setNegativeButton("취소", null)
                     .setPositiveButton("종료", (d, w) -> finishAndRemoveTask()).show();
@@ -276,6 +387,7 @@ public class MainActivity extends Activity {
 
     @Override protected void onDestroy() {
         handler.removeCallbacks(poll);
+        splash.animate().cancel();
         web.stopLoading();
         if (web.getParent() instanceof android.view.ViewGroup) ((android.view.ViewGroup) web.getParent()).removeView(web);
         web.destroy();

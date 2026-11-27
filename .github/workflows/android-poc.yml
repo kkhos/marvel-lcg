@@ -102,7 +102,24 @@ jobs:
           printf '%s' "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$key"
           keytool -list -keystore "$key" -storepass android -alias androiddebugkey >/dev/null
           echo "MARVEL_DEBUG_KEYSTORE_PATH=$key" >> "$GITHUB_ENV"
+      - name: Prepare optional offline splash backdrop
+        shell: bash
+        run: |
+          set -eu
+          dest=mobile/android/app/src/main/assets/splash/doom.webp
+          if curl --fail --location --retry 1 --connect-timeout 8 --max-time 25 \
+              'https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/002085A1CE8A7388B940AF1093C7A3D1B8A3B0C17A424070D7AE2D25D701C2D1/compose?format=webp&width=2560' -o "$dest.tmp" && \
+              python -c 'import sys; d=open(sys.argv[1],"rb").read(12); assert d[:4]==b"RIFF" and d[8:12]==b"WEBP"' "$dest.tmp"; then
+            mv "$dest.tmp" "$dest"
+            echo "Doom backdrop bundled for offline startup."
+          else
+            rm -f "$dest.tmp"
+            echo "::warning::Doom backdrop unavailable; using built-in green gradient."
+          fi
       - run: gradle -p mobile/android :app:assembleDebug --stacktrace
+      - name: Verify bundled splash assets
+        run: |
+          python -c 'import zipfile; z=zipfile.ZipFile("mobile/android/app/build/outputs/apk/debug/app-debug.apk"); assert "assets/splash/champions.png" in z.namelist(); print("Doom backdrop bundled:", "assets/splash/doom.webp" in z.namelist())'
       - name: Verify APK signing certificate
         shell: bash
         run: |
