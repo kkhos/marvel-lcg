@@ -1,3 +1,4 @@
+import { koKeywordLabel } from './ko-glossary.js';
 // Display-only labels; engine commands and card data must never be translated.
 // Terminology: Korean Marvel Champions Rules Reference (June 2023), pp. 2–6, 35.
 // Scheme as an action = 암약; scheme card = 음모; SCH stat = 음모 수치.
@@ -147,28 +148,7 @@ const labels: Record<string, string> = {
   "Stunned": "기절",
   "Confused": "혼란",
   "Tough": "강인함",
-  "Toughness": "강인",
-  "Steady": "의연",
-  "Stalwart": "견고",
-  "Piercing": "관통",
-  "Overkill": "압살",
   "Indirect Damage": "간접 피해",
-  "Retaliate": "반격",
-  "Ranged": "원거리",
-  "Guard": "경호",
-  "Patrol": "순찰",
-  "Quickstrike": "속공",
-  "Villainous": "악당",
-  "Uses": "사용",
-  "Restricted": "한정",
-  "Requirement": "필수",
-  "Team-Up": "협동",
-  "Permanent": "영속",
-  "Victory": "승점",
-  "Surge": "쇄도",
-  "Peril": "고립",
-  "Incite": "진척",
-  "Hinder": "교란",
   "Hazard": "수렁",
   "Acceleration": "가속",
   "Crisis": "위기",
@@ -231,11 +211,6 @@ const labels: Record<string, string> = {
   "Threat": "위협",
   "Identity": "아이덴티티",
   "Status Card": "부가 상태 카드",
-  "Alliance": "동맹",
-  "Temporary": "순간",
-  "Setup": "사전 준비",
-  "Teamwork": "팀워크",
-  "Form": "형태",
   "Physical Resource": "물리력 자원",
   "Mental Resource": "정신력 자원",
   "Energy Resource": "에너지 자원",
@@ -263,10 +238,26 @@ const labels: Record<string, string> = {
   "Player Discard Pile": "버린 플레이어 카드 더미",
   "Ready State": "준비 상태",
   "Exhausted State": "소진 상태",
+  "Threat Threshold": "위협 임계점",
+  "Triggering Condition": "격발 조건",
+  "Constant Ability": "상시 능력",
+  "Lasting Effect": "지속 효과",
+  "Delayed Effect": "지연 효과",
+  "Replacement Effect": "대체 효과",
+  "Reminder Text": "되새김 문구",
+  "Trait": "특성",
+  "Active Player": "활성 플레이어",
+  "Remaining Hit Points": "남은 생명력",
+  "Maximum Hit Points": "최대 생명력",
+  "Excess Damage": "초과 피해",
+  "Nemesis Encounter Set": "숙적 조우 세트",
+  "Resolve Ability": "능력 해결",
+  "Initiate Ability": "능력 개시",
+  "Amplify Icon": "증폭 아이콘",
   "Card Play": "카드 플레이"
 };
 export function koLabel(value: string): string {
-    return Object.prototype.hasOwnProperty.call(labels, value) ? labels[value] : value;
+    return koKeywordLabel(value) ?? (Object.prototype.hasOwnProperty.call(labels, value) ? labels[value] : value);
 }
 // Statistics event codes are presentation labels, not engine commands.
 export function koStatistic(value: string): string {

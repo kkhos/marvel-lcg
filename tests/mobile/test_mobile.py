@@ -300,6 +300,23 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["symbols"], "정신력 물리력 에너지 만능 플레이어마다")
         self.assertEqual(result["normalized"], "당신이 조종하는 카드. 버린 카드 더미.")
 
+    def test_ko_rules_reference_keywords(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koKeywords,koKeywordLabel,koGlossary} = await import('/public/js/marvel/ko-glossary.js');
+            const {koLabel} = await import('/public/js/marvel/ko-game.js');
+            return {count:Object.keys(koKeywords).length,
+                labels:['Toughness','Tough','Steady','Stalwart','Hinder 2','Retaliate 1','Incite X','Victory 3','Teamwork(Goblin)','Requirement(mental)','Uses(web 3)'].map(koLabel),
+                timing:[koGlossary.then,koGlossary.instead,koGlossary['triggering condition']],
+                untouched:koKeywordLabel('Retaliate 1 after attacking') === undefined,
+                shared:Object.entries(koKeywords).every(([key,value])=>koLabel(key)===value)};
+        }""")
+        self.assertEqual(result["count"], 26)
+        self.assertEqual(result["labels"], ["강인","강인함","의연","견고","교란 2","반격 1","진척 X","승점 3","팀워크(Goblin)","필수(mental)","사용(web 3)"])
+        self.assertEqual(result["timing"], ["그러고 나서","대신","격발 조건"])
+        self.assertTrue(result["untouched"])
+        self.assertTrue(result["shared"])
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
