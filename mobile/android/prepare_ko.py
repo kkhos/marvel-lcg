@@ -147,7 +147,7 @@ FILES = [
 ]
 OUT = ROOT / "public/js/marvel/ko-bundled.ts"
 SYMBOLS = {"energy":"에너지","mental":"정신력","physical":"물리력","wild":"만능",
-           "per_hero":"플레이어당","boost":"강화 아이콘","star":"★","cost":"비용",
+           "per_hero":"플레이어마다","boost":"강화 아이콘","star":"★","cost":"비용",
            "acceleration":"가속","amplify":"증폭","crisis":"위기","hazard":"수렁",
            "unique":"고유","per_group":"그룹당"}
 HANGUL = re.compile(r"[가-힣]")

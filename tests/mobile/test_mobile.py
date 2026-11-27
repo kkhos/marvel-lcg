@@ -275,6 +275,31 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["unchanged"], "위협 3을 놓습니다. 위협을 2만큼 제거합니다.")
         self.assertEqual(result["recover"], "회복")
 
+    def test_ko_rulebook_terminology(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koGlossary,normalizeKoCardText} = await import('/public/js/marvel/ko-glossary.js');
+            const {koLabel} = await import('/public/js/marvel/ko-game.js');
+            const {koStatusCard} = await import('/public/js/marvel/ko-status.js');
+            const {plainKo} = await import('/public/js/marvel/ko-local.js');
+            return {
+                resources:['mental','physical','energy','wild'].map(k=>koGlossary[k]),
+                aspects:['Aggression','Justice','Leadership','Protection'].map(koLabel),
+                statuses:['Tough','Stunned','Confused'].map(k=>koStatusCard('StatusCard',k).text),
+                sets:['Standard Set','Expert Set','Modular Set'].map(koLabel),
+                symbols:plainKo('[mental] [physical] [energy] [wild] [per_hero]'),
+                normalized:normalizeKoCardText('당신이 지배하는 카드. 버린 더미.')
+            };
+        }""")
+        self.assertEqual(result["resources"], ["정신력","물리력","에너지","만능"])
+        self.assertEqual(result["aspects"], ["용맹","정의","통솔","수호"])
+        self.assertEqual(result["statuses"], ["이 캐릭터가 피해를 입으려 하면, 대신 이 카드를 버립니다.",
+            "이 캐릭터가 공격하려 하면, 대신 이 카드를 버립니다.",
+            "이 캐릭터가 저지하려 하거나 암약하려 하면, 대신 이 카드를 버립니다."])
+        self.assertEqual(result["sets"], ["일반 조우 세트","전문가 조우 세트","모듈식 조우 세트"])
+        self.assertEqual(result["symbols"], "정신력 물리력 에너지 만능 플레이어마다")
+        self.assertEqual(result["normalized"], "당신이 조종하는 카드. 버린 카드 더미.")
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

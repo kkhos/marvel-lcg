@@ -1,4 +1,4 @@
-// Korean terminology verified against owner-provided physical cards; see docs/ko-glossary.md.
+// Korean terminology verified against physical cards and Korean Learn to Play rulebook; see docs/ko-glossary.md.
 // Presentation only. Never translate engine identifiers or change gameplay timing.
 export const koGlossary = {
     'basic power': '기본 기능',
@@ -11,6 +11,49 @@ export const koGlossary = {
     'discard': '버림',
     'spend': '소모',
     'damage unit': '점',
+    'mental': '정신력',
+    'physical': '물리력',
+    'energy': '에너지',
+    'wild': '만능',
+    'aspect': '성향',
+    'aggression': '용맹',
+    'justice': '정의',
+    'leadership': '통솔',
+    'protection': '수호',
+    'basic (aspect)': '기본',
+    'identity': '아이덴티티',
+    'ally': '동료',
+    'villain': '빌런',
+    'event': '이벤트',
+    'upgrade': '업그레이드',
+    'support': '지원',
+    'attachment': '장착',
+    'obligation': '의무',
+    'status card': '부가 상태 카드',
+    'main scheme': '주요 음모',
+    'encounter set': '조우 세트',
+    'modular encounter set': '모듈식 조우 세트',
+    'standard encounter set': '일반 조우 세트',
+    'expert encounter set': '전문가 조우 세트',
+    'discard pile': '버린 카드 더미',
+    'boost card': '강화 카드',
+    'boost icon': '강화 아이콘',
+    'hazard': '수렁',
+    'acceleration': '가속',
+    'crisis': '위기',
+    'per player': '플레이어마다',
+    'unique': '고유',
+    'stage': '스테이지',
+    'trigger (ability)': '격발',
+    'resolve (ability)': '해결',
+    'ready': '준비',
+    'control': '조종',
+    'consequential damage': '부수적 피해',
+    'overkill': '압살',
+    'guard': '경호',
+    'setup': '사전 준비',
+    'mulligan': '멀리건',
+    'first player': '시작 플레이어',
     'threat': '위협',
     'remove threat': '위협 제거',
     'pay': '지불',
@@ -53,6 +96,9 @@ export const koGlossary = {
 export function normalizeKoCardText(value: string): string {
     return value
         .replace(/기본 능력/g, koGlossary['basic power'])
+        .replace(/버린 더미/g, '버린 카드 더미')
+        .replace(/지배하에 플레이/g, '조종하에 플레이')
+        .replace(/당신이 지배하는/g, '당신이 조종하는')
         .replace(/라운드당 (\d+)회 제한/g, '라운드마다 $1회 제한')
         .replace(/위협 (\d+)(?:점)?[을를] 제거/g, '위협을 $1만큼 제거')
         .replace(/스파이더 센스/g, koGlossary['spider-sense'])
