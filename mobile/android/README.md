@@ -20,7 +20,8 @@ The app first probes Python, NumPy, Pillow, HTTP and WebSocket; press Start game
 - Debug PoC only. No release signing or public APK distribution. Check upstream permission and artwork rights before distribution (ATTRIBUTION.md).
 - Android wheel candidates differ from upstream (NumPy 1.26.2 vs 2.5.1; aiohttp 3.10.10); do not change desktop requirements. Revisit security and API compatibility before production.
 - Existing game UI is unchanged. Android lifecycle, save/resume, bundle upgrades, and graceful shutdown are not implemented. The process must be restarted after engine failure.
-- App bundle extraction is first-install only; reinstalling without clearing data will retain the old code. Use a disposable emulator/app profile for PoC iterations; clearing data destroys saves/artwork.
+- UI revision 2 refreshes only bundled public/ files on an in-place update, preserving other files and the artwork library. Full engine/data upgrades are not implemented. APK updates require the same signing certificate; do not uninstall or clear data if you want to preserve artwork.
+- Touch: tap for the original card action; hold a visible card for a large preview; drag highlighted cards onto the selection drop zone or play area; drag the active card onto an already-legal target during target selection. Drag prompt boxes with a finger. The native Back button and Android back gesture close previews first, then navigate (with confirmation before leaving a game). No automatic turn end or undo. Touch UI is experimental and needs real-device testing.
 - Verify server binding and authentication before multiplayer use. This PoC is intended for localhost only, not LAN exposure. No untrusted custom card scripts.
 - First game target: Spider-Man vs Rhino; then airplane mode after artwork preparation.
 

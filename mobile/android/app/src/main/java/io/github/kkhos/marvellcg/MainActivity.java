@@ -1,6 +1,7 @@
 package io.github.kkhos.marvellcg;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,6 +13,8 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View;
+import android.view.Gravity;
+import android.widget.FrameLayout;
 import com.chaquo.python.Python;
 import com.chaquo.python.PyObject;
 import com.chaquo.python.android.AndroidPlatform;
@@ -33,6 +36,8 @@ public class MainActivity extends Activity {
     private WebView web;
     private TextView status;
     private Button start;
+    private Button back;
+    private static final String UI_REVISION = "2";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -58,7 +63,20 @@ public class MainActivity extends Activity {
             }
         });
         web.setVisibility(View.GONE);
-        layout.addView(web, new LinearLayout.LayoutParams(-1, 0, 1));
+        FrameLayout content = new FrameLayout(this);
+        content.addView(web, new FrameLayout.LayoutParams(-1, -1));
+        back = new Button(this);
+        back.setText("‹");
+        back.setTextSize(24);
+        back.setContentDescription("Back");
+        back.setPadding(0, 0, 0, 0);
+        back.setAlpha(0.8f);
+        back.setVisibility(View.GONE);
+        int size = (int) (48 * getResources().getDisplayMetrics().density);
+        FrameLayout.LayoutParams backParams = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.START);
+        content.addView(back, backParams);
+        back.setOnClickListener(v -> handleBack());
+        layout.addView(content, new LinearLayout.LayoutParams(-1, 0, 1));
         setContentView(layout);
         start.setOnClickListener(v -> {
             if (launching) return;
@@ -109,6 +127,7 @@ public class MainActivity extends Activity {
                                     if (isDestroyed() || url.equals(loadedUrl)) return;
                                     loadedUrl = url;
                                     web.setVisibility(View.VISIBLE);
+                                    back.setVisibility(View.VISIBLE);
                                     status.setVisibility(View.GONE);
                                     start.setVisibility(View.GONE);
                                     web.loadUrl(url);
@@ -118,6 +137,7 @@ public class MainActivity extends Activity {
                     }
                     if (launching && url.isEmpty() && !loadedUrl.isEmpty()) {
                         web.setVisibility(View.GONE);
+                        back.setVisibility(View.GONE);
                         status.setVisibility(View.VISIBLE);
                         loadedUrl = "";
                     }
@@ -130,18 +150,24 @@ public class MainActivity extends Activity {
         }
     };
 
-    // Fresh-install PoC only: keep saves/artwork in the extracted game folder.
-    // Never overwrite existing user files. Upgrade/migration is a separate milestone.
+    // Update bundled web files only; do not replace user data, engine config or artwork.
+    // Full engine/data upgrades need a separate migration design.
     private File unpack() throws IOException {
         File root = new File(getFilesDir(), "game");
         File marker = new File(root, ".installed");
-        if (marker.isFile()) return root;
+        File uiMarker = new File(root, ".ui-" + UI_REVISION);
+        boolean uiOnly = marker.isFile();
+        if (uiOnly && uiMarker.isFile()) return root;
         if (!root.isDirectory() && !root.mkdirs()) throw new IOException("Cannot create game folder");
         String prefix = root.getCanonicalPath() + File.separator;
         try (ZipInputStream zip = new ZipInputStream(getAssets().open("game.zip"))) {
             ZipEntry entry;
             byte[] buf = new byte[65536];
             while ((entry = zip.getNextEntry()) != null) {
+                if (uiOnly && !entry.getName().startsWith("public/")) {
+                    zip.closeEntry();
+                    continue;
+                }
                 File out = new File(root, entry.getName());
                 if (!out.getCanonicalPath().startsWith(prefix)) throw new IOException("Unsafe bundle path");
                 if (entry.isDirectory()) {
@@ -157,8 +183,40 @@ public class MainActivity extends Activity {
                 zip.closeEntry();
             }
         }
-        if (!marker.createNewFile()) throw new IOException("Cannot mark installed bundle");
+        if (!marker.isFile() && !marker.createNewFile()) throw new IOException("Cannot mark installed bundle");
+        if (!uiMarker.isFile() && !uiMarker.createNewFile()) throw new IOException("Cannot mark UI revision");
+        runOnUiThread(() -> { if (!isDestroyed()) web.clearCache(true); });
         return root;
+    }
+
+    @Override public void onBackPressed() {
+        handleBack();
+    }
+
+    private void handleBack() {
+        if (web.getVisibility() != View.VISIBLE) {
+            moveTaskToBack(true);
+            return;
+        }
+        web.evaluateJavascript("!!(window.MarvelTouch && window.MarvelTouch.back())", result -> {
+            if (isDestroyed() || "true".equals(result)) return;
+            String current = web.getUrl();
+            Uri uri = current == null ? Uri.EMPTY : Uri.parse(current);
+            String path = uri.getPath();
+            boolean gamePage = "/marvel".equals(path) || "/watch".equals(path)
+                    || "/public/marvel.html".equals(path)
+                    || ("/".equals(path) && uri.getQuery() != null);
+            if (gamePage) {
+                new AlertDialog.Builder(this).setTitle("Leave game screen?")
+                        .setMessage("This does not undo a move or end your turn. Save progress in the game first if needed.")
+                        .setNegativeButton("Stay", null)
+                        .setPositiveButton("Leave", (d, w) -> web.loadUrl(loadedUrl)).show();
+            } else if (web.canGoBack()) {
+                web.goBack();
+            } else {
+                moveTaskToBack(true);
+            }
+        });
     }
 
     @Override protected void onDestroy() {
