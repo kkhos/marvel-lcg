@@ -104,6 +104,30 @@ class MobileRegression(unittest.TestCase):
         self.bounds(self.page.locator(".ml-footer .ml-primary"))
         return rhino
 
+    def test_save_slot_delete_confirmation(self):
+        # Only the isolated CI checkout gets a synthetic save file.
+        fixture = Path(__file__).resolve().parents[2] / "save_3.json"
+        self.assertFalse(fixture.exists(), "Do not overwrite an existing save")
+        fixture.write_text("{}", encoding="utf-8")
+        try:
+            self.goto("/main")
+            self.page.get_by_role("button", name="저장 게임", exact=True).tap()
+            row = self.page.locator("#save-list > div").filter(has_text="저장 3")
+            delete = row.get_by_role("button", name="삭제", exact=True)
+            expect(delete).to_be_enabled()
+            delete.tap()
+            expect(self.page.locator("#save-delete-confirm")).to_be_visible()
+            self.page.locator("#save-delete-cancel").tap()
+            self.assertTrue(fixture.exists())
+            delete.tap()
+            self.page.locator("#save-delete-apply").tap()
+            expect(self.page.locator("#save-status")).to_have_text("저장 게임을 삭제했습니다.")
+            expect(delete).to_be_disabled()
+            self.assertFalse(fixture.exists())
+            self.assertEqual(self.errors, [])
+        finally:
+            fixture.unlink(missing_ok=True)
+
     def test_scenario_selection_and_preview(self):
         rhino = self.open_setup()
         self.screenshot("scenario")
@@ -312,7 +336,7 @@ class MobileRegression(unittest.TestCase):
                 const h = document.getElementById('mobile-progress-bar').getBoundingClientRect();
                 return b.width > 0 && b.right <= innerWidth + 1 && b.right > r.left &&
                     b.top >= h.bottom - 1 && b.bottom <= innerHeight + 1 &&
-                    r.width <= 131 && h.height <= 46;
+                    r.width <= 131 && h.height <= 34;
             }""")
             prompt = self.page.locator("#prompt-box-container")
             options = self.page.locator("#option-buttons")

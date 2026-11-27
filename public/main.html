@@ -256,10 +256,27 @@ function doReplay(file_name) {
     </script>
 
 <dialog id="saved-games" style="background:#192542;color:white;border:1px solid #7285c3;border-radius:12px;width:min(80vw,650px);max-height:85dvh;overflow:auto">
-<h2 style="margin:0 0 8px">저장 게임</h2><div id="save-list"></div><p id="save-status" role="status"></p><button onclick="document.getElementById('saved-games').close()">닫기</button>
+<h2 style="margin:0 0 8px">저장 게임</h2><div id="save-list"></div>
+<section id="save-delete-confirm" hidden style="padding:12px;border:1px solid #c07782;border-radius:8px;background:#382333">
+ <p id="save-delete-message"></p><p>삭제한 저장 게임은 복구할 수 없습니다.</p>
+ <button type="button" id="save-delete-cancel" style="min-height:40px;padding:6px 16px">취소</button>
+ <button type="button" id="save-delete-apply" style="min-height:40px;padding:6px 16px;background:#a32540;color:white;border:1px solid #dca3ae;border-radius:6px">삭제 확인</button>
+</section><p id="save-status" role="status"></p><button onclick="document.getElementById('saved-games').close()">닫기</button>
 </dialog>
 <script>
+const deletePanel=document.getElementById('save-delete-confirm');
+const deleteApply=document.getElementById('save-delete-apply');
+const deleteCancel=document.getElementById('save-delete-cancel');
+const saveDialog=document.getElementById('saved-games');
+const saveList=document.getElementById('save-list');
+function cancelSaveDelete(){
+ deletePanel.hidden=true;saveList.hidden=false;
+ deleteApply.onclick=null;deleteApply.disabled=false;deleteCancel.disabled=false;
+}
+deleteCancel.onclick=cancelSaveDelete;
+saveDialog.addEventListener('close',cancelSaveDelete);
 async function showSaves(){
+ cancelSaveDelete();
  const dialog=document.getElementById('saved-games'), list=document.getElementById('save-list'), status=document.getElementById('save-status');
  if(!dialog.open) dialog.showModal();
  list.replaceChildren();status.textContent='불러오는 중…';
@@ -271,7 +288,19 @@ async function showSaves(){
    const label=document.createElement('div');label.style.flex='1';label.textContent=(s.slot===0?'빠른 저장':'저장 '+s.slot)+(s.exists?' · '+new Date(s.modified*1000).toLocaleString():' · 비어 있음');row.append(label);
    for(const [name,action] of [['이어하기','resume'],['삭제','delete']]){
     const b=document.createElement('button');b.textContent=name;b.disabled=!s.exists;b.style.cssText='min-height:40px;padding:6px 12px';b.onclick=async()=>{
-     if(action==='delete'&&!confirm('이 저장 게임을 삭제할까요?'))return;
+     if(action==='delete'){
+      document.getElementById('save-delete-message').textContent=(s.slot===0?'빠른 저장':'저장 '+s.slot)+'을 삭제할까요?';
+      saveList.hidden=true;deletePanel.hidden=false;status.textContent='';
+      deleteApply.onclick=async()=>{
+       deleteApply.disabled=true;deleteCancel.disabled=true;
+       try{
+        const r=await fetch('/mobile_save_slot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slot:s.slot,action:'delete'})});
+        if(!r.ok || (await r.json()).result!=='OK')throw Error('Delete failed');
+        await showSaves();status.textContent='저장 게임을 삭제했습니다.';
+       }catch(e){status.textContent='삭제하지 못했습니다. 다시 시도해 주세요.';deleteApply.disabled=false;deleteCancel.disabled=false;}
+      };
+      deleteCancel.focus();return;
+     }
      b.disabled=true;try{
       const r=await fetch('/mobile_save_slot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slot:s.slot,action})});
       if(r.status===409&&action==='resume'){const m=await import('/public/js/module/artwork.js');dialog.close();m.showArtworkPreparation(()=>b.onclick());return;}
@@ -283,7 +312,7 @@ async function showSaves(){
   }
  }catch(e){status.textContent='저장 목록을 불러오지 못했습니다.';}
 }
-window.MarvelSetup={back:()=>{const d=document.getElementById('saved-games');if(d.open){d.close();return true;}return false;}};
+window.MarvelSetup={back:()=>{const d=document.getElementById('saved-games');if(d.open){if(!deletePanel.hidden){if(!deleteApply.disabled)cancelSaveDelete();return true;}d.close();return true;}return false;}};
 </script>
 </body>
 
