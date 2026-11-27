@@ -5,10 +5,8 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Build;
 import android.view.WindowInsets;
-import android.view.WindowInsetsController;
-import android.view.WindowManager;
-import android.window.OnBackInvokedCallback;
-import android.window.OnBackInvokedDispatcher;
+import android.graphics.Insets;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.net.Uri;
@@ -19,6 +17,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View;
+import android.view.Gravity;
 import android.widget.FrameLayout;
 import com.chaquo.python.Python;
 import com.chaquo.python.PyObject;
@@ -41,20 +40,12 @@ public class MainActivity extends Activity {
     private WebView web;
     private TextView status;
     private Button start;
-    private OnBackInvokedCallback systemBackCallback;
-    private boolean backPending;
-    private AlertDialog leaveDialog;
-    private static final String UI_REVISION = "20";
+    private Button back;
+    private static final String UI_REVISION = "21";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
         super.onCreate(saved);
-        configureFullscreen();
-        if (Build.VERSION.SDK_INT >= 33) {
-            systemBackCallback = this::handleBack;
-            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
-                    OnBackInvokedDispatcher.PRIORITY_DEFAULT, systemBackCallback);
-        }
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         status = new TextView(this);
@@ -66,12 +57,24 @@ public class MainActivity extends Activity {
         layout.addView(start);
         web = new WebView(this);
         web.getSettings().setUseWideViewPort(true);
-        web.getSettings().setUserAgentString(web.getSettings().getUserAgentString() + " MarvelAndroid");
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
         web.getSettings().setAllowFileAccess(false);
         web.getSettings().setAllowContentAccess(false);
         web.setWebViewClient(new WebViewClient() {
+            @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                if (back != null) back.setVisibility(View.VISIBLE);
+            }
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                // Hide the redundant native overlay only when the wizard initialized.
+                view.evaluateJavascript("!!window.MarvelSetup", result -> {
+                    if (!isDestroyed() && url.equals(view.getUrl()) && back != null) {
+                        back.setVisibility("true".equals(result) ? View.GONE : View.VISIBLE);
+                    }
+                });
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri u = request.getUrl();
                 return !("http".equals(u.getScheme()) && "127.0.0.1".equals(u.getHost()) && u.getPort() == 2345);
@@ -80,9 +83,31 @@ public class MainActivity extends Activity {
         web.setVisibility(View.GONE);
         FrameLayout content = new FrameLayout(this);
         content.addView(web, new FrameLayout.LayoutParams(-1, -1));
+        back = new Button(this);
+        back.setText("‹");
+        back.setTextSize(24);
+        back.setContentDescription("뒤로가기");
+        back.setPadding(0, 0, 0, 0);
+        back.setAlpha(0.8f);
+        back.setVisibility(View.GONE);
+        int size = (int) (48 * getResources().getDisplayMetrics().density);
+        FrameLayout.LayoutParams backParams = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.START);
+        content.addView(back, backParams);
+        back.setOnClickListener(v -> handleBack());
         layout.addView(content, new LinearLayout.LayoutParams(-1, 0, 1));
         setContentView(layout);
-        hideSystemBars();
+        // Android 15+ enforces edge-to-edge for targetSdk 35. Keep the
+        // WebView and native Back button outside system bars/cutouts.
+        if (Build.VERSION.SDK_INT >= 30) {
+            getWindow().setDecorFitsSystemWindows(false);
+            layout.setOnApplyWindowInsetsListener((v, insets) -> {
+                Insets safe = insets.getInsets(WindowInsets.Type.systemBars()
+                        | WindowInsets.Type.displayCutout());
+                v.setPadding(safe.left, safe.top, safe.right, safe.bottom);
+                return insets;
+            });
+            layout.requestApplyInsets();
+        }
         start.setOnClickListener(v -> {
             if (launching) return;
             launching = true;
@@ -132,6 +157,7 @@ public class MainActivity extends Activity {
                                     if (isDestroyed() || url.equals(loadedUrl)) return;
                                     loadedUrl = url;
                                     web.setVisibility(View.VISIBLE);
+                                    back.setVisibility(View.VISIBLE);
                                     status.setVisibility(View.GONE);
                                     start.setVisibility(View.GONE);
                                     web.loadUrl(url);
@@ -141,6 +167,7 @@ public class MainActivity extends Activity {
                     }
                     if (launching && url.isEmpty() && !loadedUrl.isEmpty()) {
                         web.setVisibility(View.GONE);
+                        back.setVisibility(View.GONE);
                         status.setVisibility(View.VISIBLE);
                         loadedUrl = "";
                     }
@@ -192,78 +219,28 @@ public class MainActivity extends Activity {
         return root;
     }
 
-    private void configureFullscreen() {
-        // Allow the content background to fill landscape cutout areas as well.
-        if (Build.VERSION.SDK_INT >= 28) {
-            WindowManager.LayoutParams attrs = getWindow().getAttributes();
-            attrs.layoutInDisplayCutoutMode = Build.VERSION.SDK_INT >= 30
-                    ? WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-                    : WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
-            getWindow().setAttributes(attrs);
-        }
-        if (Build.VERSION.SDK_INT >= 30) getWindow().setDecorFitsSystemWindows(false);
-        hideSystemBars();
-    }
-
-    private void hideSystemBars() {
-        if (Build.VERSION.SDK_INT >= 30) {
-            WindowInsetsController controller = getWindow().getInsetsController();
-            if (controller != null) {
-                controller.setSystemBarsBehavior(WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
-                controller.hide(WindowInsets.Type.systemBars());
-            }
-        } else {
-            getWindow().getDecorView().setSystemUiVisibility(
-                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
-        }
-    }
-
-    @Override protected void onResume() {
-        super.onResume();
-        hideSystemBars();
-    }
-
-    @Override public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if (hasFocus) hideSystemBars();
-    }
-
     @Override public void onBackPressed() {
         handleBack();
     }
 
     private void handleBack() {
-        if (backPending || (leaveDialog != null && leaveDialog.isShowing())) return;
-        if (web == null || web.getVisibility() != View.VISIBLE) {
+        if (web.getVisibility() != View.VISIBLE) {
             moveTaskToBack(true);
             return;
         }
-        backPending = true;
         web.evaluateJavascript("!!((window.MarvelDeckTouch && window.MarvelDeckTouch.back && window.MarvelDeckTouch.back()) || (window.MarvelSetup && window.MarvelSetup.back()) || (window.MarvelTouch && window.MarvelTouch.back()))", result -> {
-            backPending = false;
-            if (isDestroyed() || isFinishing() || "true".equals(result)) return;
+            if (isDestroyed() || "true".equals(result)) return;
             String current = web.getUrl();
             Uri uri = current == null ? Uri.EMPTY : Uri.parse(current);
             String path = uri.getPath();
             boolean gamePage = "/marvel".equals(path) || "/watch".equals(path)
                     || "/public/marvel.html".equals(path)
                     || ("/".equals(path) && uri.getQuery() != null);
-            if ("/main".equals(path) || "/public/main.html".equals(path)) {
-                moveTaskToBack(true);
-            } else if (gamePage) {
-                leaveDialog = new AlertDialog.Builder(this).setTitle("게임 화면에서 나갈까요?")
+            if (gamePage) {
+                new AlertDialog.Builder(this).setTitle("게임 화면에서 나갈까요?")
                         .setMessage("차례 종료나 되돌리기는 실행되지 않습니다. 필요하면 먼저 게임을 저장하세요.")
                         .setNegativeButton("계속 플레이", null)
-                        .setPositiveButton("나가기", (d, w) -> web.loadUrl(loadedUrl)).create();
-                leaveDialog.setOnDismissListener(d -> { leaveDialog = null; hideSystemBars(); });
-                leaveDialog.show();
-            } else if ("/scene".equals(path) || "/public/scene.html".equals(path)) {
-                web.loadUrl(loadedUrl);
+                        .setPositiveButton("나가기", (d, w) -> web.loadUrl(loadedUrl)).show();
             } else if (web.canGoBack()) {
                 web.goBack();
             } else {
@@ -273,9 +250,6 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onDestroy() {
-        if (Build.VERSION.SDK_INT >= 33 && systemBackCallback != null) {
-            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback(systemBackCallback);
-        }
         handler.removeCallbacks(poll);
         web.destroy();
         super.onDestroy();
