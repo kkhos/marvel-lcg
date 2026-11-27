@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
     private TextView status;
     private Button start;
     private Button back;
-    private static final String UI_REVISION = "7";
+    private static final String UI_REVISION = "8";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -214,7 +214,7 @@ public class MainActivity extends Activity {
             moveTaskToBack(true);
             return;
         }
-        web.evaluateJavascript("!!(window.MarvelTouch && window.MarvelTouch.back())", result -> {
+        web.evaluateJavascript("!!((window.MarvelSetup && window.MarvelSetup.back()) || (window.MarvelTouch && window.MarvelTouch.back()))", result -> {
             if (isDestroyed() || "true".equals(result)) return;
             String current = web.getUrl();
             Uri uri = current == null ? Uri.EMPTY : Uri.parse(current);

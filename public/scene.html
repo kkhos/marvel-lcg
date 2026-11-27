@@ -4,6 +4,8 @@
 
 <head>
     <title>새 게임</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/public/css/menu/mobile-launcher.css">
     <link rel="stylesheet" href="/public/css/menu/style.css">
     <link rel="stylesheet" href="/public/css/font-awesome.css">
 <style>
@@ -941,6 +943,8 @@ async function createSets() {
 (async () => {
     await createScenarios()
     await createSets()
+    window.setupCatalogReady = true;
+    window.dispatchEvent(new Event("setup-catalog-ready"));
 })()
 
 </script>
@@ -2578,7 +2582,8 @@ p:has(#timeout_text) {
                 document.cookie = `btn_show_deck_during_full_search_${player_id}=${cookieValue}; max-age=3153600000; path=/`
             }
             const newUrl = getJoinGameUrl(player_id)
-            window.open(newUrl)
+            if (/Android/i.test(navigator.userAgent)) location.assign(newUrl);
+        else window.open(newUrl)
         }
 
         async function getScenario(name) {
@@ -2777,5 +2782,6 @@ p:has(#timeout_text) {
         });
     }
 </script>
+<script src="/public/js/menu/mobile-launcher.js" defer></script>
 </body>
 </html>
