@@ -92,6 +92,7 @@ class MobileRegression(unittest.TestCase):
 
     def open_setup(self):
         self.goto("/main")
+        self.page.wait_for_function("document.querySelector('.brand-emblem').naturalWidth === 804")
         self.bounds(self.page.locator(".brand-emblem"))
         self.page.get_by_role("button", name="새 게임", exact=True).tap()
         self.page.wait_for_function("window.setupCatalogReady === true", timeout=90000)
@@ -107,8 +108,16 @@ class MobileRegression(unittest.TestCase):
     def test_home_menu_alignment(self):
         self.goto("/main")
         logo = self.page.locator(".brand-emblem")
+        # Verify the real bundled PNG rather than the synthetic card cache.
+        response = self.context.request.get(BASE + "/public/images/home/champions.png")
+        self.assertTrue(response.ok)
+        self.assertEqual(response.body(), (Path(__file__).resolve().parents[2] /
+                         "public/images/home/champions.png").read_bytes())
+        self.page.wait_for_function("""() => {
+            const img = document.querySelector('.brand-emblem');
+            return img.complete && img.naturalWidth === 804 && img.naturalHeight === 435;
+        }""")
         self.bounds(logo)
-        self.page.wait_for_function("document.querySelector('.brand-emblem').naturalWidth === 804")
         buttons = self.page.locator(".main .custom-btn")
         expect(buttons).to_have_count(8)
         for button in buttons.all():

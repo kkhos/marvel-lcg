@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
     private LinearLayout failurePanel;
     private ProgressBar loadingBar;
     private boolean splashFading;
-    private static final String UI_REVISION = "29";
+    private static final String UI_REVISION = "30";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -329,7 +329,9 @@ public class MainActivity extends Activity {
             ZipEntry entry;
             byte[] buf = new byte[65536];
             while ((entry = zip.getNextEntry()) != null) {
-                if (uiOnly && !entry.getName().startsWith("public/") && !entry.getName().equals("engine/device/web/server/server_new_game.py")) {
+                if (uiOnly && !entry.getName().startsWith("public/")
+                        && !entry.getName().equals("engine/device/web/server/server_new_game.py")
+                        && !entry.getName().equals("engine/device/web/server/server_files.py")) {
                     zip.closeEntry();
                     continue;
                 }

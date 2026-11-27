@@ -23,6 +23,7 @@ body {
 .brand { min-width: 0; display: flex; flex-direction: column; gap: 20px; align-items: flex-start; }
 .brand-emblem {
     display: block; width: min(100%, 420px); height: auto;
+    aspect-ratio: 804 / 435; max-height: 48dvh;
     object-fit: contain; filter: drop-shadow(0 4px 12px #000b);
 }
 .brand-meta { color: #c0cdc7; font-size: 11px; line-height: 1.65; text-shadow: 0 1px 4px #000; }

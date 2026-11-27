@@ -64,6 +64,21 @@ class GameServerFiles(GameServerBase):
 
         self.AddDefaultGet()
 
+        # Home branding is bundled artwork, not a card ID. Register exact
+        # paths before the catch-all card image handler.
+        async def home_logo(request: web.Request) -> web.StreamResponse:
+            response = self.ReadFile('./public/images/home/champions.png')
+            response.headers['Cache-Control'] = 'no-store'
+            return response
+
+        async def home_backdrop(request: web.Request) -> web.StreamResponse:
+            response = self.ReadFile('./public/images/home/doom.webp')
+            response.headers['Cache-Control'] = 'no-store'
+            return response
+
+        self.AddAwaitGetSecurity('/public/images/home/champions.png', home_logo)
+        self.AddAwaitGetSecurity('/public/images/home/doom.webp', home_backdrop)
+
         self.AddAwaitGetSecurity('/', self.handle_marvel)
         self.AddAwaitGetSecurity(r'/p={player:\d+}', self.handle_players_404)
         self.AddAwaitGetSecurity('/watch', self.handle_marvel)
