@@ -43,6 +43,19 @@ jobs:
         with:
           gradle-version: '8.9'
       - run: npx --yes --package typescript@5.9.3 tsc -p public/js/tsconfig.json
+      - name: Restore persistent debug signing key
+        shell: bash
+        env:
+          ANDROID_DEBUG_KEYSTORE_BASE64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+        run: |
+          if [[ -z "$ANDROID_DEBUG_KEYSTORE_BASE64" ]]; then
+            echo "::error::Set ANDROID_DEBUG_KEYSTORE_BASE64 in repository Actions secrets before building an update."
+            exit 1
+          fi
+          umask 077
+          mkdir -p "$HOME/.android"
+          printf '%s' "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$HOME/.android/debug.keystore"
+          keytool -list -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey >/dev/null
       - run: gradle -p mobile/android :app:assembleDebug --stacktrace
       - name: Upload debug APK for device testing
         uses: actions/upload-artifact@v4
