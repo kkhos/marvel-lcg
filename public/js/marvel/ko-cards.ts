@@ -2,6 +2,8 @@ import { readKoCache } from './ko-local.js';
 import { normalizeKoCardText } from './ko-glossary.js';
 import { bundledKo } from './ko-bundled.js';
 import { goblinDraft } from './ko-goblin.js';
+import { coreEncounterDraft } from './ko-core-encounter.js';
+import { koAliases } from './ko-aliases.js';
 // Core Korean display translations, terminology cross-checked against the NamuWiki mirror (Marvel Champions core cards, heroes and villains); not verified against physical Korean cards.
 // Presentation only: never use these names or text as rule identifiers.
 export const koCards: Record<string, {name: string; text?: string}> = {
@@ -286,15 +288,31 @@ const sinisterDraft: Record<string, {name:string; text?:string}> = {
 };
 const localCards = {...readKoCache(), ...bundledKo};
 export const bundledKoCount = Object.keys(bundledKo).length;
-const reviewedDrafts = {...goblinDraft, ...sinisterDraft};
+const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
 const physicalVerified = new Set(['01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b']);
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
-for (const [id, entry] of Object.entries({...localCards, ...reviewedDrafts, ...koCards})) {
-    normalizedCards[id] = {name:entry.name, text:entry.text === undefined ? undefined : normalizeKoCardText(entry.text)};
+const draftCards = {...reviewedDrafts, ...koCards};
+const sources: Record<string,'verified'|'community'|'draft'> = Object.create(null);
+for (const id of new Set([...Object.keys(draftCards), ...Object.keys(localCards)])) {
+    const verified = physicalVerified.has(id);
+    const community = !verified && Object.prototype.hasOwnProperty.call(localCards,id);
+    const entry = (community ? localCards[id] : draftCards[id]) ?? localCards[id];
+    if (!entry) continue;
+    normalizedCards[id] = {name:entry.name, text:entry.text === undefined ? undefined : (community ? entry.text : normalizeKoCardText(entry.text))};
+    sources[id] = verified ? 'verified' : community ? 'community' : 'draft';
 }
-export function koCard(id: string) { return normalizedCards[id]; }
+// Reprints inherit the original description only when no exact-ID translation exists.
+function originalId(id: string): string {
+    const seen = new Set<string>();
+    while (!normalizedCards[id] && Object.prototype.hasOwnProperty.call(koAliases,id) && !seen.has(id)) {
+        seen.add(id); id=koAliases[id];
+    }
+    return id;
+}
+export function koCard(id: string) { return normalizedCards[originalId(id)]; }
 export function koCardSource(id: string) {
-    if (physicalVerified.has(id)) return 'verified';
-    return Object.prototype.hasOwnProperty.call(koCards,id) || Object.prototype.hasOwnProperty.call(reviewedDrafts,id) ? 'draft' : Object.prototype.hasOwnProperty.call(localCards,id) ? 'community' : undefined;
+    const original=originalId(id);
+    if (original !== id && normalizedCards[original]) return 'reprint';
+    return sources[id];
 }

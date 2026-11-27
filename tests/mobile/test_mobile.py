@@ -317,6 +317,25 @@ class MobileRegression(unittest.TestCase):
         self.assertTrue(result["untouched"])
         self.assertTrue(result["shared"])
 
+    def test_ko_core_encounters_and_reprints(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koCard,koCardSource} = await import('/public/js/marvel/ko-cards.js');
+            const {koAliases} = await import('/public/js/marvel/ko-aliases.js');
+            const {coreEncounterDraft} = await import('/public/js/marvel/ko-core-encounter.js');
+            return {aliases:Object.keys(koAliases).length, drafts:Object.keys(coreEncounterDraft).length,
+                klaw:koCard('01116a').name, ultron:koCard('01138a').name,
+                reprint:koCard('08014').name, original:koCard('01062').name,
+                source:koCardSource('08014'), unknown:koCard('99999')===undefined};
+        }""")
+        self.assertEqual(result["aliases"], 80)
+        self.assertEqual(result["drafts"], 61)
+        self.assertEqual(result["klaw"], "지하 경제")
+        self.assertEqual(result["ultron"], "NORAD 습격")
+        self.assertEqual(result["reprint"], result["original"])
+        self.assertEqual(result["source"], "reprint")
+        self.assertTrue(result["unknown"])
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

@@ -1,6 +1,7 @@
 // Local, opt-in Korean text cache. Independent of engine commands and card rules.
 export type KoEntry = {name: string; text?: string};
 export const KO_CACHE_KEY = 'marvel-ko-cards-v1';
+export const KO_COMPLETE_KEY = 'marvel-ko-complete-v2';
 export const KO_SOURCE_REV = '055b6b427854287943ffa025adf8c39b44494fbf';
 export const KO_PACKS = ['core','gob','cap','trors','msm','thor','twc','bkw','drs','hlk','toafk','ant','wsp','qsv','scw'];
 const scenarioOnly = new Set(['gob','twc','toafk']);
@@ -67,5 +68,6 @@ export async function importKoCards(progress: (message:string)=>void) {
         } catch { failures.push(job.file); }
         progress('한국어 카드 데이터 '+(++complete)+'/'+jobs.length+' · '+Object.keys(cards).length+'개');
     }
+    if (!failures.length && Object.keys(cards).length >= 250) localStorage.setItem(KO_COMPLETE_KEY, KO_SOURCE_REV);
     return {count:Object.keys(cards).length, failures};
 }
