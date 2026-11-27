@@ -36,7 +36,7 @@ body.mobile-layout #right-side-bar:hover #right-side-bar-handle {
 body.mobile-layout #right-side-bar.clicked #right-side-bar-handle {
     right: 100%;
 }
-body.mobile-layout #left-side-bar { top: 64px; }
+body.mobile-layout #left-side-bar { top: 16px; }
 
 
 /* Mobile settings are a separate top-layer dialog. Use a normal block scroll

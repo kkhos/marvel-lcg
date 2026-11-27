@@ -9,7 +9,8 @@
   let stage=0,slot=1,selected=null,loaded=false,kind='starter',catalogReady=!!window.setupCatalogReady;
   const back=button('‹ 이전',()=>{if(preview.open){preview.close();return;}if(stage)go(stage-1);else if(history.length>1)history.back();else location.assign('/');});
   const next=button('',()=>{if(stage<2)go(stage+1);else doCreateNewGame(Object.values(heroes).filter(Boolean).length>1?'hot_seat':'');},'ml-primary');
-  header.append(back,title,steps);foot.append(msg,next);shell.append(header,body,foot);document.body.prepend(shell);document.body.classList.add('ml-mobile');
+  if (!navigator.userAgent.includes('MarvelAndroid')) header.append(back);
+  header.append(title,steps);foot.append(msg,next);shell.append(header,body,foot);document.body.prepend(shell);document.body.classList.add('ml-mobile');
   const panels=[0,1,2].map(()=>el('section','ml-panel'));body.append(...panels);
   const left=el('div','ml-scroll'),right=el('aside','ml-scroll ml-detail'),search=el('input','ml-search');search.type='search';search.placeholder='빌런 / 확장팩 검색';
   const scenarioName=el('h2','ml-scenario-name','시나리오를 선택하세요'),scenarioImage=el('img','ml-big'),mode=el('p','ml-scenario-mode'),scenarioPack=el('p','ml-muted ml-scenario-pack'),scenarioHeading=el('div','ml-scenario-heading');scenarioImage.alt='';scenarioHeading.append(el('span','ml-muted','선택한 시나리오'),scenarioName,mode,scenarioPack);scenarioHeading.setAttribute('aria-live','polite');

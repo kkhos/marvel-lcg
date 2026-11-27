@@ -42,7 +42,7 @@ class MobileRegression(unittest.TestCase):
             viewport={"width": 915, "height": 412},
             screen={"width": 915, "height": 412},
             is_mobile=True, has_touch=True, device_scale_factor=2,
-            user_agent="Mozilla/5.0 (Linux; Android 17; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36",
+            user_agent="Mozilla/5.0 (Linux; Android 17; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36 MarvelAndroid",
             locale="ko-KR",
         )
         self.context.tracing.start(screenshots=True, snapshots=True, sources=True)
@@ -68,8 +68,12 @@ class MobileRegression(unittest.TestCase):
 
     def goto(self, path):
         sep = "&" if "?" in path else "?"
+        # The version endpoint sets the real browser cookie; urllib's health
+        # probe has no shared browser cookie jar.
+        response = self.context.request.get(BASE + "/get_version")
+        self.assertTrue(response.ok)
         self.page.goto(BASE + path + sep + "v=" + quote(self.version, safe=""))
-        self.assertTrue(self.page.evaluate("navigator.maxTouchPoints > 0"))
+        self.page.wait_for_function("navigator.maxTouchPoints > 0")
 
     def bounds(self, locator):
         expect(locator).to_be_visible()
@@ -103,6 +107,7 @@ class MobileRegression(unittest.TestCase):
     def test_scenario_selection_and_preview(self):
         rhino = self.open_setup()
         self.screenshot("scenario")
+        expect(self.page.locator(".ml-header button")).to_have_count(0)
         self.assertEqual(self.page.get_by_role("button", name="시나리오 파일 가져오기").count(), 0)
         rhino.locator(".ml-preview-icon").tap()
         preview = self.page.locator("dialog.ml-card-preview")
@@ -111,13 +116,18 @@ class MobileRegression(unittest.TestCase):
         expect(image).to_be_visible()
         self.page.wait_for_function("document.querySelector('.ml-card-preview img').naturalWidth > 0")
         self.bounds(image)
-        preview.get_by_role("button", name="닫기 ×").tap()
+        self.assertTrue(self.page.evaluate("window.MarvelSetup.back()"))
         expect(preview).to_be_hidden()
         expect(self.page.locator(".ml-scenario-name")).to_have_text("Rhino")
         expert = self.page.locator('#set-content button[data-caption="Rhino"][data-mode="전문가"]').first
         expert.tap()
         expect(self.page.locator(".ml-scenario-mode")).to_have_text("전문가 모드")
         expect(self.page.locator(".ml-footer .ml-primary")).to_be_enabled()
+        self.page.locator(".ml-footer .ml-primary").tap()
+        expect(self.page.locator(".ml-steps")).to_have_text("2 / 3")
+        self.assertTrue(self.page.evaluate("window.MarvelSetup.back()"))
+        expect(self.page.locator(".ml-steps")).to_have_text("1 / 3")
+        expect(self.page.locator(".ml-scenario-mode")).to_have_text("전문가 모드")
         self.assertEqual(self.errors, [])
 
     def test_card_browser_touch_preview(self):
