@@ -6,11 +6,28 @@ plugins {
 android {
     namespace 'io.github.kkhos.marvellcg'
     compileSdk 35
+    signingConfigs {
+        debug {
+            def fixedKeystore = System.getenv('MARVEL_DEBUG_KEYSTORE_PATH')
+            if (System.getenv('GITHUB_ACTIONS') == 'true' && !fixedKeystore) {
+                throw new GradleException('CI requires the persistent debug signing key')
+            }
+            if (fixedKeystore) {
+                storeFile file(fixedKeystore)
+                storePassword 'android'
+                keyAlias 'androiddebugkey'
+                keyPassword 'android'
+            }
+        }
+    }
+    buildTypes {
+        debug { signingConfig signingConfigs.debug }
+    }
     defaultConfig {
         applicationId 'io.github.kkhos.marvellcg'
         minSdk 24
         targetSdk 35
-        versionCode 8
+        versionCode 9
         versionName '0.5-mobile-launcher'
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
     }

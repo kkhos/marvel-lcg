@@ -53,10 +53,25 @@ jobs:
             exit 1
           fi
           umask 077
-          mkdir -p "$HOME/.android"
-          printf '%s' "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$HOME/.android/debug.keystore"
-          keytool -list -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey >/dev/null
+          key="$RUNNER_TEMP/marvel-debug.keystore"
+          printf '%s' "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$key"
+          keytool -list -keystore "$key" -storepass android -alias androiddebugkey >/dev/null
+          echo "MARVEL_DEBUG_KEYSTORE_PATH=$key" >> "$GITHUB_ENV"
       - run: gradle -p mobile/android :app:assembleDebug --stacktrace
+      - name: Verify APK signing certificate
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          expected="$(keytool -exportcert -keystore "$MARVEL_DEBUG_KEYSTORE_PATH" -storepass android -alias androiddebugkey | sha256sum | cut -d' ' -f1)"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$apk" | tee "$RUNNER_TEMP/apk-signing.txt"
+          actual="$(sed -n 's/^Signer #1 certificate SHA-256 digest: //p' "$RUNNER_TEMP/apk-signing.txt" | tr '[:upper:]' '[:lower:]')"
+          echo "Expected signing certificate SHA-256: $expected"
+          echo "Actual signing certificate SHA-256: $actual"
+          if [[ -z "$actual" || "$actual" != "$expected" ]]; then
+            echo "::error::APK signing certificate differs from the persistent key."
+            exit 1
+          fi
       - name: Upload debug APK for device testing
         uses: actions/upload-artifact@v4
         with:
