@@ -7,7 +7,7 @@ import { goblinDraft } from './ko-goblin.js';
 export const koCards: Record<string, {name: string; text?: string}> = {
   "01001a": {
     "name": "Spider-Man",
-    "text": "스파이더 센스 — 난입: 빌런이 당신을 대상으로 공격을 개시할 때, 카드 1장을 뽑습니다."
+    "text": "스파이더센스 — 난입: 빌런이 당신에게 공격을 개시할 때, 카드 1장을 뽑습니다."
   },
   "01001b": {
     "name": "Peter Parker",
@@ -19,7 +19,7 @@ export const koCards: Record<string, {name: string; text?: string}> = {
   },
   "01003": {
     "name": "공중제비",
-    "text": "난입 (방어): 공격으로 피해를 받으려 할 때, 그 피해를 모두 방지합니다."
+    "text": "난입(방어): 당신이 공격으로 피해를 입으려 할 때, 그 피해를 모두 방지합니다."
   },
   "01004": {
     "name": "향상된 스파이더센스",
@@ -288,7 +288,7 @@ const localCards = {...readKoCache(), ...bundledKo};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...goblinDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
-const physicalVerified = new Set(['01005','02021','27002','01004','01008','01009','01186','01190']);
+const physicalVerified = new Set(['01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a']);
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
 for (const [id, entry] of Object.entries({...localCards, ...reviewedDrafts, ...koCards})) {
     normalizedCards[id] = {name:entry.name, text:entry.text === undefined ? undefined : normalizeKoCardText(entry.text)};

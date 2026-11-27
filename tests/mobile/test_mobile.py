@@ -240,6 +240,23 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["scheme"], "암약")
         self.assertEqual(result["normalized"], "따로 놓아둔 카드. 사용(카운터 3).")
 
+    def test_ko_spider_man_physical_cards(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koCard,koCardSource} = await import('/public/js/marvel/ko-cards.js');
+            const {koLabel} = await import('/public/js/marvel/ko-game.js');
+            const {koGlossary} = await import('/public/js/marvel/ko-glossary.js');
+            return {hero:koCard('01001a').text, defense:koCard('01003').text,
+                sources:['01001a','01003'].map(koCardSource),
+                label:koLabel('Spider-Sense'),
+                status:['tough (status)','stunned (status)','confused (status)'].map(k=>koGlossary[k])};
+        }""")
+        self.assertEqual(result["hero"], "스파이더센스 — 난입: 빌런이 당신에게 공격을 개시할 때, 카드 1장을 뽑습니다.")
+        self.assertEqual(result["defense"], "난입(방어): 당신이 공격으로 피해를 입으려 할 때, 그 피해를 모두 방지합니다.")
+        self.assertEqual(result["sources"], ["verified"] * 2)
+        self.assertEqual(result["label"], "스파이더센스")
+        self.assertEqual(result["status"], ["강인함", "기절", "혼란"])
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

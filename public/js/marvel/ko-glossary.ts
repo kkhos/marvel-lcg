@@ -11,6 +11,13 @@ export const koGlossary = {
     'discard': '버림',
     'spend': '소모',
     'damage unit': '점',
+    'spider-sense': '스파이더센스',
+    'defense': '방어',
+    'thwart': '저지',
+    'prevent damage': '피해 방지',
+    'tough (status)': '강인함',
+    'stunned (status)': '기절',
+    'confused (status)': '혼란',
     'interrupt': '난입',
     'forced interrupt': '강제 난입',
     'treachery': '배반',
@@ -35,6 +42,7 @@ export const koGlossary = {
 export function normalizeKoCardText(value: string): string {
     return value
         .replace(/기본 능력/g, koGlossary['basic power'])
+        .replace(/스파이더 센스/g, koGlossary['spider-sense'])
         .replace(/예비로 둔/g, '따로 놓아둔')
         .replace(/사용 +\(/g, '사용(')
         .replace(/기본 기능을 사용한 직후/g, '기본 기능을 사용한 후,')

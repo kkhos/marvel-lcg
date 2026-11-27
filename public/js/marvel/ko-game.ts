@@ -25,7 +25,7 @@ const labels: Record<string, string> = {
   "Yes": "예",
   "No": "아니요",
   "All": "모두",
-  "Spider-Sense": "스파이더 센스",
+  "Spider-Sense": "스파이더센스",
   "Scientist": "과학자",
   "Main scheme phase start": "주요 음모 단계 시작",
   "Main scheme phase end": "주요 음모 단계 종료",
@@ -393,7 +393,7 @@ export function koText(value: string): string {
             .replace(/\blooks at\b/g, "확인:")
             .replace(/\bgains resource\b/g, "자원 획득:")
             .replace(/\btotal (?=\d)/g, "합계 ")
-            .replace(/\bSpider-Sense\b/g, "스파이더 센스")
+            .replace(/\bSpider-Sense\b/g, "스파이더센스")
             .replace(/\bScientist\b/g, "과학자")
             .replace(/\bStunned\b/g, "기절")
             .replace(/\bConfused\b/g, "혼란")
