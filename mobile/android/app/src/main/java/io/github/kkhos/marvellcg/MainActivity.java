@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.os.Bundle;
 import android.os.Build;
 import android.view.WindowInsets;
+import android.view.WindowInsetsController;
 import android.graphics.Insets;
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -108,6 +109,29 @@ public class MainActivity extends Activity {
             });
             layout.requestApplyInsets();
         }
+        // Fullscreen isolation step 1: hide only system bars after the
+        // content view is attached. Keep the existing safe-insets listener,
+        // cutout policy, native Back button and legacy onBackPressed unchanged.
+        layout.post(() -> {
+            if (isDestroyed() || isFinishing()) return;
+            try {
+                if (Build.VERSION.SDK_INT >= 30) {
+                    WindowInsetsController controller = getWindow().getInsetsController();
+                    if (controller != null) {
+                        controller.setSystemBarsBehavior(
+                                WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                        controller.hide(WindowInsets.Type.systemBars());
+                    }
+                } else {
+                    getWindow().getDecorView().setSystemUiVisibility(
+                            View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+                }
+            } catch (RuntimeException e) {
+                android.util.Log.w("MarvelChampions", "Fullscreen bars unavailable; keeping normal window", e);
+            }
+        });
         start.setOnClickListener(v -> {
             if (launching) return;
             launching = true;
