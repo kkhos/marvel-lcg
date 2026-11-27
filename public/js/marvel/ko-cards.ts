@@ -1,3 +1,4 @@
+import { readKoCache } from './ko-local.js';
 // Core Korean display translations, terminology cross-checked against the NamuWiki mirror (Marvel Champions core cards, heroes and villains); not verified against physical Korean cards.
 // Presentation only: never use these names or text as rule identifiers.
 export const koCards: Record<string, {name: string; text?: string}> = {
@@ -237,4 +238,49 @@ export const koCards: Record<string, {name: string; text?: string}> = {
     "text": "공개될 때: 예비로 둔 당신의 숙적 하수인을 공개해 당신과 교전한 상태로 플레이 영역에 놓습니다. 숙적 부가 음모를 공개해 플레이 영역에 놓습니다. 나머지 숙적 조우 세트를 조우 덱에 섞습니다. 숙적 하수인이 게임에 들어오지 않았다면 이 카드는 쇄도를 얻습니다."
   }
 };
-export function koCard(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? koCards[id] : undefined; }
+// Draft names and effects for the first Sinister Motives hero; compare physical Korean cards.
+Object.assign(koCards, {
+  "27002": {
+    "name": "고스트 킥",
+    "text": "히어로 반응 (공격): Ghost-Spider가 기본 능력을 사용한 직후 적 하나에게 피해 6을 줍니다. (기본 능력 사용당 최대 1회.)"
+  },
+  "27003": {
+    "name": "부모로서의 조언",
+    "text": "일상 행동: George Stacy가 플레이 영역에 있으면 손 또는 버린 더미의 이벤트 1장을 그에게 뒷면으로 장착합니다. 없다면 덱과 버린 더미에서 George Stacy를 찾아 손에 더하고 덱을 섞습니다."
+  },
+  "27004": {
+    "name": "환상적인 공중제비",
+    "text": "히어로 반응 (저지): Ghost-Spider가 기본 능력을 사용한 직후 음모 하나의 위협을 5 제거합니다. (기본 능력 사용당 최대 1회.)"
+  },
+  "27005": {
+    "name": "피루엣 펀치",
+    "text": "히어로 난입: 조우 덱에서 카드가 공개될 때 그 카드의 강화 아이콘 수에 1을 더한 만큼 빌런에게 피해를 줍니다. 해당 카드의 공개될 때 효과를 무효화합니다."
+  },
+  "27006": {
+    "name": "거미줄 포박",
+    "text": "필수(정신력). 히어로 난입: 적이 활성화되려 할 때 그 활성화를 무효화합니다. 이 방식으로 하수인의 활성화를 무효화했다면 그 하수인에게 피해 4를 줍니다."
+  },
+  "27007": {
+    "name": "George Stacy",
+    "text": "George Stacy에 장착된 이벤트를 손에 있는 것처럼 플레이할 수 있습니다. 행동: George Stacy를 소진 → 손의 이벤트 1장을 뒷면으로 여기에 장착합니다(최대 3장)."
+  },
+  "27008": {
+    "name": "멀티버스행 티켓",
+    "text": "행동: 이 카드를 게임에서 제거 → 손의 카드를 모두 버리고 버린 더미를 덱에 섞습니다. 손 크기에 이를 때까지 카드를 뽑고 자신이 조종하는 모든 Ghost-Spider 카드를 준비합니다."
+  },
+  "27009": {
+    "name": "거미줄 팔찌",
+    "text": "히어로 반응: 이벤트의 난입 또는 반응 능력을 해결한 후 거미줄 팔찌를 소진 → 카드 1장을 뽑습니다. (이벤트당 최대 1회.)"
+  },
+  "27001a": {
+    "name": "Ghost-Spider",
+    "text": "현란한 반사 신경 — 반응: 이벤트의 난입 또는 반응 능력을 해결한 후 Ghost-Spider를 준비합니다. (페이즈마다 1회 제한.)"
+  },
+  "27001b": {
+    "name": "Gwen Stacy",
+    "text": "행동: 버린 더미에 있는 멀티버스행 티켓을 덱에 섞거나 George Stacy를 준비하는 것 중 하나를 선택합니다. (라운드마다 1회 제한.)"
+  }
+});
+const localCards = readKoCache();
+export function koCard(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? koCards[id] : localCards[id]; }
+export function koCardSource(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? 'draft' : localCards[id] ? 'community' : undefined; }

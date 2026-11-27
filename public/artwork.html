@@ -54,6 +54,13 @@
         </div>
     </section>
     <p><small>You can close the browser while the game host continues downloading. Closing the host pauses the download; it resumes when you reopen the game. Existing games stay open while new artwork is prepared.</small></p>
+    <section class="panel" aria-labelledby="ko-heading">
+        <h2 id="ko-heading">한국어 카드 설명</h2>
+        <p>한국 정발 범위의 MarvelCDB 커뮤니티 번역 중 한국어 설명이 있는 카드만 기기에 저장합니다. 기본판 기존 번역은 유지하며, 정발 실물과 문구가 다를 수 있습니다.</p>
+        <p id="ko-progress" role="status"></p>
+        <button id="ko-import" type="button" class="primary">한국어 번역 받기 / 업데이트</button>
+        <small>최초 한 번 인터넷 필요 · 이후 오프라인 사용 · 조우 카드와 시니스터 모티브 일부 미번역</small>
+    </section>
     <section class="panel" aria-labelledby="maintenance">
         <h2 id="maintenance">이미지 라이브러리 관리</h2>
         <p>The first download is about 1.7 GiB, separate from the application ZIP. Keep the library in the <strong>저장 위치</strong> folder shown above: new installations reuse it automatically. Only the host needs the full library, including for LAN and Cloudflare games.</p>
@@ -77,7 +84,19 @@
 </main>
 <script type="module">
     import { startArtworkPage } from '/public/js/module/artwork.js';
+    import { importKoCards, readKoCache } from '/public/js/marvel/ko-local.js';
     startArtworkPage();
+    const button = document.getElementById('ko-import');
+    const progress = document.getElementById('ko-progress');
+    progress.textContent = '저장된 추가 번역: '+Object.keys(readKoCache()).length+'개';
+    button.onclick = async () => {
+        button.disabled = true;
+        try {
+            const result = await importKoCards(message=>progress.textContent=message);
+            progress.textContent = '추가 번역 '+result.count+'개 저장 완료. '+(result.failures.length?'실패한 파일: '+result.failures.join(', ')+' · 다시 시도 가능.':'다음 게임 화면부터 적용됩니다.');
+        } catch(error) { progress.textContent = '번역을 가져오지 못했습니다. '+String(error); }
+        finally { button.disabled=false; }
+    };
 </script>
 </body>
 </html>

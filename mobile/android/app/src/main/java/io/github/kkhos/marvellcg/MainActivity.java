@@ -54,7 +54,7 @@ public class MainActivity extends Activity {
     private boolean splashFading;
     private boolean closing;
     private String shownDiagnostic = "";
-    private static final String UI_REVISION = "34";
+    private static final String UI_REVISION = "35";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {

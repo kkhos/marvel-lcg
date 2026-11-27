@@ -1,4 +1,4 @@
-import { koCard } from './ko-cards.js';
+import { koCard, koCardSource } from './ko-cards.js';
 import { koStatusCard } from './ko-status.js';
 import { Cards } from './cards.js';
 import { ClassName } from './class_name.js';
@@ -83,7 +83,7 @@ export class TouchControls {
             const raw = translated?.text ?? (showingBack ? '' : Cards.getText(id));
             const plain = raw.replace(/<hr\s*\/?\s*>/gi,'\n────\n').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'');
             text.textContent = plain || (translated ? '추가 능력 설명 없음' : '표시할 설명 없음');
-            source.textContent = status ? '부가 상태 카드 · 한국어 설명' : translated?.text !== undefined ? '한국어 번역 초안 · 원본 카드와 대조 권장' : '원문 / 미번역';
+            source.textContent = status ? '부가 상태 카드 · 한국어 설명' : translated?.text !== undefined ? (koCardSource(id) === 'community' ? 'MarvelCDB 커뮤니티 번역 · 실물 대조 권장' : '한국어 번역 초안 · 원본 카드와 대조 권장') : '원문 / 미번역';
         }
         close.onclick = () => dialog.close();
         dialog.onclick = e => { if (e.target === dialog) dialog.close(); };

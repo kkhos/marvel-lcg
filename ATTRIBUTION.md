@@ -17,3 +17,7 @@ The Jessica Jones and Luke Cage artwork collection uses 75 October 2026 original
 Their bundled pack-selection thumbnails use the unchanged transparent product images from Fantasy Flight Games' [Jessica Jones](https://www.fantasyflightgames.com/product/jessica-jones/) and [Luke Cage](https://www.fantasyflightgames.com/product/luke-cage/) listings. Exact URLs and hashes are recorded in `packaging/artwork/collections/jessica-jones-luke-cage/pack-textures.json`.
 
 `assets/textures/sparkles.gif` is an original community-build replacement animation for the ultra-rare card effect. The upstream source references this filename, but the upstream v0.5.9.200 download does not contain it.
+
+## Korean card descriptions
+
+Korean release scope and terminology reference: [Namu.moe Marvel Champions card index](https://www.namu.moe/w/Marvel%20챔피언스%20카드게임/카드) (community wiki, not official card scans). The Sinister Motives draft is an independent rendering of English card effects with names cross-checked against that index. The optional local import reads the user-requested Korean community data from [MarvelCDB data repository](https://github.com/zzorba/marvelsdb-json-data/tree/055b6b427854287943ffa025adf8c39b44494fbf/translations/ko/pack); it does not redistribute that translation corpus in the repository or APK. Imported entries are cached on the player's device, restricted to the selected Korean-release packs, and are not verified official Korean card text. English-only entries are skipped. No rules or card identifiers are modified.

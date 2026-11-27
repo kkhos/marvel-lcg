@@ -196,6 +196,28 @@ class MobileRegression(unittest.TestCase):
             'Unknown future text',
         ])
 
+    def test_ko_library_import_filter(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const m = await import('/public/js/marvel/ko-local.js');
+            const c = m.mergeKoPack([
+                {code:'03001a',name:'Captain America',text:'<b>행동</b>: 카드 1장. [mental]'},
+                {code:'03002',name:'English',text:'English only'},
+                {code:'03003',name:'Not in engine',text:'번역'},
+                {code:'04001a',name:'Other pack',text:'번역'}
+            ], new Set(['03001a','03002','04001a']), '03');
+            localStorage.setItem(m.KO_CACHE_KEY,JSON.stringify({rev:m.KO_SOURCE_REV,cards:c}));
+            const {koCard,koCardSource} = await import('/public/js/marvel/ko-cards.js');
+            return {ids:Object.keys(c), name:koCard('03001a')?.name, text:koCard('03001a')?.text,
+                    source:koCardSource('03001a'), draft:koCard('27002')?.name, core:koCard('01001a')?.name};
+        }""")
+        self.assertEqual(result["ids"], ["03001a"])
+        self.assertEqual(result["name"], "Captain America")
+        self.assertEqual(result["text"], "행동: 카드 1장. 정신력")
+        self.assertEqual(result["source"], "community")
+        self.assertEqual(result["draft"], "고스트 킥")
+        self.assertEqual(result["core"], "Spider-Man")
+
     def test_ko_core_dictionary(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
