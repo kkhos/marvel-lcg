@@ -30,50 +30,50 @@
 </head>
 <body>
 <main>
-    <h1>Prepare card artwork</h1>
+    <h1>카드 이미지 준비</h1>
     <p>Artwork for every card supported by this build downloads automatically before your first game. It stays on the host computer for fast loading, offline play, and future updates.</p>
     <p><strong>Supported up to: Luke Cage.</strong></p>
     <section class="panel" aria-labelledby="state">
-        <h2 id="state" aria-live="polite">Checking artwork…</h2>
+        <h2 id="state" aria-live="polite">이미지 확인 중…</h2>
         <progress id="progress" max="1" value="0" aria-label="Artwork preparation progress"></progress>
-        <p id="message">Connecting to the game host.</p>
+        <p id="message">게임 서버 연결 중입니다.</p>
         <dl>
-            <dt>Cards ready</dt><dd id="cards">—</dd>
-            <dt>Packs ready</dt><dd id="packs">—</dd>
-            <dt>Download</dt><dd id="download">—</dd>
-            <dt>Stored artwork</dt><dd id="installed">—</dd>
-            <dt>Additional space needed</dt><dd id="required">—</dd>
-            <dt>Saved on host</dt><dd id="folder">—</dd>
+            <dt>준비된 카드</dt><dd id="cards">—</dd>
+            <dt>준비된 팩</dt><dd id="packs">—</dd>
+            <dt>다운로드</dt><dd id="download">—</dd>
+            <dt>저장된 이미지</dt><dd id="installed">—</dd>
+            <dt>추가 필요 용량</dt><dd id="required">—</dd>
+            <dt>저장 위치</dt><dd id="folder">—</dd>
         </dl>
         <p id="errors" role="alert" hidden></p>
         <div class="actions">
-            <button id="pause" type="button" disabled>Pause</button>
-            <button id="resume" type="button" disabled>Resume</button>
-            <button id="retry" type="button" disabled>Retry failed downloads</button>
-            <button id="continue" class="primary" type="button" disabled>Continue</button>
+            <button id="pause" type="button" disabled>일시정지</button>
+            <button id="resume" type="button" disabled>이어서 받기</button>
+            <button id="retry" type="button" disabled>실패한 다운로드 재시도</button>
+            <button id="continue" class="primary" type="button" disabled>계속</button>
         </div>
     </section>
     <p><small>You can close the browser while the game host continues downloading. Closing the host pauses the download; it resumes when you reopen the game. Existing games stay open while new artwork is prepared.</small></p>
     <section class="panel" aria-labelledby="maintenance">
-        <h2 id="maintenance">Keeping your artwork library</h2>
-        <p>The first download is about 1.7 GiB, separate from the application ZIP. Keep the library in the <strong>Saved on host</strong> folder shown above: new installations reuse it automatically. Only the host needs the full library, including for LAN and Cloudflare games.</p>
+        <h2 id="maintenance">이미지 라이브러리 관리</h2>
+        <p>The first download is about 1.7 GiB, separate from the application ZIP. Keep the library in the <strong>저장 위치</strong> folder shown above: new installations reuse it automatically. Only the host needs the full library, including for LAN and Cloudflare games.</p>
         <details>
-            <summary>Updating the game and artwork</summary>
+            <summary>게임 및 이미지 업데이트</summary>
             <p>Extract each application update into a new folder. Leave your artwork library in place; the new build checks it and downloads only missing or changed packs. Return here using <strong>Card artwork</strong> on the main menu to check progress.</p>
             <p>Artwork and game progress are stored separately. Copy your saves, replays, custom decks and <code>campaign_settings.json</code> from the old installation when updating. Copy any personal artwork overrides you want to keep, too.</p>
         </details>
         <details>
-            <summary>Interrupted downloads or missing images</summary>
-            <p>Use <strong>Resume</strong> after pausing. If a download fails, check the error above, restore the internet connection or free the required space, then choose <strong>Retry failed downloads</strong>. Keep completed artwork; you do not need to clear the library.</p>
+            <summary>중단된 다운로드 및 누락 이미지</summary>
+            <p>Use <strong>이어서 받기</strong> after pausing. If a download fails, check the error above, restore the internet connection or free the required space, then choose <strong>실패한 다운로드 재시도</strong>. Keep completed artwork; you do not need to clear the library.</p>
             <p>Restarting the host checks the stored artwork and prepares any missing or damaged files again. If an image looks wrong, check for a personal override in <code>assets/pics</code> or your configured <code>image_folders</code>; those take priority over managed artwork.</p>
         </details>
         <details>
-            <summary>Moving or backing up the library</summary>
+            <summary>라이브러리 이동 및 백업</summary>
             <p>Close all running copies of the host before copying the entire artwork folder. To use a different location, set <code>"artwork_folder": "D:/MarvelArtwork"</code> in <code>launch.json</code> in every installation that should share it. An empty value uses the default user location.</p>
             <p>Keep the library's files and subfolders together. Do not rename or edit its managed image files. Use <code>assets/pics</code> for personal replacements; <code>cache_folder</code> is a separate legacy setting. Deleting the managed library means downloading it again.</p>
         </details>
     </section>
-    <a href="/credits">Credits</a> · <a href="/report">Diagnostics</a>
+    <a href="/credits">제작진</a> · <a href="/report">진단</a>
 </main>
 <script type="module">
     import { startArtworkPage } from '/public/js/module/artwork.js';

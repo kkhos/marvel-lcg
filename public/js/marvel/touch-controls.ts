@@ -36,15 +36,15 @@ export class TouchControls {
         document.head.append(style);
         const dialog = document.createElement('dialog');
         dialog.id = 'touch-preview';
-        dialog.setAttribute('aria-label', 'Card preview');
+        dialog.setAttribute('aria-label', '카드 미리보기');
         const img = document.createElement('img');
-        img.alt = 'Card preview';
+        img.alt = '카드 미리보기';
         const controls = document.createElement('div');
         controls.className = 'touch-buttons';
         const flip = document.createElement('button');
-        flip.type = 'button'; flip.textContent = 'Flip';
+        flip.type = 'button'; flip.textContent = '뒤집기';
         const close = document.createElement('button');
-        close.type = 'button'; close.textContent = 'Close';
+        close.type = 'button'; close.textContent = '닫기';
         controls.append(flip, close);
         dialog.append(img, controls);
         document.body.append(dialog);
@@ -70,7 +70,7 @@ export class TouchControls {
         const ghost = document.createElement('div');
         ghost.id = 'touch-drag-ghost'; ghost.hidden = true;
         const zone = document.createElement('div');
-        zone.id = 'touch-drop-zone'; zone.hidden = true; zone.textContent = 'Drop to select card';
+        zone.id = 'touch-drop-zone'; zone.hidden = true; zone.textContent = '여기에 놓아 카드 선택';
         document.body.append(ghost, zone);
 
         let gesture: Gesture | null = null;

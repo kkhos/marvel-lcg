@@ -46,7 +46,7 @@ export class ErrorDialog {
         const ignoreButton = document.createElement('button');
         ignoreButton.type = 'button';
         ignoreButton.id = 'error-ignore';
-        ignoreButton.textContent = 'Ignore';
+        ignoreButton.textContent = '무시';
         ignoreButton.onclick = () => ErrorDialog.hideError();
         footerDiv.appendChild(ignoreButton);
 
@@ -54,7 +54,7 @@ export class ErrorDialog {
         const reportButton = document.createElement('button');
         reportButton.type = 'button';
         reportButton.id = 'error-report';
-        reportButton.textContent = 'Report';
+        reportButton.textContent = '오류 신고';
         reportButton.onclick = () => ErrorDialog.reportError();
         footerDiv.appendChild(reportButton);
 
@@ -69,13 +69,13 @@ export class ErrorDialog {
             return
         }
         if (text.endsWith("UndoRequest\n")) {
-            ErrorDialog.error_occurred_body_tip.innerHTML = `In most cases, this is NOT a real crash.
-• Please undo and try another way.
+            ErrorDialog.error_occurred_body_tip.innerHTML = `대부분 실제 충돌이 아닙니다.
+• 되돌리기를 누르고 다른 방법으로 시도하세요.
 
-Please check these before reporting a bug:
-• Check if you selected the correct target.
-• Check if you met the cost of this effect.
-• Check if any forced effects haven't resolved.`;
+오류 신고 전에 다음을 확인하세요.
+• 올바른 대상을 선택했는지
+• 효과의 비용을 지불했는지
+• 해결되지 않은 강제 효과가 있는지`;
         } else {
             ErrorDialog.error_occurred_body_tip.innerHTML = ""
         }

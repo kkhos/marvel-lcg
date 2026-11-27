@@ -43,15 +43,15 @@ export function showArtworkPreparation(retry: () => void): void {
     notice.setAttribute('role', 'status');
     notice.style.cssText = 'position:fixed;right:20px;bottom:20px;max-width:420px;padding:20px;background:#253244;color:white;border:1px solid #80d5ff;border-radius:8px;z-index:99999;font:16px Arial;box-shadow:0 8px 30px #0008';
     const message = document.createElement('p');
-    message.textContent = 'Artwork for this selection is still being prepared. Your selection is kept. Check preparation, then retry when it finishes.';
+    message.textContent = '선택한 카드의 이미지를 준비 중입니다. 선택은 유지됩니다. 준비 완료 후 다시 시도하세요.';
     notice.appendChild(message);
     const link = document.createElement('a');
     link.href = '/artwork'; link.target = '_blank'; link.rel = 'noopener';
-    link.textContent = 'View artwork'; link.style.color = '#80d5ff';
+    link.textContent = '이미지 준비 상태'; link.style.color = '#80d5ff';
     notice.appendChild(link);
     for (const [label, action] of [
-        ['Retry selection', () => { notice.remove(); retry(); }],
-        ['Dismiss', () => notice.remove()],
+        ['선택 다시 시도', () => { notice.remove(); retry(); }],
+        ['닫기', () => notice.remove()],
     ] as const) {
         const control = document.createElement('button');
         control.type = 'button'; control.textContent = label;
@@ -75,15 +75,15 @@ export function startArtworkPage(): void {
         status = value;
         const preparing = ['idle', 'preparing', 'downloading'].includes(value.state);
         const titles: Record<string, string> = {
-            idle: 'Preparing your collection', preparing: 'Preparing your collection', downloading: 'Downloading artwork',
-            paused: 'Download paused', ready: 'Your artwork is ready', error: 'Preparation needs attention', incomplete: 'Artwork catalog is incomplete',
+            idle: '카드 이미지 준비 중', preparing: '카드 이미지 준비 중', downloading: '카드 이미지 다운로드 중',
+            paused: '다운로드 일시정지', ready: '카드 이미지 준비 완료', error: '다운로드 오류 확인 필요', incomplete: '카드 이미지 목록 불완전',
         };
-        text('state', titles[value.state] || 'Preparing artwork');
-        text('message', value.ready ? 'Artwork for all cards supported by this build is saved locally and ready to use.'
-            : value.can_play ? 'Installed content is ready. New content becomes available as its artwork finishes.'
-            : value.state === 'incomplete' ? 'This build does not yet contain a complete verified artwork catalog. A corrected build is needed before first-time preparation can finish.'
-            : value.state === 'paused' ? 'Resume whenever you are ready. Completed downloads are kept.'
-            : 'Preparing the complete collection before play. Progress is saved automatically.');
+        text('state', titles[value.state] || '이미지 준비 중');
+        text('message', value.ready ? '지원되는 모든 카드 이미지가 저장되었습니다.'
+            : value.can_play ? '설치된 카드로 플레이할 수 있습니다. 새 카드는 다운로드 후 사용할 수 있습니다.'
+            : value.state === 'incomplete' ? '검증된 이미지 목록이 불완전합니다. 수정된 빌드가 필요합니다.'
+            : value.state === 'paused' ? '이어서 받기를 누르세요. 완료된 이미지는 유지됩니다.'
+            : '플레이 전 전체 카드를 준비합니다. 진행 상황은 자동 저장됩니다.');
         progress.max = Math.max(1, value.total_cards);
         progress.value = value.completed_cards;
         text('cards', `${value.completed_cards.toLocaleString()} / ${value.total_cards.toLocaleString()}`);
@@ -99,7 +99,7 @@ export function startArtworkPage(): void {
         button('resume').disabled = actionRunning || value.state !== 'paused';
         button('retry').disabled = actionRunning || value.state !== 'error';
         button('continue').disabled = !value.can_play;
-        button('continue').textContent = value.ready ? 'Continue' : 'Continue with installed content';
+        button('continue').textContent = value.ready ? '계속' : '설치된 카드로 계속';
         if (next && value.can_play) location.replace(destination);
     }
 
@@ -115,8 +115,8 @@ export function startArtworkPage(): void {
             }
             render(await response.json());
         } catch {
-            text('state', 'Waiting for the game host');
-            text('message', 'Keep the game host open. This page will reconnect automatically.');
+            text('state', '게임 서버 연결 대기 중');
+            text('message', '앱을 켜 두세요. 자동으로 다시 연결합니다.');
         } finally {
             timer = window.setTimeout(poll, 1000);
         }

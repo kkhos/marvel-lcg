@@ -1,3 +1,4 @@
+import { koText, koHtml, koLabel } from "./ko-game.js";
 import { Lib } from './lib.js'
 import { Setting, ButtonSetting, ClientPreferences } from './settings.js'
 import { Game } from './game.js'
@@ -357,7 +358,7 @@ export class Button{
     static doSave(slot: number) {
         Button.doDebug(`/save save_${slot}.json`);
         const button = document.getElementById(`load-btn-${slot}`) as HTMLButtonElement;
-        button.innerHTML = `Step ${Game.current_step_id}`
+        button.innerHTML = `${Game.current_step_id}단계`
     }
 
     static async doSaveFile() {
@@ -861,7 +862,7 @@ export class Button{
         const enabled = ClientPreferences.showDeckDuringFullSearch(playerId)
         button.classList.toggle('clicked', enabled)
         const playerLabel = Setting.is_hot_seat ? `P${playerId + 1} ` : ''
-        button.innerHTML = `${playerLabel}Full Search: ${enabled ? 'On' : 'Off'}`
+        button.innerHTML = `${playerLabel}전체 검색: ${enabled ? '켜짐' : '꺼짐'}`
     }
 
     static getFullSearchPreferencePlayerId(): number {
@@ -909,7 +910,7 @@ export class Button{
                     value = 0
                 }
 
-                button.innerHTML = labels[value]
+                button.innerHTML = koLabel(labels[value])
                 if( value == 0 ) {
                     button.classList.remove('clicked')
                 } else {
@@ -930,13 +931,13 @@ export class Button{
 
         if( property ) {
             const value = ButtonSetting[property] as number
-            button.innerHTML = labels[value];
+            button.innerHTML = koLabel(labels[value]);
             if( value != 0 ) {
                 button.classList.add('clicked')
             }
         }
         else {
-            button.innerHTML = text;
+            button.innerHTML = koLabel(text);
         }
 
         if( callWhenInit && onClick ) {

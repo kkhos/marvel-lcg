@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
     private TextView status;
     private Button start;
     private Button back;
-    private static final String UI_REVISION = "4";
+    private static final String UI_REVISION = "5";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -51,7 +51,7 @@ public class MainActivity extends Activity {
         status.setTextIsSelectable(true);
         layout.addView(status);
         start = new Button(this);
-        start.setText("Start game engine");
+        start.setText("게임 엔진 시작");
         start.setEnabled(false);
         layout.addView(start);
         web = new WebView(this);
@@ -72,7 +72,7 @@ public class MainActivity extends Activity {
         back = new Button(this);
         back.setText("‹");
         back.setTextSize(24);
-        back.setContentDescription("Back");
+        back.setContentDescription("뒤로가기");
         back.setPadding(0, 0, 0, 0);
         back.setAlpha(0.8f);
         back.setVisibility(View.GONE);
@@ -223,10 +223,10 @@ public class MainActivity extends Activity {
                     || "/public/marvel.html".equals(path)
                     || ("/".equals(path) && uri.getQuery() != null);
             if (gamePage) {
-                new AlertDialog.Builder(this).setTitle("Leave game screen?")
-                        .setMessage("This does not undo a move or end your turn. Save progress in the game first if needed.")
-                        .setNegativeButton("Stay", null)
-                        .setPositiveButton("Leave", (d, w) -> web.loadUrl(loadedUrl)).show();
+                new AlertDialog.Builder(this).setTitle("게임 화면에서 나갈까요?")
+                        .setMessage("턴 종료나 되돌리기는 실행되지 않습니다. 필요하면 먼저 게임을 저장하세요.")
+                        .setNegativeButton("계속 플레이", null)
+                        .setPositiveButton("나가기", (d, w) -> web.loadUrl(loadedUrl)).show();
             } else if (web.canGoBack()) {
                 web.goBack();
             } else {

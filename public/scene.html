@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>New Game</title>
+    <title>새 게임</title>
     <link rel="stylesheet" href="/public/css/menu/style.css">
     <link rel="stylesheet" href="/public/css/font-awesome.css">
 <style>
@@ -340,7 +340,7 @@
 </head>
 <body>
     <fieldset style="flex-direction: column;">
-        <legend id="scenario-selector-title">Scenario</legend>
+        <legend id="scenario-selector-title">시나리오</legend>
 
         <div id="set-images"></div>
 
@@ -354,7 +354,7 @@
         <div style="display: none;">
             Encounter Sets: <span id="default-encounter-sets"></span><hr/>
             Modular Sets: <span id="default-modular-sets"></span><hr/>
-            Expert: <span id="is-expert"></span><hr/>
+            전문가: <span id="is-expert"></span><hr/>
             Encounter Size: <span id="encounter-size"></span>
         </div>
         </div>
@@ -779,9 +779,9 @@ async function createScenarios() {
 </script>
 
 <fieldset id="split-scenario-selector" hidden style="flex-direction: column; position: relative;">
-    <legend>Scenarios</legend>
+    <legend>시나리오</legend>
     <div>
-        <button id="default-scheme-button" onclick="default_schemes()" title="Select the leader's preconstructed schemes" hidden disabled>Default</button>
+        <button id="default-scheme-button" onclick="default_schemes()" title="Select the leader's preconstructed schemes" hidden disabled>기본값</button>
     </div>
 
     <fieldset style="gap: 0; padding: 0; border: none">
@@ -792,7 +792,7 @@ async function createScenarios() {
 </fieldset>
 
 <fieldset style="flex-direction: column; position: relative;">
-    <legend>Standard Sets</legend>
+    <legend>표준 세트</legend>
 
     <fieldset style="gap: 0; padding: 0; border: none">
         <div>
@@ -803,14 +803,14 @@ async function createScenarios() {
 </fieldset>
 
 <fieldset style="flex-direction: column; position: relative;">
-    <legend>Modular Sets</legend>
+    <legend>모듈 세트</legend>
     <div>
-        <button onclick="default_modular()">Default</button>
+        <button onclick="default_modular()">기본값</button>
         <button id="faction-modular-button" onclick="faction_modular()" hidden></button>
-        <button onclick="random_modular()">Random</button>
-        <button onclick="document.querySelector(`#modular-sets`).classList.toggle('hide-not-click')">Expand</button>
-        <button onclick="document.querySelectorAll(`#modular-sets .nemesis`).forEach(e=>e.classList.toggle('hide'))">Nemesis</button>
-        <button onclick="document.querySelector(`#modular-sets`).classList.toggle('show-set-name')">Name</button>
+        <button onclick="random_modular()">무작위</button>
+        <button onclick="document.querySelector(`#modular-sets`).classList.toggle('hide-not-click')">펼치기</button>
+        <button onclick="document.querySelectorAll(`#modular-sets .nemesis`).forEach(e=>e.classList.toggle('hide'))">숙적</button>
+        <button onclick="document.querySelector(`#modular-sets`).classList.toggle('show-set-name')">이름</button>
     </div>
 
     <fieldset style="gap: 0; padding: 0; border: none">
@@ -946,7 +946,7 @@ async function createSets() {
 </script>
 
     <fieldset style="flex-wrap: wrap; flex-direction: column;">
-        <legend>Heroes</legend>
+        <legend>영웅</legend>
         <div style="display: flex; flex-direction: row; gap:5px">
             <label for="heroes-1">
             <input id="heroes-1" type="file" name="heroes" accept=".json" onclick="Reset(this)" onchange="Load(this)"/>
@@ -983,7 +983,7 @@ async function createSets() {
             }
         </script>
         <p>
-        Default hero JSON files are located in folder "./deck/starter". You can also <button onclick="importDeck()">Import</button> the data from your clipboard, or <a href="./deck">edit the deck</a>.
+        Default hero JSON files are located in folder "./deck/starter". You can also <button onclick="importDeck()">가져오기</button> the data from your clipboard, or <a href="./deck">덱 편집</a>.
         </p>
 
     </fieldset>
@@ -1001,7 +1001,7 @@ async function createSets() {
 }
     </style>
     <fieldset id="game-start">
-        <legend>Game Start</legend>
+        <legend>게임 시작</legend>
         <style>
 .slidecontainer {
     width: 100%;
@@ -1030,19 +1030,19 @@ p:has(#timeout_text) {
 }
         </style>
         <div class="slidecontainer">
-            <p>Timeout: <span id="timeout_text"></span></p>
+            <p>시간 제한: <span id="timeout_text"></span></p>
             <input class="slider" type="range" min="0" max="300" value="120" step="5" oninput="timeout_update()" id="timeout_slider" style="max-width: 300px;" disabled>
         </div>
         <div>
-            <p style="padding-right: .5rem;">Seed</p><input type="text" id="seed_div" value="" placeholder="keep empty for random">
-            <button id="seed_button" onclick="random_seed()">Random</button>
+            <p style="padding-right: .5rem;">시드</p><input type="text" id="seed_div" value="" placeholder="비워 두면 무작위">
+            <button id="seed_button" onclick="random_seed()">무작위</button>
         </div>
 
         <script>
             function timeout_update(off=false) {
                 value = document.querySelector("#timeout_slider").value
                 if( value == 0 || off ) {
-                    document.querySelector("#timeout_text").innerHTML = "<span style='color: palegreen'>Off</span>"
+                    document.querySelector("#timeout_text").innerHTML = "<span style='color: palegreen'>끄기</span>"
                 } else {
                     document.querySelector("#timeout_text").innerHTML = value
                 }
@@ -1057,15 +1057,15 @@ p:has(#timeout_text) {
         </script>
 
         <details id="mode" open>
-            <summary> Modes of Play</summary>
+            <summary> 게임 모드</summary>
             <div class="slidecontainer">
-                <p>Heroic: <span id="mode_heroic_text"></span>
+                <p>영웅 난이도: <span id="mode_heroic_text"></span>
                 <input class="slider" type="range" min="0" max="8" value="0" step="1" oninput="mode_heroic_update()" id="mode_heroic_slider" style="max-width: 200px;"></p>
                 <script>
                     function mode_heroic_update() {
                         value = document.querySelector("#mode_heroic_slider").value
                         if( value == 0 ) {
-                            document.querySelector("#mode_heroic_text").innerHTML = "<span style='color: palegreen'>Off</span>"
+                            document.querySelector("#mode_heroic_text").innerHTML = "<span style='color: palegreen'>끄기</span>"
                         } else {
                             document.querySelector("#mode_heroic_text").innerHTML = value
                         }
@@ -1085,7 +1085,7 @@ p:has(#timeout_text) {
             <label id="mode_campaign_container" class="hide">
                 Campaign (Experimental):
                 <select id="campaign_selector">
-                    <option value="">None (standard game)</option>
+                    <option value="">없음 (표준 게임)</option>
                 </select>
             </label>
 
@@ -1111,7 +1111,7 @@ p:has(#timeout_text) {
         </details>
 
         <details id="rules">
-            <summary> Rule </summary>
+            <summary> 규칙 </summary>
             <script>
                 data = {
                     "v16_all": "All v16 rules",
@@ -1192,7 +1192,7 @@ p:has(#timeout_text) {
         </details>
 
         <details id="challenge">
-            <summary>Challenges</summary>
+            <summary>도전 과제</summary>
         </details>
 
         <style>
@@ -1287,7 +1287,7 @@ p:has(#timeout_text) {
         </style>
 
         <details id="campaign_log" class="hide" open>
-            <summary>Campaign Log</summary>
+            <summary>캠페인 기록</summary>
 
             <style>
                 #campaign_log_container {
@@ -1334,8 +1334,8 @@ p:has(#timeout_text) {
                 <tbody id="campaign_log_container"></tbody>
             </table>
             <div id="campaign_log_actions">
-                <button type="button" id="save_campaign_log_button" onclick="saveCampaignSettings(this)">Save Campaign Log</button>
-                <button type="button" id="clear_campaign_log_button" onclick="clearCampaignSettings(this)">Clear Campaign</button>
+                <button type="button" id="save_campaign_log_button" onclick="saveCampaignSettings(this)">캠페인 기록 저장</button>
+                <button type="button" id="clear_campaign_log_button" onclick="clearCampaignSettings(this)">캠페인 초기화</button>
                 <span id="campaign_log_save_status" role="status" aria-live="polite"></span>
             </div>
 
@@ -1979,7 +1979,7 @@ p:has(#timeout_text) {
                             row.innerHTML += `<td>${html}</td>`
                         } else if (item.type === "number") {
                             const randomButton = item.random
-                                ? `<button type="button" onclick="randomizeCampaignNumber(this)">Random</button>`
+                                ? `<button type="button" onclick="randomizeCampaignNumber(this)">무작위</button>`
                                 : ""
                             row.innerHTML += `<td><input type="number" data-key="${item.description}" step="1" min="0" value="${item.default ?? ""}">${randomButton}</td>`;
                         } else if (item.type === "checkbox") {
@@ -1995,7 +1995,7 @@ p:has(#timeout_text) {
                             tooltip = item.tooltip ? item.tooltip : "Enter list items"
                             row.innerHTML += `<td><input type="text" data-key="${item.description}" placeholder="${tooltip}"><span class="campaign-list-delimiter">Delimiter: <code>;</code></span></td>`;
                         } else if (item.type === "campaignRandom") {
-                            row.innerHTML += `<td class="campaign-random-control"><output aria-live="polite">${item.emptyText}</output><button type="button" onclick="randomizeFearNoEvilCampaign(this, '${item.randomType}')">Random</button></td>`;
+                            row.innerHTML += `<td class="campaign-random-control"><output aria-live="polite">${item.emptyText}</output><button type="button" onclick="randomizeFearNoEvilCampaign(this, '${item.randomType}')">무작위</button></td>`;
                         } else if (item.type === "card") {
                             row.innerHTML += `<td><input type="text" data-key="${item.description}" placeholder="use 'card_id'"></td>`;
                         } else {
@@ -2011,19 +2011,19 @@ p:has(#timeout_text) {
         </details>
 
         <details id="settings_other" open="">
-        <summary>Other</summary>
-        <label><input type="checkbox" id="remove_standard_set_restriction" autocomplete="off" onchange="applyStandardSetRestriction()">Remove Standard Set Restriction
+        <summary>기타</summary>
+        <label><input type="checkbox" id="remove_standard_set_restriction" autocomplete="off" onchange="applyStandardSetRestriction()" >표준 세트 제한 해제
             <span class="tooltip">Allow any combination of Standard and Expert encounter sets, including none.</span>
         </label>
-        <label><input type="checkbox" id="hide_bug_report">Hide Error Message</label>
-        <label><input type="checkbox" id="show_achievement">Show Achievements</label>
-        <label><input type="checkbox" id="show_deck_during_full_search">Show Deck During Full Search</label>
+        <label><input type="checkbox" id="hide_bug_report">오류 메시지 숨기기</label>
+        <label><input type="checkbox" id="show_achievement">업적 표시</label>
+        <label><input type="checkbox" id="show_deck_during_full_search">전체 검색 중 덱 표시</label>
         <div style="display: flex;">
-            <p>Statistics Notification: </p>
+            <p>통계 알림: </p>
             <select id="statistics_notification">
-                <option value="0">Off</option>
-                <option selected="selected" value="1">First time</option>
-                <option value="2">All</option>
+                <option value="0">끄기</option>
+                <option selected="selected" value="1">처음만</option>
+                <option value="2">모두</option>
             </select>
         </div>
 
@@ -2033,7 +2033,7 @@ p:has(#timeout_text) {
         </label>
         </details>
 
-        <button type="button" id="clearCacheButton">Reset to default</button>
+        <button type="button" id="clearCacheButton">기본값으로 초기화</button>
 
         <style>
             #clearCacheButton {
@@ -2063,9 +2063,9 @@ p:has(#timeout_text) {
         <hr style="width: 100%;"/>
 
         <div style="display: flex; gap: 1rem;">
-            <button onclick="doCreateNewGame('')">Create Scene</button>
+            <button onclick="doCreateNewGame('')">게임 생성</button>
             <!-- <button onclick="OpenToLAN(this)">Create Scene (LAN)</button> -->
-            <button onclick="doCreateNewGame('hot_seat')">Create Scene & Play (Hot Seat)</button>
+            <button onclick="doCreateNewGame('hot_seat')">게임 생성 및 플레이 (핫시트)</button>
             <!-- <button onclick="NewGameOnline(this)">Create Scene (Online)</button> -->
         </div>
 
@@ -2078,10 +2078,10 @@ p:has(#timeout_text) {
         </style>
 
         <div style="display: flex; gap: 1rem;" id="play-buttons">
-            <button><a target="_blank" href="">Join as player 1</a></button>
-            <button><a target="_blank" href="">Join as player 2</a></button>
-            <button><a target="_blank" href="">Join as player 3</a></button>
-            <button><a target="_blank" href="">Join as player 4</a></button>
+            <button><a target="_blank" href="">플레이어 1로 참가</a></button>
+            <button><a target="_blank" href="">플레이어 2로 참가</a></button>
+            <button><a target="_blank" href="">플레이어 3로 참가</a></button>
+            <button><a target="_blank" href="">플레이어 4로 참가</a></button>
         </div>
     </fieldset>
 

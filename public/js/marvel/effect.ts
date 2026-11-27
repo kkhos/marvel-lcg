@@ -1,3 +1,4 @@
+import { koText, koHtml, koLabel } from "./ko-game.js";
 import { Lib } from './lib.js'
 import { ButtonSetting, ClientPreferences, Setting } from './settings.js'
 import { Game } from './game.js'
@@ -890,7 +891,7 @@ export class Effect {
                 }
                 let button = document.createElement('button')
                 button.classList.add('button')
-                button.innerHTML = Lib.game.cleanResText(json_obj.name_with_space)
+                button.innerHTML = Lib.game.cleanResText(koLabel(json_obj.name_with_space))
                 button.dataset.json_str = JSON.stringify(json_obj)
                 if( json_obj.failure_reason != '' ) {
                     button.classList.add('disable')

@@ -1,3 +1,4 @@
+import { koText, koHtml, koLabel } from "./ko-game.js";
 import { Command } from "./command.js";
 import { Game } from "./game.js";
 import { Replay } from "./replay.js";
@@ -22,15 +23,15 @@ export class Message {
         const game_over_buttons = document.getElementById('game-over-buttons')!;
 
         const buttonSave = document.createElement('button');
-        buttonSave.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i> Save replay';
+        buttonSave.innerHTML = '<i class="fa fa-download" aria-hidden="true"></i> 리플레이 저장';
         buttonSave.classList.add('save-replay')
-        buttonSave.title = 'Save this game to the local replay library'
+        buttonSave.title = '이 게임을 로컬 리플레이 보관함에 저장'
         buttonSave.addEventListener('click', function() {
             Command.saveLocal()
         });
 
         const buttonShare = document.createElement('button');
-        buttonShare.innerHTML = '<i class="fa fa-cloud-upload" aria-hidden="true"></i> Share replay';
+        buttonShare.innerHTML = '<i class="fa fa-cloud-upload" aria-hidden="true"></i> 리플레이 공유';
         buttonShare.classList.add('share-replay')
         buttonShare.addEventListener('click', function() {
             Command.uploadSave("Share")
@@ -48,11 +49,11 @@ export class Message {
         Message.game_over_div.classList.add('active');
         Message.overlay.classList.remove('active');
         if( Game.players_won ) {
-            Message.end_messageElement.textContent = Replay.is_watching ? "Replay complete — VICTORY" : "VICTORY";
+            Message.end_messageElement.textContent = koLabel(Replay.is_watching ? "Replay complete — VICTORY" : "VICTORY");
         } else {
-            Message.end_messageElement.textContent = Replay.is_watching ? "Replay complete — DEFEAT" : "DEFEAT";
+            Message.end_messageElement.textContent = koLabel(Replay.is_watching ? "Replay complete — DEFEAT" : "DEFEAT");
         }
-        Message.end_messageElementText.textContent = text
+        Message.end_messageElementText.textContent = koText(text)
     }
 
     static showMessage(text: string, original_duration: number|null = 1200) {
@@ -69,10 +70,10 @@ export class Message {
             Message.showGameOverMessage(text)
         } else
         if( original_duration == null ) {
-            Message.messageElement.textContent = text;
+            Message.messageElement.textContent = koText(text);
             Message.overlay.style.animation = `overlay-move-once ${sec}s forwards`
         } else {
-            Message.messageElement.textContent = text;
+            Message.messageElement.textContent = koText(text);
             Message.overlay.style.animation = `overlay-move ${sec}s forwards`
         }
 

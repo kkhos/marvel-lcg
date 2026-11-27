@@ -1,3 +1,4 @@
+import { koText, koHtml, koLabel } from "./ko-game.js";
 import { ButtonSetting, Setting } from './settings.js'
 import { Game } from './game.js'
 import { Effect } from './effect.js'
@@ -204,11 +205,11 @@ class PromptBox {
                 add_on_event = false
             }
             if( !add_on_event || is_in_play_turn ) {
-                if( text != PromptBox.prompt_text_div.innerHTML ) {
-                    PromptBox.prompt_text_div.innerHTML = text
+                if( koHtml(text) != PromptBox.prompt_text_div.innerHTML ) {
+                    PromptBox.prompt_text_div.innerHTML = koHtml(text)
                 }
             } else {
-                PromptBox.prompt_text_div.innerHTML = PromptBox.prompt_text + "<hr/>" + text
+                PromptBox.prompt_text_div.innerHTML = koHtml(PromptBox.prompt_text + "<hr/>" + text)
                 // PromptBox.prompt_text_div.classList.add('none-events')
             }
             PromptBox.restartPromptTextAnimation()
@@ -497,7 +498,7 @@ export class UI {
     }
 
     static setPhaseText(text: string) {
-        UI.phase_div.dataset.phase = text
+        UI.phase_div.dataset.phase = koText(text)
     }
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -511,7 +512,7 @@ export class UI {
     ////////////////////////////////////////////////////////////////////////////////
     //
     static setTurnId(round: number, step: number) {
-        UI.current_div.innerHTML = `Round ${round} Step ${step}`
+        UI.current_div.innerHTML = koText(`Round ${round} Step ${step}`)
 
         let phase_text = ""
         if( Game.game_over ) {
@@ -540,7 +541,7 @@ export class UI {
         }
         let text_div = UI.top_bar_div?.querySelector<HTMLElement>("#turn-id")
         if( text_div ) {
-            text_div.innerHTML = text
+            text_div.textContent = koText(text)
         }
 
         if( !["Initialize",

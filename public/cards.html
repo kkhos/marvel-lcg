@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Card Viewer</title>
+    <title>카드 보기</title>
     <link rel="stylesheet" href="/public/css/menu/style.css">
     <link rel="stylesheet" href="/public/css/menu/preview.css">
     <link rel="stylesheet" href="/public/css/font-awesome.css">
@@ -140,7 +140,7 @@
 </head>
 <body style="display: flex; flex-direction: column;">
 <fieldset style="display: flex; flex-direction: column; gap: 5px;">
-    <legend>Filter</legend>
+    <legend>필터</legend>
     <style>
         .sortby-buttons-padding {
             width: 5px;
@@ -149,20 +149,20 @@
     <div class="sortby-buttons" id="sort_filter_buttons">
         <!-- <p style="display: inline-block;">Sort</p> -->
         <!-- <label> <input type="checkbox" class="sortby" checked="" onclick="SortBy(this)" value="card_id">ID</label> -->
-        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='new'>New</label>
+        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='new'>신규</label>
         <div class="sortby-buttons-padding"></div>
 
-        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='name'>Name</label>
-        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='type'>Type</label>
-        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='cost'>Cost</label>
+        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='name'>이름</label>
+        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='type'>종류</label>
+        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='cost'>비용</label>
 
         <div class="sortby-buttons-padding"></div>
 
-        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='hp'>HP</label>
-        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='atk'>ATK</label>
-        <label class="all-only hide"> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='sch'>SCH</label>
-        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='thw'>THW</label>
-        <label class="all-only hide"> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='boost'>Boost</label>
+        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='hp'>체력</label>
+        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='atk'>공격</label>
+        <label class="all-only hide"> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='sch'>음모</label>
+        <label> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='thw'>저지</label>
+        <label class="all-only hide"> <input type="checkbox" class="sortby" onclick="sortBy(this)" value='boost'>부스트</label>
 
         <div style="width: 100%; height: 0;"></div>
         <!-- <div class="sortby-buttons-padding"></div> -->
@@ -216,7 +216,7 @@
         <input id="find_trait" type="text" value="" placeholder="trait" onchange="resort()" style="width: 100px;">
         <input id="find_text" type="text" value="" placeholder="text (regex supported)" onchange="resort()" style="width: 300px;">
         <select id="package" onchange="SelectAll()">
-            <option value="">any</option>
+            <option value="">전체</option>
             <option value="core">1. Core Set</option>
             <option value="gob">2. The Green Goblin</option>
             <option value="cap">3. Captain America</option>

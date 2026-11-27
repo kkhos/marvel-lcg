@@ -146,19 +146,19 @@
         <div id='prompt-text'></div>
     </div>
     <button id='btn-end' class="button" onclick="Button.doBtnCancel()" disabled></button>
-    <button id='btn-ok' class="button ok" onclick="Button.doBtnOk()" disabled>OK</button>
+    <button id='btn-ok' class="button ok" onclick="Button.doBtnOk()" disabled>확인</button>
 
     <div id="right-side-bar" class="side-bar">
-        <div id="right-side-bar-handle">Settings</div>
+        <div id="right-side-bar-handle">설정</div>
         <div id="interaction-speed-control">
             <label for="anime-time">
-                <span>Card speed</span>
+                <span>카드 속도</span>
                 <output id="anime-speed-value" for="anime-time">1&times;</output>
             </label>
             <input type="range" min=".25" max="2" value="1" step=".25" class="slider" id="anime-time">
             <div class="speed-scale" aria-hidden="true">
-                <span>Slower</span>
-                <span>Faster</span>
+                <span>느리게</span>
+                <span>빠르게</span>
             </div>
         </div>
         <input type="range" min="100" max="1500" value="600" class="slider hide" id="delay-range">
@@ -194,7 +194,7 @@
     <div id="history" class="hide">
         <div id='history-text'></div>
         <div id="contextMenu">
-            <button id="view_in_mdb" onclick="HistoryLog.gotoMDB(this)">View on Marvelcdb</button>
+            <button id="view_in_mdb" onclick="HistoryLog.gotoMDB(this)">MarvelCDB에서 보기</button>
             <!-- <button id="view_in_mdb" class="debug-only hide" onclick="HistoryLog.editCard(this)">Edit</button> -->
         </div>
         <div id="ex-buttons">
@@ -204,7 +204,7 @@
             <div style="display: flex;" id="ex-buttons-4"> </div>
 
             <div style="display: flex;">
-                <button class="button" onclick="Button.gotoStep()">Goto</button>
+                <button class="button" onclick="Button.gotoStep()">이동</button>
                 <output class="slider"></output>
                 <input type="range" min="1" max="1" value="0" step="1" class="slider" id="goto-id" oninput="this.previousElementSibling.value = this.value" style="max-width: 500px;"> <output id="current-round"></output>
             </div>
@@ -222,9 +222,9 @@
     </div>
 
     <div id="lost-connect" class="lost-connect hide">
-        <p id="wait-connect">Reconnect in <span id="retry-timer">1</span> seconds. <a id="reconnect-link">Reconnect Now</a></p>
-        <p id="connecting">Connecting...</p>
-        <p id="manual-connect"><a id="reconnect-link2">Reconnect Now</a></p>
+        <p id="wait-connect"><span id="retry-timer">1</span>초 후 다시 연결합니다. <a id="reconnect-link">지금 다시 연결</a></p>
+        <p id="connecting">연결 중…</p>
+        <p id="manual-connect"><a id="reconnect-link2">지금 다시 연결</a></p>
     </div>
 
     <div id='top-bar' style="display: none;">

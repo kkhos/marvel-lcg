@@ -1,3 +1,4 @@
+import { koText, koHtml, koLabel } from "./ko-game.js";
 export class HistoryLog
 {
     static history_div? = document.getElementById("history") as HTMLElement;
@@ -34,7 +35,7 @@ export class HistoryLog
             return
         }
         if( text && HistoryLog.history_text_div ) {
-            text = text.replaceAll("\n", "")
+            text = koHtml(text).replaceAll("\n", "")
             HistoryLog.last_id = id
             text = `<p class='log-id'>${id}</p> <p>${text}</p>`
             // Preserve existing entries instead of rebuilding the entire log.

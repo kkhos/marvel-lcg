@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Deck Editor</title>
+    <title>덱 편집기</title>
     <link rel="stylesheet" href="/public/css/menu/style.css">
     <link rel="stylesheet" href="/public/css/menu/preview.css">
     <link rel="stylesheet" href="/public/css/font-awesome.css">
@@ -57,7 +57,7 @@
 <body>
 
 <fieldset style="flex-direction: column;">
-    <legend>Sets</legend>
+    <legend>세트</legend>
     
     <div id="set-images"></div>
     
@@ -266,7 +266,7 @@ var cardPreview
 </script>
 
 <fieldset style="flex-direction: column;">
-    <legend>Load</legend>
+    <legend>불러오기</legend>
     <div>Load from marvelcdb.com: <input id="deck_id" name="deck_id" value="" placeholder="2345" required> <input type="button" onclick="getDeck(false)" value="Get Player Deck"> <input type="button" onclick="getDeck(true)" value="Get Player Deck (Private)"></div>
     <div>Load from a local file: <input type="file" onchange="loadDeck(this)" accept=".json"> </div>
     <div>Load from clipboard: <input type="button" onclick="importDeck()" value="Import"> </div>
@@ -275,7 +275,7 @@ var cardPreview
 <input id="hero" name="hero" value="" placeholder="" style="display: none;" readonly required>
 
 <fieldset style="display: flex; flex-direction: column; overflow: auto; width: 100%;" id="deck_editor">
-    <legend>Deck Build</legend>
+    <legend>덱 구성</legend>
     <div id="hero_images"></div>
 
     <div id="hero_obligation"></div>
@@ -291,25 +291,25 @@ var cardPreview
     <textarea style="display: none;" id="hero_deck" readonly></textarea>
 
     <fieldset style="padding: 2px;">
-        <legend id="player_deck_images_size">Main</legend>
+        <legend id="player_deck_images_size">메인</legend>
         <div id="player_deck_images" class="drop-zone"></div>
         <textarea onchange="updatePlayerDeck()" id="slots" placeholder="player deck" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
     </fieldset>
     
     <fieldset style="padding: 2px;">
-        <legend id="side_deck_images_size">Side</legend>
+        <legend id="side_deck_images_size">사이드</legend>
         <div id="side_deck_images" class="drop-zone"></div>
         <textarea onchange="updatePlayerDeck()" id="side_deck" placeholder="side deck" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
     </fieldset>
 
     <ul>
-        <li>Left click: Preview</li>
-        <li>Right click: Remove</li>
-        <li>Middle click: Duplicate</li>
+        <li>좌클릭: 미리보기</li>
+        <li>우클릭: 제거</li>
+        <li>가운데 클릭: 복제</li>
         <!-- <li>"Deadpool" and other heroes who use `set_aside` may also need to edit Extra deck.</li> -->
         <li>Put your decks in the folder "./deck" to display them in `My Deck`</li>
         <li>We recommend you use <a href="https://marvelcdb.com/deck/new">marvelcdb.com</a> to build your deck.</li>
-        <li><button onclick="ViewCards()">View Cards</button></li>
+        <li><button onclick="ViewCards()">카드 보기</button></li>
         <script>
             function ViewCards() {
                 text = document.querySelector(`#slots`).value

@@ -1,3 +1,4 @@
+import { koText, koHtml, koLabel } from "./ko-game.js";
 import { Effect } from "./effect.js";
 import { SelectStep } from "./select.js";
 import { UI } from "./ui.js";
@@ -40,13 +41,13 @@ export class BtnOk
         BtnOk.btn_ok_div.classList.remove("overpay")
 
         if( text == "OverPay" ) {
-            BtnOk.btn_ok_div.innerHTML = "Over<br/>Pay"
+            BtnOk.btn_ok_div.innerHTML = koLabel("Over<br/>Pay")
             BtnOk.btn_ok_div.classList.add('overpay')
             BtnOk.btn_ok_div.classList.add('ok')
             BtnOk.btn_ok_div.disabled = false
         }
         else if( text ) {
-            BtnOk.btn_ok_div.innerHTML = "OK"
+            BtnOk.btn_ok_div.innerHTML = koLabel("OK")
             BtnOk.btn_ok_div.classList.add('ok')
             BtnOk.btn_ok_div.disabled = false
         }
@@ -58,7 +59,7 @@ export class BtnOk
             const text = "Cancel"
             BtnOk.btn_end_div.classList.add("ex_effect")
             BtnOk.btn_end_div.classList.add(BtnOk.response_interrupt_class_name)
-            BtnOk.btn_end_div.innerHTML = text
+            BtnOk.btn_end_div.innerHTML = koLabel(text)
         }
     }
     static setCancel(text: string)
@@ -134,7 +135,7 @@ export class BtnOk
         }
 
         BtnOk.btn_ok_div.disabled = true
-        BtnOk.btn_end_div.innerHTML = text
+        BtnOk.btn_end_div.innerHTML = koLabel(text)
     }
 }
 
