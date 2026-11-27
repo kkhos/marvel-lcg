@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
     private WebView web;
     private TextView status;
     private Button start;
-    private static final String UI_REVISION = "24";
+    private static final String UI_REVISION = "25";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -215,7 +215,7 @@ public class MainActivity extends Activity {
             ZipEntry entry;
             byte[] buf = new byte[65536];
             while ((entry = zip.getNextEntry()) != null) {
-                if (uiOnly && !entry.getName().startsWith("public/")) {
+                if (uiOnly && !entry.getName().startsWith("public/") && !entry.getName().equals("engine/device/web/server/server_new_game.py")) {
                     zip.closeEntry();
                     continue;
                 }

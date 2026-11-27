@@ -111,6 +111,41 @@ class GameServerNewGame(GameServerBase):
         self.device_manager.notify.ExitWait()
         return web.json_response({'result': "Continue playing"})
 
+    async def mobile_save_slots(self, request: web.Request) -> web.Response:
+        from pathlib import Path
+        slots = []
+        for slot in range(4):
+            path = Path(f"save_{slot}.json")
+            exists = path.is_file() and not path.is_symlink()
+            slots.append({"slot": slot, "exists": exists,
+                          "modified": path.stat().st_mtime if exists else 0})
+        return web.json_response(slots, headers={"Cache-Control": "no-store"})
+
+    async def mobile_save_slot(self, request: web.Request) -> web.Response:
+        from pathlib import Path
+        from game.scene.loader import SceneLoader
+        try:
+            data = await request.json()
+            slot = data.get("slot")
+            action = data.get("action")
+            if type(slot) is not int or slot not in range(4) or action not in ("resume", "delete"):
+                raise ValueError()
+        except Exception:
+            return web.json_response({"error": "Invalid slot or action"}, status=400)
+        path = Path(f"save_{slot}.json")
+        if not path.is_file() or path.is_symlink():
+            return web.json_response({"error": "Save not found"}, status=404)
+        if action == "delete":
+            path.unlink()
+        else:
+            scene = SceneLoader.Load(str(path))
+            blocked = self.ArtworkSelectionResponse('scene', scene)
+            if blocked is not None:
+                return blocked
+            self.game.session.Load(str(path), -1, "Load")
+            self.controller_manager.OnNewGame()
+        return web.json_response({"result": "OK"})
+
     async def save_local(self, request: web.Request) -> web.Response:
         try:
             path = self.game.session.SaveReplay()
@@ -266,6 +301,8 @@ class GameServerNewGame(GameServerBase):
         self.AddAwaitGetSecurity('/load_replay', self.load_replay)
         self.AddAwaitGetSecurity('/resume_replay', self.resume_replay)
         self.AddPostSecurity('/continue_replay', self.continue_replay)
+        self.AddAwaitGetSecurity('/mobile_save_slots', self.mobile_save_slots)
+        self.AddPostSecurity('/mobile_save_slot', self.mobile_save_slot)
         self.AddPostSecurity('/save_local', self.save_local)
         # Older cached clients used GET for this explicit save button.
         self.AddAwaitGetSecurity('/save_local', self.save_local)

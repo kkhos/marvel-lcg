@@ -175,6 +175,7 @@ body{background:radial-gradient(ellipse at 20% 35%,#51308d,#192a5b 43%,#080d22 8
             <button class="custom-btn btn-3" onclick="Open('scene')">
                 <span>새 게임</span>
             </button>
+            <button class="custom-btn btn-3" onclick="showSaves()"><span>저장 게임</span></button>
             <button class="custom-btn btn-3" onclick="Open('replay')">
                 <span>리플레이</span>
             </button>
@@ -254,6 +255,36 @@ function doReplay(file_name) {
 }
     </script>
 
+<dialog id="saved-games" style="background:#192542;color:white;border:1px solid #7285c3;border-radius:12px;width:min(80vw,650px);max-height:85dvh;overflow:auto">
+<h2 style="margin:0 0 8px">저장 게임</h2><div id="save-list"></div><p id="save-status" role="status"></p><button onclick="document.getElementById('saved-games').close()">닫기</button>
+</dialog>
+<script>
+async function showSaves(){
+ const dialog=document.getElementById('saved-games'), list=document.getElementById('save-list'), status=document.getElementById('save-status');
+ if(!dialog.open) dialog.showModal();
+ list.replaceChildren();status.textContent='불러오는 중…';
+ try {
+  const res=await fetch('/mobile_save_slots',{cache:'no-store'});if(!res.ok)throw Error();
+  const slots=await res.json();status.textContent='';
+  for(const s of slots){
+   const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid #526080';
+   const label=document.createElement('div');label.style.flex='1';label.textContent=(s.slot===0?'빠른 저장':'저장 '+s.slot)+(s.exists?' · '+new Date(s.modified*1000).toLocaleString():' · 비어 있음');row.append(label);
+   for(const [name,action] of [['이어하기','resume'],['삭제','delete']]){
+    const b=document.createElement('button');b.textContent=name;b.disabled=!s.exists;b.style.cssText='min-height:40px;padding:6px 12px';b.onclick=async()=>{
+     if(action==='delete'&&!confirm('이 저장 게임을 삭제할까요?'))return;
+     b.disabled=true;try{
+      const r=await fetch('/mobile_save_slot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slot:s.slot,action})});
+      if(r.status===409&&action==='resume'){const m=await import('/public/js/module/artwork.js');dialog.close();m.showArtworkPreparation(()=>b.onclick());return;}
+      if(!r.ok)throw Error();
+      if(action==='resume')Open('/?hot_seat&3d_scene');else await showSaves();
+     }catch(e){status.textContent='처리하지 못했습니다. 다시 시도해 주세요.';b.disabled=false;}
+    };row.append(b);
+   }list.append(row);
+  }
+ }catch(e){status.textContent='저장 목록을 불러오지 못했습니다.';}
+}
+window.MarvelSetup={back:()=>{const d=document.getElementById('saved-games');if(d.open){d.close();return true;}return false;}};
+</script>
 </body>
 
 </html>
