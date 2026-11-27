@@ -64,11 +64,12 @@ async def _network_probe():
 
 
 def start(root):
-    global _started
+    global _started, _status
     with _lock:
         if _started:
             return
         _started = True
+        _status = "Starting game engine"
     threading.Thread(target=_run, args=(root,), name="marvel-engine", daemon=True).start()
 
 

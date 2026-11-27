@@ -48,10 +48,13 @@ public class MainActivity extends Activity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         status = new TextView(this);
-        status.setTextIsSelectable(true);
+        status.setText("Marvel Champions\n게임 로딩 중…");
+        status.setGravity(android.view.Gravity.CENTER);
+        status.setTextSize(20);
         layout.addView(status);
         start = new Button(this);
-        start.setText("게임 엔진 시작");
+        start.setText("앱 종료 후 다시 실행");
+        start.setVisibility(View.GONE);
         start.setEnabled(false);
         layout.addView(start);
         web = new WebView(this);
@@ -128,30 +131,20 @@ public class MainActivity extends Activity {
                 android.util.Log.w("MarvelChampions", "Fullscreen bars unavailable; keeping normal window", e);
             }
         });
-        start.setOnClickListener(v -> {
-            if (launching) return;
-            launching = true;
-            start.setEnabled(false);
-            worker.execute(() -> {
-                try {
-                    File root = unpack();
-                    runtime.callAttr("start", root.getAbsolutePath());
-                } catch (Throwable e) {
-                    diagnostic = android.util.Log.getStackTraceString(e);
-                    launching = false;
-                }
-            });
-        });
+        start.setOnClickListener(v -> finishAndRemoveTask());
         if (!preparing) {
             preparing = true;
+            launching = true;
             worker.execute(() -> {
                 try {
                     if (!Python.isStarted()) Python.start(new AndroidPlatform(getApplicationContext()));
                     PyObject module = Python.getInstance().getModule("mobile_entry");
-                    diagnostic = module.callAttr("probe").toString();
                     runtime = module;
+                    File root = unpack();
+                    module.callAttr("start", root.getAbsolutePath());
                 } catch (Throwable e) {
                     diagnostic = android.util.Log.getStackTraceString(e);
+                    launching = false;
                 }
             });
         }
@@ -161,13 +154,15 @@ public class MainActivity extends Activity {
     private final Runnable poll = new Runnable() {
         public void run() {
             if (isFinishing() || isDestroyed()) return;
-            String message = diagnostic;
+            String message = "Marvel Champions\n게임 로딩 중…";
+            boolean failed = !launching;
             if (runtime != null) {
-                start.setEnabled(!launching);
+                
                 try {
                     String state = runtime.callAttr("status").toString();
                     String url = runtime.callAttr("url").toString();
-                    if (launching) message += "\n" + state;
+                    if (state.startsWith("Traceback") || state.startsWith("Engine stopped")) { failed = true; message = state; }
+                    else if (launching) message += "\n" + state;
                     if (!url.isEmpty() && !url.equals(loadedUrl)) {
                         // Check readiness off the UI thread; never block rendering.
                         worker.execute(() -> {
@@ -190,8 +185,16 @@ public class MainActivity extends Activity {
                         loadedUrl = "";
                     }
                 } catch (Throwable e) {
-                    message += "\n" + android.util.Log.getStackTraceString(e);
+                    failed = true;
+                    message = android.util.Log.getStackTraceString(e);
                 }
+            }
+            if (failed) {
+                web.setVisibility(View.GONE);
+                status.setVisibility(View.VISIBLE);
+                start.setVisibility(View.VISIBLE);
+                start.setEnabled(true);
+                if (!launching) message = diagnostic;
             }
             status.setText(message);
             handler.postDelayed(this, 1000);
@@ -243,7 +246,9 @@ public class MainActivity extends Activity {
 
     private void handleBack() {
         if (web.getVisibility() != View.VISIBLE) {
-            moveTaskToBack(true);
+            new AlertDialog.Builder(this).setTitle("게임을 종료할까요?")
+                    .setNegativeButton("취소", null)
+                    .setPositiveButton("종료", (d, w) -> finishAndRemoveTask()).show();
             return;
         }
         web.evaluateJavascript("!!((window.MarvelDeckTouch && window.MarvelDeckTouch.back && window.MarvelDeckTouch.back()) || (window.MarvelSetup && window.MarvelSetup.back()) || (window.MarvelTouch && window.MarvelTouch.back()))", result -> {
@@ -262,14 +267,25 @@ public class MainActivity extends Activity {
             } else if (web.canGoBack()) {
                 web.goBack();
             } else {
-                moveTaskToBack(true);
+                new AlertDialog.Builder(this).setTitle("게임을 종료할까요?")
+                    .setNegativeButton("취소", null)
+                    .setPositiveButton("종료", (d, w) -> finishAndRemoveTask()).show();
             }
         });
     }
 
     @Override protected void onDestroy() {
         handler.removeCallbacks(poll);
+        web.stopLoading();
+        if (web.getParent() instanceof android.view.ViewGroup) ((android.view.ViewGroup) web.getParent()).removeView(web);
         web.destroy();
         super.onDestroy();
+        // The upstream GameRun loop has no cooperative process-stop API.
+        // Only an explicit Activity finish ends the process; backgrounding or
+        // configuration recreation must preserve the running game.
+        if (isFinishing()) {
+            worker.shutdownNow();
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
     }
 }
