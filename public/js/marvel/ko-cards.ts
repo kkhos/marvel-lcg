@@ -1,4 +1,5 @@
 import { readKoCache } from './ko-local.js';
+import { bundledKo } from './ko-bundled.js';
 import { goblinDraft } from './ko-goblin.js';
 // Core Korean display translations, terminology cross-checked against the NamuWiki mirror (Marvel Champions core cards, heroes and villains); not verified against physical Korean cards.
 // Presentation only: never use these names or text as rule identifiers.
@@ -282,7 +283,8 @@ const sinisterDraft: Record<string, {name:string; text?:string}> = {
     "text": "행동: 버린 더미에 있는 멀티버스행 티켓을 덱에 섞거나 George Stacy를 준비하는 것 중 하나를 선택합니다. (라운드마다 1회 제한.)"
   }
 };
-const localCards = readKoCache();
+const localCards = {...readKoCache(), ...bundledKo};
+export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...goblinDraft, ...sinisterDraft};
 export function koCard(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? koCards[id] : Object.prototype.hasOwnProperty.call(reviewedDrafts,id) ? reviewedDrafts[id] : localCards[id]; }
 export function koCardSource(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) || Object.prototype.hasOwnProperty.call(reviewedDrafts,id) ? 'draft' : localCards[id] ? 'community' : undefined; }

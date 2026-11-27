@@ -85,10 +85,18 @@
 <script type="module">
     import { startArtworkPage } from '/public/js/module/artwork.js';
     import { importKoCards, readKoCache } from '/public/js/marvel/ko-local.js';
+    import { bundledKoCount } from '/public/js/marvel/ko-cards.js';
     startArtworkPage();
     const button = document.getElementById('ko-import');
     const progress = document.getElementById('ko-progress');
-    progress.textContent = '저장된 추가 번역: '+Object.keys(readKoCache()).length+'개';
+    if (bundledKoCount > 0) {
+        progress.textContent = 'APK 기본 내장 번역: '+bundledKoCount+'개 · 오프라인 사용 가능';
+        button.hidden = true;
+        button.parentElement.querySelector('small').textContent = '추가 다운로드 불필요 · 커뮤니티 번역이며 실물 검수 필요';
+        button.parentElement.querySelector('p').textContent = '이 APK에는 카드별 한국어 설명이 포함되어 있습니다.';
+    } else {
+        progress.textContent = '저장된 추가 번역: '+Object.keys(readKoCache()).length+'개';
+    }
     button.onclick = async () => {
         button.disabled = true;
         try {

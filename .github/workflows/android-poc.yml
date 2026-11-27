@@ -2,6 +2,11 @@ name: Android APK and mobile UI regression
 
 on:
   workflow_dispatch:
+    inputs:
+      personal_ko:
+        description: 'Embed Korean community data (private repositories only)'
+        type: boolean
+        default: true
   push:
     branches: ['mobile/android-poc']
     paths:
@@ -40,6 +45,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Prepare personal Korean bundle
+        if: github.event.repository.private && (github.event_name != 'workflow_dispatch' || inputs.personal_ko)
+        run: python mobile/android/prepare_ko.py
       - name: Install test dependencies
         run: |
           python -m pip install -r mobile/android/requirements-mobile.txt playwright==1.51.0
@@ -95,6 +103,9 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Prepare personal Korean bundle
+        if: github.event.repository.private && (github.event_name != 'workflow_dispatch' || inputs.personal_ko)
+        run: python mobile/android/prepare_ko.py
       - run: npx --yes --package typescript@5.9.3 tsc -p public/js/tsconfig.json
       - name: Restore persistent debug signing key
         shell: bash
@@ -134,6 +145,10 @@ jobs:
       - name: Verify bundled splash assets
         run: |
           python -c 'import zipfile,struct,hashlib; z=zipfile.ZipFile("mobile/android/app/build/outputs/apk/debug/app-debug.apk"); p=z.read("assets/splash/champions.png"); assert struct.unpack(">II",p[16:24])==(804,435); assert hashlib.sha256(p).hexdigest()=="490c4c9672cb57fe0e15201096a68aac25bd8c2bbe1703b8e9b2007676d945e2"; import io; d=z.read("assets/splash/doom.webp"); game=zipfile.ZipFile(io.BytesIO(z.read("assets/game.zip"))); assert d==game.read("public/images/home/doom.webp"); print("High-resolution logo and shared offline background verified")'
+      - name: Verify bundled Korean descriptions
+        if: github.event.repository.private && (github.event_name != 'workflow_dispatch' || inputs.personal_ko)
+        run: |
+          python -c 'import io,zipfile; a=zipfile.ZipFile("mobile/android/app/build/outputs/apk/debug/app-debug.apk"); g=zipfile.ZipFile(io.BytesIO(a.read("assets/game.zip"))); s=g.read("public/js/marvel/ko-bundled.js").decode(); assert "03001a" in s and len(s)>20000; print("Personal Korean module verified inside APK")'
       - name: Verify APK signing certificate
         shell: bash
         run: |

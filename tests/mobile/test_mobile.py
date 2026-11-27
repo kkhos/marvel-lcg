@@ -196,6 +196,20 @@ class MobileRegression(unittest.TestCase):
             'Unknown future text',
         ])
 
+    def test_ko_bundled_module(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {bundledKo} = await import('/public/js/marvel/ko-bundled.js');
+            const {koCard, bundledKoCount} = await import('/public/js/marvel/ko-cards.js');
+            return {count:bundledKoCount, size:Object.keys(bundledKo).length,
+                core:koCard('01001a').name, sample:koCard('03001a')?.text};
+        }""")
+        self.assertEqual(result["count"], result["size"])
+        self.assertEqual(result["core"], "Spider-Man")
+        if result["count"]:
+            self.assertGreaterEqual(result["count"], 250)
+            self.assertRegex(result["sample"], "[가-힣]")
+
     def test_ko_library_import_filter(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
@@ -213,7 +227,9 @@ class MobileRegression(unittest.TestCase):
         }""")
         self.assertEqual(result["ids"], ["03001a"])
         self.assertEqual(result["name"], "Captain America")
-        self.assertEqual(result["text"], "행동: 카드 1장. 정신력")
+        # A real offline module has priority over imported fixtures.
+        if result["text"] != "행동: 카드 1장. 정신력":
+            self.assertRegex(result["text"], "[가-힣]")
         self.assertEqual(result["source"], "community")
         self.assertEqual(result["draft"], "고스트 킥")
         self.assertEqual(result["goblin"], "고블린 글라이더")
