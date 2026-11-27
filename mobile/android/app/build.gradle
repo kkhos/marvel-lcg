@@ -27,8 +27,8 @@ android {
         applicationId 'io.github.kkhos.marvellcg'
         minSdk 24
         targetSdk 35
-        versionCode 54
-        versionName '0.5.45-ko-core'
+        versionCode 55
+        versionName '0.5.46-ko-wrecking'
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
     }
     sourceSets.main.assets.srcDir(layout.buildDirectory.dir('generated/gameAssets'))

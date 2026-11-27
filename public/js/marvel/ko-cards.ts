@@ -3,6 +3,7 @@ import { normalizeKoCardText } from './ko-glossary.js';
 import { bundledKo } from './ko-bundled.js';
 import { goblinDraft } from './ko-goblin.js';
 import { coreEncounterDraft } from './ko-core-encounter.js';
+import { wreckingCrewDraft } from './ko-wrecking-crew.js';
 import { koAliases } from './ko-aliases.js';
 // Core Korean display translations, terminology cross-checked against the NamuWiki mirror (Marvel Champions core cards, heroes and villains); not verified against physical Korean cards.
 // Presentation only: never use these names or text as rule identifiers.
@@ -10,15 +11,6 @@ export const koCards: Record<string, {name: string; text?: string}> = {
   "07001a": {
     "name": "탈옥",
     "text": "시나리오 구성: 빌런으로 Wrecker A, Thunderball A, Piledriver A, Bulldozer A. (어려운 도전은 B버전.) Wrecker, Thunderball, Piledriver, Bulldozer 조우 덱.\n사전 준비: 응징의 날, 천둥강타, 강화하다!, 길을 비켜라 부가 음모를 플레이 영역에 내려놓습니다. Wrecker에 활성 카운터를 놓습니다. 스테이지 1B로 넘어갑니다."
-  },
-  "07019": {
-    "name": "천둥강타"
-  },
-  "07034": {
-    "name": "강화하다!"
-  },
-  "07048": {
-    "name": "길을 비켜라"
   },
   "07001b": {
     "name": "탈옥",
@@ -309,7 +301,7 @@ const sinisterDraft: Record<string, {name:string; text?:string}> = {
 };
 const localCards = {...readKoCache(), ...bundledKo};
 export const bundledKoCount = Object.keys(bundledKo).length;
-const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...sinisterDraft};
+const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...wreckingCrewDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
 const physicalVerified = new Set(['07001a','07001b','07004','01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b']);
 // Names confirmed by the photographed setup face; effects not physically verified.
