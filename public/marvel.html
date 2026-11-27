@@ -63,6 +63,12 @@
     <link rel="stylesheet" href="/public/css/marvel/mouse.css">
     <link rel="stylesheet" href="/public/css/font-awesome.css">
     <link rel="stylesheet" href="/public/css/marvel/mobile-layout.css">
+    <script>
+        // Set dimensions before ES modules cache root card metrics.
+        if (/Android|iPhone|iPad/i.test(navigator.userAgent) || matchMedia('(pointer: coarse)').matches) {
+            document.documentElement.classList.add('mobile-card-layout');
+        }
+    </script>
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <meta name="theme-color" content="#569AFE">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

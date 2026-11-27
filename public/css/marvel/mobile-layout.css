@@ -1,4 +1,8 @@
 /* Keep touch layouts entirely within the visible WebView. Desktop is unchanged. */
+:root.mobile-card-layout {
+    --card-width: 140px;
+    --card-height: 194px;
+}
 body.mobile-layout {
     height: 100dvh;
     --card-scale-hover: 1;
@@ -7,17 +11,20 @@ body.mobile-layout {
 body.mobile-layout #area-villain { --y: 12; }
 body.mobile-layout #player-all-engaged-minions { --y: 185; }
 body.mobile-layout #player-all-allies { --y: 360; }
-body.mobile-layout #player-all-supports { --y: 535; }
-body.mobile-layout #player-all-area-hero { --y: 710; }
-body.mobile-layout #player-all-hand-cards { --y: 885; --total-deg: 0deg; }
+body.mobile-layout #player-all-supports { --y: 525; }
+body.mobile-layout #player-all-area-hero { --y: 680; }
+body.mobile-layout #player-all-hand-cards { --y: 875; --total-deg: 0deg; }
 body.mobile-layout #player-all-hand-cards .card,
 body.mobile-layout #player-all-hand-cards:hover .card {
-    --top: 885px !important;
+    --top: 875px !important;
 }
-body.mobile-layout .player-deck { --y: 885; }
-body.mobile-layout .player-discard-pile { --y: 690; }
-body.mobile-layout .additional-deck { --y: 885; }
-body.mobile-layout .additional-discard-pile { --y: 690; }
+body.mobile-layout .player-deck { --y: 875; }
+body.mobile-layout .player-discard-pile { --y: 665; }
+body.mobile-layout .additional-deck { --y: 875; }
+body.mobile-layout .additional-discard-pile { --y: 665; }
+/* Keep the hand and identity fully within the 1080-unit board. */
+body.mobile-layout #player-all-hand-cards { --pre-deg: 0deg; }
+body.mobile-layout #player-all-hand-cards .card .face { rotate: 0deg; }
 body.mobile-layout #right-side-bar {
     position: fixed;
     bottom: 6px;
