@@ -114,6 +114,32 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result, ['피해 2 받기', '주요 음모에 위협 1 놓기',
                                   '<u>하이드라 폭탄마</u> 공개됨', '카드 3장 뽑기'])
 
+    def test_ko_engine_messages(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koHtml} = await import('/public/js/marvel/ko-game.js');
+            return [
+                '<a class="log-card" data-id="19">Rhino</a> will attack <u>Spider-Man</u> (+0)',
+                '<u>Spider-Man</u> will take 3 damage from <u>Rhino</u>',
+                '<u>Rhino</u> was defeated',
+                'Encounter Deck was shuffled',
+                '<u>Spider-Man</u> readied',
+                '<u>하이드라 폭탄마</u> is being revealed',
+                'Exhaust Peter Parker → remove Eviction Notice from the game',
+                'Unknown future text'
+            ].map(koHtml);
+        }""")
+        self.assertEqual(result, [
+            '<a class="log-card" data-id="19">Rhino</a> 공격 예정: <u>Spider-Man</u> (+0)',
+            '<u>Spider-Man</u> 피해 3 받을 예정 · 원인: <u>Rhino</u>',
+            '<u>Rhino</u> 격파됨',
+            'Encounter Deck 섞음',
+            '<u>Spider-Man</u> 준비됨',
+            '<u>하이드라 폭탄마</u> 공개 중',
+            'Peter Parker 소진 → 퇴거 통지를 게임에서 제거',
+            'Unknown future text',
+        ])
+
     def test_ko_core_dictionary(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
