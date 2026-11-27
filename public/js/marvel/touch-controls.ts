@@ -188,7 +188,8 @@ export class TouchControls {
             closeSettings.type = 'button';
             closeSettings.textContent = '닫기 ×';
             header.append(title, closeSettings);
-            sidebar.classList.remove('clicked');
+            sidebar.classList.remove('clicked', 'side-bar');
+            sidebar.classList.add('mobile-settings-controls');
             document.body.append(sidebarHandle, settings);
             settings.append(header, sidebar);
             sidebarHandle.setAttribute('role', 'button');

@@ -1,8 +1,4 @@
 /* Keep touch layouts entirely within the visible WebView. Desktop is unchanged. */
-:root.mobile-card-layout {
-    --card-width: 140px;
-    --card-height: 194px;
-}
 body.mobile-layout {
     height: 100dvh;
     --card-scale-hover: 1;
@@ -11,20 +7,17 @@ body.mobile-layout {
 body.mobile-layout #area-villain { --y: 12; }
 body.mobile-layout #player-all-engaged-minions { --y: 185; }
 body.mobile-layout #player-all-allies { --y: 360; }
-body.mobile-layout #player-all-supports { --y: 525; }
-body.mobile-layout #player-all-area-hero { --y: 680; }
-body.mobile-layout #player-all-hand-cards { --y: 875; --total-deg: 0deg; }
+body.mobile-layout #player-all-supports { --y: 535; }
+body.mobile-layout #player-all-area-hero { --y: 710; }
+body.mobile-layout #player-all-hand-cards { --y: 885; --total-deg: 0deg; }
 body.mobile-layout #player-all-hand-cards .card,
 body.mobile-layout #player-all-hand-cards:hover .card {
-    --top: 875px !important;
+    --top: 885px !important;
 }
-body.mobile-layout .player-deck { --y: 875; }
-body.mobile-layout .player-discard-pile { --y: 665; }
-body.mobile-layout .additional-deck { --y: 875; }
-body.mobile-layout .additional-discard-pile { --y: 665; }
-/* Keep the hand and identity fully within the 1080-unit board. */
-body.mobile-layout #player-all-hand-cards { --pre-deg: 0deg; }
-body.mobile-layout #player-all-hand-cards .card .face { rotate: 0deg; }
+body.mobile-layout .player-deck { --y: 885; }
+body.mobile-layout .player-discard-pile { --y: 690; }
+body.mobile-layout .additional-deck { --y: 885; }
+body.mobile-layout .additional-discard-pile { --y: 690; }
 body.mobile-layout #right-side-bar {
     position: fixed;
     bottom: 6px;
@@ -45,48 +38,30 @@ body.mobile-layout #right-side-bar.clicked #right-side-bar-handle {
 }
 body.mobile-layout #left-side-bar { top: 64px; }
 
-/* Touch-only settings: independent modal, not the desktop hover sidebar. */
+
+/* Mobile settings are a separate top-layer dialog. Use a normal block scroll
+   container, not the legacy absolutely positioned/grid sidebar. */
 body.mobile-layout > #right-side-bar-handle {
-    position: fixed;
-    z-index: 202;
-    right: 8px;
-    bottom: 8px;
-    width: auto;
-    min-width: 64px;
-    min-height: 40px;
-    padding: 6px 12px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border: 1px solid #788bc6;
-    border-radius: 8px;
-    background: #27365e;
-    color: white;
-    font: 700 14px system-ui, sans-serif;
-    white-space: nowrap;
-    cursor: pointer;
-    touch-action: manipulation;
+    position: fixed; z-index: 202; right: 8px; bottom: 8px;
+    width: auto; min-width: 64px; min-height: 40px; padding: 6px 12px;
+    display: flex; justify-content: center; align-items: center;
+    border: 1px solid #788bc6; border-radius: 8px; background: #27365e;
+    color: white; font: 700 14px system-ui, sans-serif; white-space: nowrap;
+    cursor: pointer; touch-action: manipulation;
 }
 #mobile-settings-dialog {
-    position: fixed;
-    inset: 8px 8px auto auto;
-    margin: 0;
-    width: min(265px, calc(100vw - 16px));
-    max-width: calc(100vw - 16px);
-    max-height: calc(100dvh - 16px);
-    box-sizing: border-box;
-    padding: 10px;
-    border: 1px solid #7589bf;
-    border-radius: 12px;
-    background: #172440;
-    color: #eef3ff;
-    font: 14px system-ui, sans-serif;
+    position: fixed; top: 8px; right: 8px; bottom: auto; left: auto;
+    margin: 0; width: min(285px, calc(100vw - 16px));
+    height: calc(100dvh - 16px); max-height: calc(100dvh - 16px);
+    max-width: calc(100vw - 16px); box-sizing: border-box;
+    padding: 10px; border: 1px solid #7589bf; border-radius: 12px;
+    background: #172440; color: #eef3ff; font: 14px system-ui, sans-serif;
     overflow: hidden;
 }
-#mobile-settings-dialog[open] { display: flex; flex-direction: column; gap: 8px; }
+#mobile-settings-dialog[open] { display: block; }
 #mobile-settings-dialog::backdrop { background: rgba(3, 8, 20, .64); }
 #mobile-settings-dialog .mobile-settings-header {
-    display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between;
+    display: flex; height: 46px; align-items: center; justify-content: space-between;
     gap: 8px; font-size: 16px; padding-bottom: 6px; border-bottom: 1px solid #566b9c;
 }
 #mobile-settings-dialog .mobile-settings-header button {
@@ -94,14 +69,18 @@ body.mobile-layout > #right-side-bar-handle {
     border-radius: 7px; background: #354b84; color: white; font: 700 13px system-ui;
 }
 body.mobile-layout #mobile-settings-dialog #right-side-bar {
-    position: static; inset: auto; width: 100%; max-height: none; min-height: 0;
-    flex: 1 1 auto; display: flex; flex-direction: column; gap: 6px;
+    position: relative !important; inset: auto !important;
+    width: 100% !important; height: calc(100% - 54px) !important;
+    max-height: none !important; min-height: 0;
+    display: block !important; visibility: visible; opacity: 1;
+    margin: 8px 0 0; padding: 0 2px 6px 0;
     overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
     transition: none; box-sizing: border-box;
+    --font-size: 14px;
 }
-body.mobile-layout #mobile-settings-dialog #right-side-bar > .button {
-    width: 100%; min-height: 38px; height: auto; flex: 0 0 auto;
-    padding: 7px 9px; margin: 0; box-sizing: border-box;
+body.mobile-layout #mobile-settings-dialog #right-side-bar > .button:not(.hide):not(.debug-only) {
+    display: block; width: 100%; min-height: 38px; height: auto;
+    padding: 7px 9px; margin: 0 0 6px; box-sizing: border-box;
     white-space: normal; overflow: visible; overflow-wrap: anywhere;
     text-overflow: unset; line-height: 1.25; font: 700 14px/1.25 system-ui, sans-serif;
     border: 1px solid #6176ab; border-radius: 7px; background-color: #2d416d;
@@ -109,7 +88,7 @@ body.mobile-layout #mobile-settings-dialog #right-side-bar > .button {
 }
 body.mobile-layout #mobile-settings-dialog #right-side-bar > .button.clicked { background-color: #4b3985; }
 body.mobile-layout #mobile-settings-dialog #interaction-speed-control {
-    width: 100%; box-sizing: border-box; flex: 0 0 auto;
+    display: block; width: 100%; box-sizing: border-box; margin-bottom: 6px;
     padding: 8px; border-radius: 7px; font: 14px system-ui, sans-serif;
 }
 body.mobile-layout #mobile-settings-dialog #interaction-speed-control input { touch-action: pan-y; }
