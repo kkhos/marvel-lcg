@@ -104,6 +104,18 @@ class MobileRegression(unittest.TestCase):
         self.bounds(self.page.locator(".ml-footer .ml-primary"))
         return rhino
 
+    def test_ko_core_dictionary(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koCard, koCards} = await import('/public/js/marvel/ko-cards.js');
+            return {count:Object.keys(koCards).length, hero:koCard('01001a').name,
+                    text:koCard('01005').text, unknown:koCard('99999') === undefined};
+        }""")
+        self.assertEqual(result["count"], 59)
+        self.assertEqual(result["hero"], "스파이더맨")
+        self.assertIn("피해 8", result["text"])
+        self.assertTrue(result["unknown"])
+
     def test_save_slot_delete_confirmation(self):
         # Only the isolated CI checkout gets a synthetic save file.
         fixture = Path(__file__).resolve().parents[2] / "save_3.json"

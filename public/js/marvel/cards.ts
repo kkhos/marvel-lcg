@@ -1,3 +1,4 @@
+import { koCard } from './ko-cards.js';
 import { Lib } from './lib.js'
 import { ButtonSetting, Setting } from './settings.js'
 import { CardDescriptor } from './descriptor.js'
@@ -1343,7 +1344,7 @@ export class Cards {
 
     private static card_statistics = new CardStatistics()
 
-    private static translate_json: Record<string, string>
+    private static translate_json: Record<string, string> = {}
 
     static {
         Cards.card_statistics.loadAllCards(true, false)
@@ -1359,6 +1360,8 @@ export class Cards {
     }
 
     static getText(card_id: string): string {
+        const korean = koCard(card_id)?.text;
+        if (korean !== undefined) return korean;
         if( card_id in Cards.translate_json ) {
             return Cards.translate_json[card_id]
         } else
@@ -1398,7 +1401,7 @@ export class Cards {
     static getSpanTextHelp(object_id: string, card_id: string, name: string): string {
         const p1 = object_id
         const p2 = card_id
-        const p4 = name
+        const p4 = koCard(card_id)?.name ?? name
         const escapedP4 = p4.replace(/'/g, "\\&apos;");
 
         // onclick='Debug.clicked_card_id.value = "${p2}"' 

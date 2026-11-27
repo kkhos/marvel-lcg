@@ -1,3 +1,4 @@
+import { koCard } from './ko-cards.js';
 import { Cards } from './cards.js';
 import { ClassName } from './class_name.js';
 import { Effect } from './effect.js';
@@ -25,6 +26,11 @@ export class TouchControls {
                 max-width: 90vw; max-height: 90vh; padding: 10px; overflow: auto; }
             #touch-preview::backdrop { background: #000b; }
             #touch-preview img { display: block; height: min(74vh, 600px); max-width: 78vw; object-fit: contain; margin: auto; }
+            #touch-preview .touch-card-body { display:flex; gap:16px; align-items:center; }
+            #touch-preview .touch-card-body img { max-width:42vw; height:min(65dvh,500px); flex:0 0 auto; }
+            #touch-preview .touch-card-text { width:min(42vw,450px); min-width:0; max-height:65dvh; overflow:auto; font:15px/1.5 system-ui,sans-serif; white-space:pre-wrap; overflow-wrap:anywhere; }
+            #touch-preview .touch-card-title { display:block; font-size:19px; margin-bottom:8px; }
+            #touch-preview .touch-card-source { display:block; color:#b9c9dd; font-size:11px; margin-top:10px; }
             #touch-preview .touch-buttons { display: flex; gap: 8px; justify-content: center; margin-top: 6px; }
             #touch-preview button { min-height: 44px; padding: 5px 16px; font-size: 16px; }
             #touch-drag-ghost { position: fixed; pointer-events: none; z-index: 2147483646; width: 86px; height: 120px;
@@ -47,25 +53,51 @@ export class TouchControls {
         const close = document.createElement('button');
         close.type = 'button'; close.textContent = '닫기';
         controls.append(flip, close);
-        dialog.append(img, controls);
+        const body = document.createElement('div');
+        body.className = 'touch-card-body';
+        const description = document.createElement('div');
+        description.className = 'touch-card-text';
+        const name = document.createElement('strong');
+        name.className = 'touch-card-title';
+        const text = document.createElement('div');
+        const source = document.createElement('small');
+        source.className = 'touch-card-source';
+        description.append(name,text,source);
+        body.append(img,description);
+        dialog.append(body, controls);
         document.body.append(dialog);
         let previewFront = '', previewBack = '', showingBack = false;
+        let previewId = '', previewName = '';
+        function updateDescription() {
+            const id = showingBack ? previewBack : previewId;
+            // Never infer or reveal a hidden card's name from its object ID.
+            const translated = koCard(id);
+            name.textContent = translated?.name ?? (showingBack ? '뒷면' : previewName);
+            const raw = translated?.text ?? (showingBack ? '' : Cards.getText(id));
+            const plain = raw.replace(/<hr\s*\/?\s*>/gi,'\n────\n').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'');
+            text.textContent = plain || (translated ? '추가 능력 설명 없음' : '표시할 설명 없음');
+            source.textContent = translated?.text !== undefined ? '한국어 번역 초안 · 원본 카드와 대조 권장' : '원문 / 미번역';
+        }
         close.onclick = () => dialog.close();
         dialog.onclick = e => { if (e.target === dialog) dialog.close(); };
         dialog.addEventListener('close', () => CardImages.setImage(img, ''));
         flip.onclick = () => {
             showingBack = !showingBack;
             CardImages.setImage(img, showingBack ? previewBack : previewFront);
+            updateDescription();
         };
         function preview(card: HTMLElement) {
             const data = Cards.getCard(Number(card.dataset.id));
             if (!data || !data.isVisible() || !data.pic_id) return;
+            previewId = data.card_id;
+            previewName = data.name;
             previewFront = data.pic_id;
             previewBack = data.down_card_id;
             showingBack = false;
             flip.disabled = !previewBack || previewBack === previewFront;
             if (!dialog.open) dialog.showModal();
             CardImages.setImage(img, previewFront);
+            updateDescription();
         }
 
         const pile = document.createElement('dialog');
@@ -101,7 +133,7 @@ export class TouchControls {
                 const button = document.createElement('button');
                 button.style.cssText = 'flex:0 0 auto;background:transparent;border:0;padding:2px';
                 const image = document.createElement('img');
-                image.alt = data.name;
+                image.alt = koCard(data.card_id)?.name ?? data.name;
                 image.style.cssText = 'height:min(48dvh,230px);width:auto;display:block';
                 button.append(image);
                 CardImages.setImage(image, data.pic_id);
