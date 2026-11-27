@@ -6,7 +6,7 @@ draggables.forEach(draggable => {
     draggable.style.touchAction = 'none';
 
     draggable.addEventListener('pointerdown', e => {
-        if (draggable.closest('#mobile-action-rail')) return;
+        if (draggable.closest('#mobile-progress-bar')) return;
         if (!e.isPrimary || e.button !== 0 || pointerId !== null) return;
         if ((e.target as Element).closest('button,input,select,textarea,a,[role="button"],#prompt-box-close,#prompt-box-lock')) return;
         pointerId = e.pointerId;
@@ -30,7 +30,7 @@ draggables.forEach(draggable => {
 });
 
 export function centerDraggableDiv(draggable: HTMLElement) {
-    if (draggable.closest('#mobile-action-rail')) return;
+    if (draggable.closest('#mobile-progress-bar')) return;
     const bodyWidth = document.body.clientWidth;
     const divWidth = draggable.clientWidth;
     const centerX = (bodyWidth - divWidth) / 2;

@@ -282,6 +282,10 @@ class MobileRegression(unittest.TestCase):
         expect(selectable).to_have_class(re.compile(r"\bselected\b"))
         self.wait_hand_images()
         self.screenshot("mulligan-selected")
+        # Wide initial landscape should use the available tabletop width.
+        self.assertGreaterEqual(self.page.evaluate("""() =>
+            Number(getComputedStyle(document.documentElement).getPropertyValue('--scene-width'))
+        """), 1920)
         # Exercise the actual production layout with synthetic long prompt and
         # option content (no game action is submitted). Keep real card DOM.
         self.page.evaluate("""() => {
@@ -304,7 +308,10 @@ class MobileRegression(unittest.TestCase):
             self.page.wait_for_function("""() => {
                 const b = document.getElementById('camera').getBoundingClientRect();
                 const r = document.getElementById('mobile-action-rail').getBoundingClientRect();
-                return b.width > 0 && b.right <= r.left + 1;
+                const h = document.getElementById('mobile-progress-bar').getBoundingClientRect();
+                return b.width > 0 && b.right <= r.left + 1 &&
+                    b.top >= h.bottom - 1 && b.bottom <= innerHeight + 1 &&
+                    r.width <= 131 && h.height <= 46;
             }""")
             prompt = self.page.locator("#prompt-box-container")
             options = self.page.locator("#option-buttons")
@@ -314,7 +321,14 @@ class MobileRegression(unittest.TestCase):
             p, o, c = prompt.bounding_box(), options.bounding_box(), ok.bounding_box()
             self.assertLessEqual(p["y"] + p["height"], o["y"] + 1)
             self.assertLessEqual(o["y"] + o["height"], c["y"] + 1)
-            self.screenshot(f"action-panel-{width}")
+            self.bounds(self.page.locator("#right-side-bar-handle"))
+            self.assertEqual(self.page.locator("#mobile-action-rail #prompt-box-container").count(), 0)
+            self.assertEqual(self.page.locator("#mobile-progress-bar #prompt-box-container").count(), 1)
+            self.assertGreaterEqual(self.page.evaluate("""() => {
+                const pos = id => Number(getComputedStyle(document.getElementById(id)).getPropertyValue('--x'));
+                return pos('area-advanced') - pos('nemesis-pool');
+            }"""), 190)
+            self.screenshot(f"compact-action-layout-{width}")
         self.assertEqual(self.errors, [])
 
 

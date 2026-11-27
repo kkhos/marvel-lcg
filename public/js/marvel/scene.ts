@@ -4,6 +4,8 @@ import { HoverCard } from './hover.js';
 
 export class Scene {
     static scale: number = 0
+    // Keep logical board coordinates constant throughout a game session.
+    static mobileBoardWidth = 0
 
     static init() {
         const mobile = /Android|iPhone|iPad/i.test(navigator.userAgent) || matchMedia('(pointer: coarse)').matches;
@@ -19,8 +21,13 @@ export class Scene {
             const controls = document.createElement('div');
             controls.id = 'mobile-action-confirm';
             controls.append(document.getElementById('btn-end')!, document.getElementById('btn-ok')!);
-            rail.append(prompt, options, controls);
-            document.body.append(rail);
+            const header = document.createElement('header');
+            header.id = 'mobile-progress-bar';
+            header.setAttribute('aria-label', '게임 진행 상황');
+            header.append(prompt);
+            rail.setAttribute('aria-label', '능력 선택 및 확인');
+            rail.append(options, controls);
+            document.body.append(header, rail);
         }
         // Layout viewport is stable when transient Android bars or dialogs
         // change only visualViewport. Coalesce genuine resizes to one frame.
@@ -35,7 +42,13 @@ export class Scene {
         document.addEventListener('DOMContentLoaded', scheduleResize);
         adjustSceneScale();
         window.addEventListener('resize', mobile ? scheduleResize : adjustSceneScale);
-        if (mobile) window.addEventListener('pageshow', scheduleResize);
+        if (mobile) {
+            window.addEventListener('pageshow', scheduleResize);
+            // Android immersive mode can report a smaller actual visible
+            // viewport than the layout viewport. Coalesce and ignore no-ops.
+            window.visualViewport?.addEventListener('resize', scheduleResize);
+            window.visualViewport?.addEventListener('scroll', scheduleResize);
+        }
 
         // import { HoverCard } from "./hover.js";
         if( Setting.scene_3d ) {
@@ -81,26 +94,53 @@ export function adjustSceneScale() {
     const camera = document.getElementById('camera')!;
     const rootStyles = getComputedStyle(document.documentElement); // Get the root element's styles
 
-    // Read the width and height from CSS variables
-    const sceneWidth = parseFloat(rootStyles.getPropertyValue('--scene-width'));
+    let sceneWidth = parseFloat(rootStyles.getPropertyValue('--scene-width'));
     const sceneHeight = parseFloat(rootStyles.getPropertyValue('--scene-height'));
-
     const mobile = document.body.classList.contains('mobile-layout');
-    const viewportWidth = mobile ? (document.documentElement.clientWidth || window.innerWidth) : window.innerWidth;
-    const viewportHeight = mobile ? (document.documentElement.clientHeight || window.innerHeight) : window.innerHeight;
+    const vv = mobile && window.visualViewport?.scale === 1 ? window.visualViewport : null;
+    const viewportWidth = mobile ? Math.min(window.innerWidth, document.documentElement.clientWidth || window.innerWidth, vv?.width || Infinity) : window.innerWidth;
+    const viewportHeight = mobile ? Math.min(window.innerHeight, document.documentElement.clientHeight || window.innerHeight, vv?.height || Infinity) : window.innerHeight;
     if (![viewportWidth, viewportHeight, sceneWidth, sceneHeight].every(n => Number.isFinite(n) && n > 0)) return;
+    const originX = vv ? Math.max(0, vv.offsetLeft) : 0;
+    const originY = vv ? Math.max(0, vv.offsetTop) : 0;
+    const header = mobile ? document.getElementById('mobile-progress-bar') : null;
+    const rail = mobile ? document.getElementById('mobile-action-rail') : null;
+    if (mobile) {
+        const body = document.body.style;
+        for (const [name, value] of Object.entries({
+            '--mobile-vp-left': originX, '--mobile-vp-top': originY,
+            '--mobile-vp-width': viewportWidth, '--mobile-vp-height': viewportHeight
+        })) {
+            const px = `${value}px`;
+            if (body.getPropertyValue(name) !== px) body.setProperty(name, px);
+        }
+    }
+    const headerHeight = header?.offsetHeight ?? 0;
+    const boardWidth = viewportWidth - (rail?.offsetWidth ?? 0);
+    const boardHeight = viewportHeight - headerHeight;
+    if (boardWidth <= 0 || boardHeight <= 0) return;
 
-    // Reserve one stable action rail, even when no ability is being chosen.
-    // Avoid shifting or resizing the board on each option/prompt update.
-    const railWidth = mobile ? (document.getElementById('mobile-action-rail')?.offsetWidth ?? 0) : 0;
-    const boardWidth = viewportWidth - railWidth;
-    if (boardWidth <= 0) return;
-    // Calculate scale factors
-    const scaleX = boardWidth / sceneWidth;
-    const scaleY = viewportHeight / sceneHeight;
-    const nextScale = Math.min(scaleX, scaleY);
-    const left = `${(boardWidth - sceneWidth * nextScale) / 2}px`;
-    const top = `${(viewportHeight - sceneHeight * nextScale) / 2}px`;
+    // Widen the logical tabletop on wide phones rather than leaving large
+    // blank side margins. Preserve the original card dimensions and height.
+    // Initialize only once; later keyboard/system viewport changes must not
+    // cause a card re-layout or change engine/selection state.
+    if (mobile && !Scene.mobileBoardWidth) {
+        Scene.mobileBoardWidth = Math.max(sceneWidth, Math.round(boardWidth * sceneHeight / boardHeight));
+        document.documentElement.style.setProperty('--scene-width', String(Scene.mobileBoardWidth));
+        // Give each upper-right pile room even for a landscape scheme card.
+        const anchors: Record<string, number> = {
+            'victory-display': 760, 'area-removed': 570, 'removed-pool': 570,
+            'nemesis-pool': 380, 'area-advanced': 190,
+            'area-schemes-main': 40, 'area-schemes-side': 40
+        };
+        for (const [id, inset] of Object.entries(anchors)) {
+            document.getElementById(id)?.style.setProperty('--x', String(Scene.mobileBoardWidth - inset));
+        }
+    }
+    if (mobile && Scene.mobileBoardWidth) sceneWidth = Scene.mobileBoardWidth;
+    const nextScale = Math.min(boardWidth / sceneWidth, boardHeight / sceneHeight);
+    const left = `${originX + (boardWidth - sceneWidth * nextScale) / 2}px`;
+    const top = `${originY + headerHeight + (boardHeight - sceneHeight * nextScale) / 2}px`;
     if (mobile && Scene.scale === nextScale && camera.style.left === left &&
         camera.style.top === top && camera.style.display === "unset") return;
     Scene.scale = nextScale;

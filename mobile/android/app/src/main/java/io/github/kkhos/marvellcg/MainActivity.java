@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
     private WebView web;
     private TextView status;
     private Button start;
-    private static final String UI_REVISION = "21";
+    private static final String UI_REVISION = "22";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
