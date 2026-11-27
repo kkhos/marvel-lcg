@@ -3,6 +3,9 @@ package io.github.kkhos.marvellcg;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.os.Bundle;
+import android.os.Build;
+import android.view.WindowInsets;
+import android.graphics.Insets;
 import android.os.Handler;
 import android.os.Looper;
 import android.net.Uri;
@@ -37,7 +40,7 @@ public class MainActivity extends Activity {
     private TextView status;
     private Button start;
     private Button back;
-    private static final String UI_REVISION = "3";
+    private static final String UI_REVISION = "4";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -52,6 +55,7 @@ public class MainActivity extends Activity {
         start.setEnabled(false);
         layout.addView(start);
         web = new WebView(this);
+        web.getSettings().setUseWideViewPort(true);
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
         web.getSettings().setAllowFileAccess(false);
@@ -78,6 +82,18 @@ public class MainActivity extends Activity {
         back.setOnClickListener(v -> handleBack());
         layout.addView(content, new LinearLayout.LayoutParams(-1, 0, 1));
         setContentView(layout);
+        // Android 15+ enforces edge-to-edge for targetSdk 35. Keep the
+        // WebView and native Back button outside system bars/cutouts.
+        if (Build.VERSION.SDK_INT >= 30) {
+            getWindow().setDecorFitsSystemWindows(false);
+            layout.setOnApplyWindowInsetsListener((v, insets) -> {
+                Insets safe = insets.getInsets(WindowInsets.Type.systemBars()
+                        | WindowInsets.Type.displayCutout());
+                v.setPadding(safe.left, safe.top, safe.right, safe.bottom);
+                return insets;
+            });
+            layout.requestApplyInsets();
+        }
         start.setOnClickListener(v -> {
             if (launching) return;
             launching = true;

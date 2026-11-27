@@ -1,0 +1,39 @@
+/* Keep touch layouts entirely within the visible WebView. Desktop is unchanged. */
+body.mobile-layout {
+    height: 100dvh;
+    --card-scale-hover: 1;
+    --card-scale-active: 1;
+}
+body.mobile-layout #area-villain { --y: 12; }
+body.mobile-layout #player-all-engaged-minions { --y: 185; }
+body.mobile-layout #player-all-allies { --y: 360; }
+body.mobile-layout #player-all-supports { --y: 535; }
+body.mobile-layout #player-all-area-hero { --y: 710; }
+body.mobile-layout #player-all-hand-cards { --y: 885; --total-deg: 0deg; }
+body.mobile-layout #player-all-hand-cards .card,
+body.mobile-layout #player-all-hand-cards:hover .card {
+    --top: 885px !important;
+}
+body.mobile-layout .player-deck { --y: 885; }
+body.mobile-layout .player-discard-pile { --y: 690; }
+body.mobile-layout .additional-deck { --y: 885; }
+body.mobile-layout .additional-discard-pile { --y: 690; }
+body.mobile-layout #right-side-bar {
+    position: fixed;
+    bottom: 6px;
+    max-height: calc(100dvh - 16px);
+    row-gap: 3px;
+}
+body.mobile-layout #right-side-bar.clicked { right: 0; }
+body.mobile-layout #right-side-bar-handle,
+body.mobile-layout #right-side-bar:hover #right-side-bar-handle {
+    opacity: 1;
+    font-size: max(13px, var(--font-size-out));
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+}
+body.mobile-layout #right-side-bar.clicked #right-side-bar-handle {
+    right: 100%;
+}
+body.mobile-layout #left-side-bar { top: 64px; }

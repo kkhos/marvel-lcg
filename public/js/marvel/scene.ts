@@ -6,12 +6,16 @@ export class Scene {
     static scale: number = 0
 
     static init() {
+        const mobile = /Android|iPhone|iPad/i.test(navigator.userAgent) || matchMedia('(pointer: coarse)').matches;
+        document.body.classList.toggle('mobile-layout', mobile);
+        if (mobile) window.visualViewport?.addEventListener('resize', adjustSceneScale);
         // Adjust scale on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', () => {
             adjustSceneScale()
         });
 
         // Adjust scale on resize
+        adjustSceneScale();
         window.onresize = () => {
             adjustSceneScale();
         }
@@ -64,8 +68,9 @@ export function adjustSceneScale() {
     const sceneWidth = parseFloat(rootStyles.getPropertyValue('--scene-width'));
     const sceneHeight = parseFloat(rootStyles.getPropertyValue('--scene-height'));
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
+    const mobile = document.body.classList.contains('mobile-layout');
+    const viewportWidth = mobile ? Math.min(window.innerWidth, document.documentElement.clientWidth || window.innerWidth, window.visualViewport?.width || window.innerWidth) : window.innerWidth;
+    const viewportHeight = mobile ? Math.min(window.innerHeight, document.documentElement.clientHeight || window.innerHeight, window.visualViewport?.height || window.innerHeight) : window.innerHeight;
 
     // Calculate scale factors
     const scaleX = viewportWidth / sceneWidth;
