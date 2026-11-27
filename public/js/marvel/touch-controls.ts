@@ -102,7 +102,7 @@ export class TouchControls {
             // A fresh deliberate tap must not be swallowed by the prior drag.
             suppressUntil = 0;
             const card = cardAt(e.target);
-            if (!card || dialog.open || (e.target as Element).closest('button,input,a,.auto-activate')) return;
+            if (!card || dialog.open || settings.open || (e.target as Element).closest('button,input,a,.auto-activate')) return;
             const g: Gesture = { id: e.pointerId, card, x: e.clientX, y: e.clientY, timer: 0, dragging: false, held: false };
             gesture = g;
             g.timer = window.setTimeout(() => {
@@ -171,13 +171,71 @@ export class TouchControls {
                 e.preventDefault(); e.stopImmediatePropagation();
             }
         }, true);
+        // Put the existing settings controls into a top-layer modal. Their IDs,
+        // listeners and game preferences remain intact. showModal makes the board
+        // inert, so dismissing the settings cannot also confirm a game action.
+        const settings = document.createElement('dialog');
+        settings.id = 'mobile-settings-dialog';
+        settings.setAttribute('aria-label', '게임 설정');
+        const sidebar = document.getElementById('right-side-bar');
         const sidebarHandle = document.getElementById('right-side-bar-handle');
-        sidebarHandle?.addEventListener('click', () => {
-            document.getElementById('right-side-bar')?.classList.toggle('clicked');
-        });
+        if (sidebar && sidebarHandle) {
+            const header = document.createElement('div');
+            header.className = 'mobile-settings-header';
+            const title = document.createElement('strong');
+            title.textContent = '게임 설정';
+            const closeSettings = document.createElement('button');
+            closeSettings.type = 'button';
+            closeSettings.textContent = '닫기 ×';
+            header.append(title, closeSettings);
+            sidebar.classList.remove('clicked');
+            document.body.append(sidebarHandle, settings);
+            settings.append(header, sidebar);
+            sidebarHandle.setAttribute('role', 'button');
+            sidebarHandle.setAttribute('tabindex', '0');
+            sidebarHandle.setAttribute('aria-expanded', 'false');
+            sidebarHandle.setAttribute('aria-controls', settings.id);
+            const openSettings = () => {
+                if (dialog.open || settings.open) return;
+                if (gesture) { suppress(gesture.card); stop(); }
+                settings.showModal();
+                sidebarHandle.setAttribute('aria-expanded', 'true');
+            };
+            sidebarHandle.addEventListener('click', e => {
+                e.preventDefault(); e.stopPropagation(); openSettings();
+            });
+            sidebarHandle.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault(); openSettings();
+                }
+            });
+            closeSettings.onclick = () => settings.close();
+            settings.addEventListener('click', e => {
+                // The backdrop targets the modal itself, not the game board.
+                e.stopPropagation();
+                if (e.target === settings) {
+                    const rect = settings.getBoundingClientRect();
+                    if (e.clientX < rect.left || e.clientX > rect.right ||
+                        e.clientY < rect.top || e.clientY > rect.bottom) {
+                        e.preventDefault();
+                        settings.close();
+                    }
+                }
+            });
+            settings.addEventListener('close', () => {
+                sidebarHandle.setAttribute('aria-expanded', 'false');
+            });
+            // History is a separate existing game overlay; reveal it after the
+            // user explicitly opens it, rather than leaving it behind settings.
+            sidebar.addEventListener('click', e => {
+                const target = e.target instanceof Element ? e.target.closest('button') : null;
+                if (target?.textContent?.trim() === '기록' && settings.open) settings.close();
+            });
+        }
         window.addEventListener('blur', () => { if (gesture) { suppress(gesture.card); stop(); } });
         (window as unknown as { MarvelTouch: { back: () => boolean } }).MarvelTouch = {
             back: () => {
+                if (settings.open) { settings.close(); return true; }
                 if (dialog.open) { dialog.close(); return true; }
                 if (gesture) { suppress(gesture.card); stop(); return true; }
                 const sidebar = document.querySelector('#right-side-bar.clicked');
