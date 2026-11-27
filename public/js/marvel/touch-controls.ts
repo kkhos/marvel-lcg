@@ -5,6 +5,7 @@ import { Effect } from './effect.js';
 import { SelectStep } from './select.js';
 import { CardImages } from '../module/card_images.js';
 import { HoverCard } from './hover.js';
+import { HistoryLog } from './history.js';
 
 type Gesture = {
     id: number; card: HTMLElement; x: number; y: number;
@@ -249,6 +250,7 @@ export class TouchControls {
         // Put the existing settings controls into a top-layer modal. Their IDs,
         // listeners and game preferences remain intact. showModal makes the board
         // inert, so dismissing the settings cannot also confirm a game action.
+        HistoryLog.initMobile();
         const settings = document.createElement('dialog');
         settings.id = 'mobile-settings-dialog';
         settings.setAttribute('aria-label', '게임 설정');
@@ -302,7 +304,7 @@ export class TouchControls {
             });
             settings.addEventListener('close', () => {
                 sidebarHandle.setAttribute('aria-expanded', 'false');
-                sidebarHandle.focus({ preventScroll: true });
+                if (!HistoryLog.isOpen()) sidebarHandle.focus({ preventScroll: true });
             });
             // History is a separate existing game overlay; reveal it after the
             // user explicitly opens it, rather than leaving it behind settings.
@@ -314,6 +316,7 @@ export class TouchControls {
         window.addEventListener('blur', () => { if (gesture) { suppress(gesture.card); stop(); } });
         (window as unknown as { MarvelTouch: { back: () => boolean } }).MarvelTouch = {
             back: () => {
+                if (HistoryLog.isOpen()) { HistoryLog.close(); return true; }
                 if (settings.open) { settings.close(); return true; }
                 if (dialog.open) { dialog.close(); return true; }
                 if (pile.open) { pile.close(); return true; }
