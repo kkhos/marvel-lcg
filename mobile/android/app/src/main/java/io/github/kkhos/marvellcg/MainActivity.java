@@ -102,16 +102,17 @@ public class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= 30) {
             getWindow().setDecorFitsSystemWindows(false);
             layout.setOnApplyWindowInsetsListener((v, insets) -> {
-                Insets safe = insets.getInsets(WindowInsets.Type.systemBars()
-                        | WindowInsets.Type.displayCutout());
+                // Fullscreen step 2: transient system bars must not resize the
+                // game viewport. Preserve physical display cutout protection.
+                Insets safe = insets.getInsets(WindowInsets.Type.displayCutout());
                 v.setPadding(safe.left, safe.top, safe.right, safe.bottom);
                 return insets;
             });
             layout.requestApplyInsets();
         }
         // Fullscreen isolation step 1: hide only system bars after the
-        // content view is attached. Keep the existing safe-insets listener,
-        // cutout policy, native Back button and legacy onBackPressed unchanged.
+        // content view is attached. The cutout policy, native Back button
+        // and legacy onBackPressed remain unchanged.
         layout.post(() -> {
             if (isDestroyed() || isFinishing()) return;
             try {
