@@ -312,6 +312,11 @@ class MobileRegression(unittest.TestCase):
             });
         }""", timeout=60000)
 
+    def test_local_port_lifecycle(self):
+        import subprocess
+        import sys
+        subprocess.run([sys.executable, "-c", "import socket\nimport unittest\n\nfrom engine.network.net_lib import NetLib\n\n\nclass PortLifecycleTests(unittest.TestCase):\n    def test_active_listener_and_recently_closed_listener(self):\n        host = \"127.0.0.1\"\n        with socket.socket() as listener:\n            listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)\n            listener.bind((host, 0))\n            port = listener.getsockname()[1]\n            listener.listen(1)\n            self.assertFalse(NetLib.IsPortAvailable(host, port))\n            with socket.create_connection((host, port), timeout=2) as peer:\n                conn, _ = listener.accept()\n                with conn:\n                    conn.shutdown(socket.SHUT_WR)\n                    self.assertEqual(peer.recv(1), b\"\")\n                    peer.shutdown(socket.SHUT_WR)\n                    self.assertEqual(conn.recv(1), b\"\")\n        self.assertTrue(NetLib.IsPortAvailable(host, port))\n\nunittest.main()\n"], cwd=Path(__file__).resolve().parents[2], check=True)
+
     def test_mobile_game_over_layout(self):
         self.start_game()
         # Render a deterministic result without ending the actual server game.

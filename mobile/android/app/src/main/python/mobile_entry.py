@@ -5,6 +5,7 @@ import os
 import sys
 import threading
 import traceback
+import time
 from pathlib import Path
 from urllib.parse import quote
 
@@ -14,6 +15,8 @@ _status = "Not started"
 _url = ""
 _lock = threading.Lock()
 _started = False
+_stopping = threading.Event()
+_engine = None
 
 
 def probe():
@@ -74,7 +77,7 @@ def start(root):
 
 
 def _run(root):
-    global _status, _url
+    global _status, _url, _engine
     engine = None
     initialized = False
     try:
@@ -85,10 +88,33 @@ def _run(root):
         _status = "Importing game engine"
         from engine import Engine
         engine = Engine
+        _engine = engine
+        from engine.network.net_lib import NetLib
+        _status = "Waiting for local server port"
+        deadline = time.monotonic() + 5
+        while not NetLib.IsPortAvailable(HOST, PORT):
+            if _stopping.is_set():
+                return
+            if time.monotonic() >= deadline:
+                raise RuntimeError(f"Local port {HOST}:{PORT} is still in use. Stop the other listener and restart the app.")
+            time.sleep(.2)
+        if _stopping.is_set():
+            return
         _status = "Initializing cards, artwork and server"
         initialized = engine.Initialize()
         if not initialized:
             raise RuntimeError("Engine.Initialize returned False")
+        # Publish the URL only after this engine's own listener has bound.
+        servers = [s for s in engine.device_manager.httpds if s.ip == HOST and s.port == PORT]
+        if len(servers) != 1:
+            raise RuntimeError(f"Expected one local game server at {HOST}:{PORT}")
+        server = servers[0]
+        if not server.startup_event.wait(15):
+            raise RuntimeError("Local game server did not start within 15 seconds")
+        if server.startup_error is not None:
+            raise RuntimeError(f"Local game server failed at {HOST}:{PORT}: {server.startup_error}") from server.startup_error
+        if _stopping.is_set():
+            return
         from engine.lib import Ver
         _url = f"http://{HOST}:{PORT}/main?v={quote(Ver.ui_version_str, safe='')}"
         _status = "Engine initialized; waiting for WebView"
@@ -103,6 +129,19 @@ def _run(root):
                 engine.Shutdown()
             except BaseException:
                 _status += "\n" + traceback.format_exc()
+
+
+def stop_listening():
+    """Bounded best-effort listener shutdown; the Activity then ends the process."""
+    global _url
+    _stopping.set()
+    _url = ""
+    manager = getattr(_engine, "device_manager", None)
+    for server in getattr(manager, "httpds", []):
+        try:
+            server.StopListening(timeout=.6)
+        except Exception:
+            pass
 
 
 def status():

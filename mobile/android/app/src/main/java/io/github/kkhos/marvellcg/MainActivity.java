@@ -52,7 +52,9 @@ public class MainActivity extends Activity {
     private LinearLayout failurePanel;
     private ProgressBar loadingBar;
     private boolean splashFading;
-    private static final String UI_REVISION = "33";
+    private boolean closing;
+    private String shownDiagnostic = "";
+    private static final String UI_REVISION = "34";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -138,7 +140,7 @@ public class MainActivity extends Activity {
                 android.util.Log.w("MarvelChampions", "Fullscreen bars unavailable; keeping normal window", e);
             }
         });
-        start.setOnClickListener(v -> finishAndRemoveTask());
+        start.setOnClickListener(v -> exitApp());
         if (!preparing) {
             preparing = true;
             launching = true;
@@ -241,10 +243,18 @@ public class MainActivity extends Activity {
         status.setTextSize(12);
         status.setMaxLines(7);
         status.setMovementMethod(new android.text.method.ScrollingMovementMethod());
+        status.setTextIsSelectable(true);
         failurePanel.addView(status, new LinearLayout.LayoutParams(-1, -2));
         start = new Button(this);
         start.setText("앱 종료 후 다시 실행");
         failurePanel.addView(start);
+        Button copyError = new Button(this);
+        copyError.setText("오류 전체 복사");
+        copyError.setOnClickListener(v -> {
+            android.content.ClipboardManager clipboard = (android.content.ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            if (clipboard != null) clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Marvel error", shownDiagnostic));
+        });
+        failurePanel.addView(copyError);
     }
 
     private void showSplash() {
@@ -268,7 +278,7 @@ public class MainActivity extends Activity {
 
     private final Runnable poll = new Runnable() {
         public void run() {
-            if (isFinishing() || isDestroyed()) return;
+            if (closing || isFinishing() || isDestroyed()) return;
             String message = "Marvel Champions\n게임 로딩 중…";
             boolean failed = !launching;
             if (runtime != null) {
@@ -278,13 +288,13 @@ public class MainActivity extends Activity {
                     String url = runtime.callAttr("url").toString();
                     if (state.startsWith("Traceback") || state.startsWith("Engine stopped")) { failed = true; message = state; }
                     else if (launching) message += "\n" + state;
-                    if (!url.isEmpty() && !url.equals(loadedUrl)) {
+                    if (!failed && !url.isEmpty() && !url.equals(loadedUrl)) {
                         // Check readiness off the UI thread; never block rendering.
                         worker.execute(() -> {
                             try (Socket socket = new Socket()) {
                                 socket.connect(new InetSocketAddress("127.0.0.1", 2345), 300);
                                 runOnUiThread(() -> {
-                                    if (isDestroyed() || url.equals(loadedUrl)) return;
+                                    if (closing || isFinishing() || isDestroyed() || url.equals(loadedUrl)) return;
                                     loadedUrl = url;
                                     showSplash();
                                     web.setVisibility(View.VISIBLE);
@@ -309,7 +319,13 @@ public class MainActivity extends Activity {
                 loadingBar.setVisibility(View.GONE);
                 failurePanel.setVisibility(View.VISIBLE);
                 if (!launching) message = diagnostic;
-                status.setText(message);
+                shownDiagnostic = message;
+                android.util.Log.e("MarvelChampions", message);
+                // The actionable exception is at the end of a Python traceback.
+                String[] lines = message.trim().split("\\r?\\n");
+                String summary = lines.length == 0 ? message : lines[lines.length - 1];
+                status.setText(summary + "\\n\\n" + message);
+                return; // do not reset the user's diagnostic scroll every second
             }
             handler.postDelayed(this, 1000);
         }
@@ -331,7 +347,9 @@ public class MainActivity extends Activity {
             while ((entry = zip.getNextEntry()) != null) {
                 if (uiOnly && !entry.getName().startsWith("public/")
                         && !entry.getName().equals("engine/device/web/server/server_new_game.py")
-                        && !entry.getName().equals("engine/device/web/server/server_files.py")) {
+                        && !entry.getName().equals("engine/device/web/server/server_files.py")
+                        && !entry.getName().equals("engine/network/net_lib.py")
+                        && !entry.getName().equals("engine/network/web_server.py")) {
                     zip.closeEntry();
                     continue;
                 }
@@ -364,7 +382,7 @@ public class MainActivity extends Activity {
         if (web.getVisibility() != View.VISIBLE || splash.getVisibility() == View.VISIBLE) {
             new AlertDialog.Builder(this).setTitle("게임을 종료할까요?")
                     .setNegativeButton("취소", null)
-                    .setPositiveButton("종료", (d, w) -> finishAndRemoveTask()).show();
+                    .setPositiveButton("종료", (d, w) -> exitApp()).show();
             return;
         }
         web.evaluateJavascript("!!((window.MarvelDeckTouch && window.MarvelDeckTouch.back && window.MarvelDeckTouch.back()) || (window.MarvelSetup && window.MarvelSetup.back()) || (window.MarvelTouch && window.MarvelTouch.back()))", result -> {
@@ -385,7 +403,33 @@ public class MainActivity extends Activity {
             } else {
                 new AlertDialog.Builder(this).setTitle("게임을 종료할까요?")
                     .setNegativeButton("취소", null)
-                    .setPositiveButton("종료", (d, w) -> finishAndRemoveTask()).show();
+                    .setPositiveButton("종료", (d, w) -> exitApp()).show();
+            }
+        });
+    }
+
+    private void exitApp() {
+        if (closing) return;
+        closing = true;
+        handler.removeCallbacks(poll);
+        web.stopLoading();
+        web.setVisibility(View.GONE);
+        showSplash();
+        // The upstream game loop is not restartable in-process. Close the
+        // listener on its owning loop, then finish the task and kill the process.
+        // Always bound the exit even if Python or a download is blocked.
+        final Runnable finish = () -> {
+            if (!isFinishing() && !isDestroyed()) finishAndRemoveTask();
+            android.os.Process.killProcess(android.os.Process.myPid());
+        };
+        handler.postDelayed(finish, 1500);
+        worker.execute(() -> {
+            try {
+                if (runtime != null) runtime.callAttr("stop_listening");
+            } catch (Throwable e) {
+                android.util.Log.w("MarvelChampions", "Listener shutdown failed", e);
+            } finally {
+                handler.post(finish);
             }
         });
     }

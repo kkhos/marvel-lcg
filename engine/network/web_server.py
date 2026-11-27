@@ -10,6 +10,8 @@ from engine.log import Log
 from engine.file import FileManager
 import hashlib
 import re
+import asyncio
+import threading
 
 CATEGORY_NAME = "WEB"
 
@@ -35,6 +37,9 @@ class WebServer:
     def __init__(self) -> None:
         self.web_app = web.Application()
         self.runner = web.AppRunner(self.web_app)
+        self.startup_event = threading.Event()
+        self.startup_error = None
+        self.server_task = None
 
         if PASSWORD.value:
             self.hash_password = hashlib.md5(PASSWORD.value.encode()).hexdigest()
@@ -191,15 +196,40 @@ class WebServer:
                 await site.start()
                 Log.Print(f"{name}:\thttp://{ip}:{port}")
             except Exception as exc:
+                self.startup_error = exc
                 Log.Print(f"{name}:\thttp://{ip}:{port} failed")
                 Log.FailedTrace(CATEGORY_NAME, exc, no_take_as_error=True)
+            finally:
+                self.startup_event.set()
 
         self.ip = ip
         self.port = port
-        TaskManager.AddTask(start_server, name="WebServer", run_forever=True)
+        self.server_task = TaskManager.AddTask(start_server, name="WebServer", run_forever=True)
+
+    def StopListening(self, timeout: float = 1.0) -> None:
+        """Stop accepting connections on the owning event loop (not the UI thread)."""
+        task = self.server_task
+        if task is None or not self.startup_event.is_set() or self.startup_error is not None:
+            return
+        async def close_sites():
+            for site in list(self.runner.sites):
+                await site.stop()
+        if task.loop.is_running():
+            future = asyncio.run_coroutine_threadsafe(close_sites(), task.loop)
+            try:
+                future.result(timeout=timeout)
+            except Exception:
+                future.cancel()
+                raise
 
     def Shutdown(self) -> None:
-        pass
+        task = self.server_task
+        if task is not None and task.loop.is_running():
+            future = asyncio.run_coroutine_threadsafe(self.runner.cleanup(), task.loop)
+            try:
+                future.result(timeout=2)
+            except Exception:
+                future.cancel()
 
     ################################################################################
     #

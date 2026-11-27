@@ -52,6 +52,7 @@ class NetLib:
     @staticmethod
     def IsPortAvailable(address: str, port: int) -> bool:
         import socket
+        import os
         port_available = True
 
         if ':' in address:
@@ -61,6 +62,9 @@ class NetLib:
 
         s = socket.socket(family, socket.SOCK_STREAM)
         try:
+            # Match aiohttp's POSIX listener behavior: TIME_WAIT is not an active listener.
+            if os.name == 'posix':
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((address, port))
         except:
             port_available = False
