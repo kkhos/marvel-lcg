@@ -246,6 +246,14 @@ export function koText(value: string): string {
             .replace(/\bwould play\b/g, '사용 예정:')
             .replace(/\bselected\b/g, '선택:')
             .replace(/\benters game area\b/g, '플레이 영역에 들어옴')
+            .replace(/\bTake (\d+) damage\b/gi, '피해 $1 받기')
+            .replace(/\bPlace (\d+) threat on the main scheme\b/gi, '주요 음모에 위협 $1 놓기')
+            .replace(/\bRemove (\d+) threat from (?:a|the) scheme\b/gi, '음모에서 위협 $1 제거하기')
+            .replace(/\bDeal (\d+) damage to an enemy\b/gi, '적에게 피해 $1 주기')
+            .replace(/\bDraw (\d+) cards?\b/gi, '카드 $1장 뽑기')
+            .replace(/\bDiscard (\d+) cards?\b/gi, '카드 $1장 버리기')
+            .replace(/\bwas revealed\b/g, '공개됨')
+            .replace(/\bwill attack\b/g, '공격 예정:')
             .replace(/\beliminated\b/g, '탈락');
     });
 }

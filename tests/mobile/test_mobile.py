@@ -104,6 +104,16 @@ class MobileRegression(unittest.TestCase):
         self.bounds(self.page.locator(".ml-footer .ml-primary"))
         return rhino
 
+    def test_ko_dynamic_choices(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koHtml} = await import('/public/js/marvel/ko-game.js');
+            return ['Take 2 damage', 'Place 1 threat on the main scheme',
+                    '<u>하이드라 폭탄마</u> was revealed', 'Draw 3 cards'].map(koHtml);
+        }""")
+        self.assertEqual(result, ['피해 2 받기', '주요 음모에 위협 1 놓기',
+                                  '<u>하이드라 폭탄마</u> 공개됨', '카드 3장 뽑기'])
+
     def test_ko_core_dictionary(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
