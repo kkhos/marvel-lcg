@@ -9,10 +9,10 @@ const hangul = /[가-힣]/;
 export function plainKo(value: string): string {
     return value.replace(/<br\s*\/?>/gi, '\n').replace(/<hr\s*\/?>/gi, '\n────\n')
         .replace(/<[^>]*>/g, '').replace(/\[\[([^\]]+)\]\]/g,'$1')
-        .replace(/&(?:nbsp|amp|quot|apos|lt|gt);/g, m => ({'&nbsp;':' ','&amp;':'＆','&quot;':'”','&apos;':'’','&lt;':'＜','&gt;':'＞'}[m] || m))
+        .replace(/&(?:nbsp|amp|quot|apos|lt|gt);/g, m => (({'&nbsp;':' ','&amp;':'＆','&quot;':'”','&apos;':'’','&lt;':'＜','&gt;':'＞'} as Record<string,string>)[m] || m))
         .replace(/\[(energy|mental|physical|wild|per_hero|boost|star|cost|acceleration|amplify|crisis|hazard|unique|per_group)\]/g,
             (m,k) => (({energy:'에너지',mental:'정신력',physical:'물리력',wild:'만능',per_hero:'플레이어당',boost:'강화 아이콘',star:'★',cost:'비용',acceleration:'가속',amplify:'증폭',crisis:'위기',hazard:'수렁',unique:'고유',per_group:'그룹당'} as Record<string,string>)[k] || m))
-        .replace(/[<>&]/g, c => ({'<':'＜','>':'＞','&':'＆'}[c] || c)).trim();
+        .replace(/[<>&]/g, c => (({'<':'＜','>':'＞','&':'＆'} as Record<string,string>)[c] || c)).trim();
 }
 function safeName(value: string): string {
     return plainKo(value).replace(/['"]/g, c => c === "'" ? '’' : '”').replace(/[\r\n\\]/g,' ');

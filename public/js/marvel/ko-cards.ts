@@ -239,7 +239,7 @@ export const koCards: Record<string, {name: string; text?: string}> = {
   }
 };
 // Draft names and effects for the first Sinister Motives hero; compare physical Korean cards.
-Object.assign(koCards, {
+const sinisterDraft: Record<string, {name:string; text?:string}> = {
   "27002": {
     "name": "고스트 킥",
     "text": "히어로 반응 (공격): Ghost-Spider가 기본 능력을 사용한 직후 적 하나에게 피해 6을 줍니다. (기본 능력 사용당 최대 1회.)"
@@ -280,7 +280,7 @@ Object.assign(koCards, {
     "name": "Gwen Stacy",
     "text": "행동: 버린 더미에 있는 멀티버스행 티켓을 덱에 섞거나 George Stacy를 준비하는 것 중 하나를 선택합니다. (라운드마다 1회 제한.)"
   }
-});
+};
 const localCards = readKoCache();
-export function koCard(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? koCards[id] : localCards[id]; }
-export function koCardSource(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? 'draft' : localCards[id] ? 'community' : undefined; }
+export function koCard(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? koCards[id] : Object.prototype.hasOwnProperty.call(sinisterDraft,id) ? sinisterDraft[id] : localCards[id]; }
+export function koCardSource(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) || Object.prototype.hasOwnProperty.call(sinisterDraft,id) ? 'draft' : localCards[id] ? 'community' : undefined; }
