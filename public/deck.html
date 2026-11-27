@@ -53,6 +53,9 @@
         font-size: 1.25rem;
     }
 </style>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/public/css/menu/touch-deck.css">
+<script src="/public/js/menu/touch-deck.js"></script>
 </head>
 <body>
 
@@ -267,9 +270,9 @@ var cardPreview
 
 <fieldset style="flex-direction: column;">
     <legend>불러오기</legend>
-    <div>Load from marvelcdb.com: <input id="deck_id" name="deck_id" value="" placeholder="2345" required> <input type="button" onclick="getDeck(false)" value="Get Player Deck"> <input type="button" onclick="getDeck(true)" value="Get Player Deck (Private)"></div>
-    <div>Load from a local file: <input type="file" onchange="loadDeck(this)" accept=".json"> </div>
-    <div>Load from clipboard: <input type="button" onclick="importDeck()" value="Import"> </div>
+    <div>MarvelCDB에서 불러오기: <input id="deck_id" name="deck_id" value="" placeholder="2345" required> <input type="button" onclick="getDeck(false)" value="덱 가져오기"> <input type="button" onclick="getDeck(true)" value="비공개 덱 가져오기"></div>
+    <div>파일에서 불러오기: <input type="file" onchange="loadDeck(this)" accept=".json"> </div>
+    <div>클립보드에서 불러오기: <input type="button" onclick="importDeck()" value="가져오기"> </div>
 </fieldset>
 
 <input id="hero" name="hero" value="" placeholder="" style="display: none;" readonly required>
@@ -293,19 +296,17 @@ var cardPreview
     <fieldset style="padding: 2px;">
         <legend id="player_deck_images_size">메인</legend>
         <div id="player_deck_images" class="drop-zone"></div>
-        <textarea onchange="updatePlayerDeck()" id="slots" placeholder="player deck" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
+        <textarea onchange="updatePlayerDeck()" id="slots" placeholder="플레이어 덱" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
     </fieldset>
     
     <fieldset style="padding: 2px;">
         <legend id="side_deck_images_size">사이드</legend>
         <div id="side_deck_images" class="drop-zone"></div>
-        <textarea onchange="updatePlayerDeck()" id="side_deck" placeholder="side deck" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
+        <textarea onchange="updatePlayerDeck()" id="side_deck" placeholder="사이드 덱" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
     </fieldset>
 
     <ul>
-        <li>좌클릭: 미리보기</li>
-        <li>우클릭: 제거</li>
-        <li>가운데 클릭: 복제</li>
+        <li class="deck-mouse-help">좌클릭: 미리보기 · 우클릭: 제거 · 가운데 클릭: 복제</li><li class="deck-touch-help">카드 터치: 확대 · − 버튼: 사이드 덱 이동/제거 · + 버튼: 복제</li>
         <!-- <li>"Deadpool" and other heroes who use `set_aside` may also need to edit Extra deck.</li> -->
         <li>Put your decks in the folder "./deck" to display them in `My Deck`</li>
         <li>We recommend you use <a href="https://marvelcdb.com/deck/new">marvelcdb.com</a> to build your deck.</li>
@@ -327,9 +328,9 @@ var cardPreview
 </fieldset>
 
 <fieldset style="flex-direction: column;">
-    <input type="button" onclick="exportDeck()" value="Export">
-    <input type="button" onclick="play()" value="Play">
-    <input type="button" onclick="saveDeck()" style="background-color: skyblue;" value="Save">
+    <input type="button" onclick="exportDeck()" value="내보내기">
+    <input type="button" onclick="play()" value="플레이">
+    <input type="button" onclick="saveDeck()" style="background-color: skyblue;" value="저장">
 </fieldset>
 
 <script>
@@ -470,6 +471,7 @@ function create_card(card_id, from_peek) {
             }
         }
     }
+    if (from_peek && window.MarvelDeckTouch) MarvelDeckTouch.attach(div, [["−", "사이드 덱으로 이동 또는 제거", () => div.oncontextmenu(new Event("contextmenu"))], ["+", "복제", () => {if(div.parentNode){div.parentNode.appendChild(create_card(card_id,true));updatePeekedCardsString();}}]]);
     return div
 }
 

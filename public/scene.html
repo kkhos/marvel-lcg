@@ -5,7 +5,6 @@
 <head>
     <title>새 게임</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="/public/css/menu/mobile-launcher.css">
     <link rel="stylesheet" href="/public/css/menu/style.css">
     <link rel="stylesheet" href="/public/css/font-awesome.css">
 <style>
@@ -67,9 +66,9 @@
         display: none;
     }
 
-    div:has(#modular-sets),
-    div:has(#encounter-sets),
-    div:has(#split-scenarios) {
+    div:has(> #modular-sets),
+    div:has(> #encounter-sets),
+    div:has(> #split-scenarios) {
         flex: 0 0 100%;
         width: 0px; /* hack */
         max-width: 100%;
@@ -339,6 +338,7 @@
     }
 </style>
 
+<link rel="stylesheet" href="/public/css/menu/mobile-launcher.css">
 </head>
 <body>
     <fieldset style="flex-direction: column;">
@@ -732,7 +732,7 @@ async function createScenarios() {
             resetInterchangeableScenario()
             updateDefaultSchemeButton(sets_json[key].leaders.length > 0)
             if( interchangeable ) {
-                scenarioTitle.textContent = "Villains"
+                scenarioTitle.textContent = "빌런"
                 splitSelector.hidden = false
                 const scenarioDetails = selectedSet.querySelector(".scenario-details").cloneNode(true)
                 scenarioDetails.style.display = "flex"
@@ -746,7 +746,7 @@ async function createScenarios() {
                 splitScenarios.replaceChildren(scenarioDetails)
                 setInterchangeableScenarioSelectionEnabled(true)
             } else {
-                scenarioTitle.textContent = "Scenario"
+                scenarioTitle.textContent = "시나리오"
                 splitSelector.hidden = true
                 splitScenarios.replaceChildren()
                 setInterchangeableScenarioSelectionEnabled(true)
@@ -945,7 +945,7 @@ async function createSets() {
     await createSets()
     window.setupCatalogReady = true;
     window.dispatchEvent(new Event("setup-catalog-ready"));
-})()
+})().catch(error => { console.error(error); window.setupCatalogError = true; window.dispatchEvent(new Event("setup-catalog-error")); })
 
 </script>
 

@@ -13,9 +13,9 @@
   const panels=[0,1,2].map(()=>el('section','ml-panel'));body.append(...panels);
   const left=el('div','ml-scroll'),right=el('aside','ml-scroll ml-detail'),search=el('input','ml-search');search.type='search';search.placeholder='빌런 / 확장팩 검색';
   const scenarioName=el('h2','','시나리오 선택'),scenarioImage=el('img','ml-big'),mode=el('p','ml-muted');scenarioImage.alt='';
-  const encounter=el('details','ml-settings');encounter.append(el('summary','','조우 세트 설정'),standard,modular);
+  const encounter=el('details','ml-settings');encounter.open=false;encounter.append(el('summary','','조우 세트 설정'),standard,modular);
   const originalFile=q('#scenario-1')?.parentElement;if(originalFile){right.append(originalFile);originalFile.classList.add('ml-file');right.append(button('시나리오 파일 가져오기',()=>q('#scenario-1')?.click()));}
-  left.append(search,sc);right.prepend(scenarioImage,scenarioName,mode);right.append(split,encounter);panels[0].append(left,right);
+  const catalogStatus=el('p','ml-muted','확장팩을 불러오는 중…');left.append(search,catalogStatus,sc);right.prepend(scenarioImage,scenarioName,mode);right.append(split,encounter);panels[0].append(left,right);
   function image(img,id){if(id){img.hidden=false;const name=get_name(id);if(img.getAttribute('src')!==name)img.src=name;}else{img.hidden=true;img.removeAttribute('src');}}
   function filter(){const term=search.value.trim().toLowerCase();document.querySelectorAll('#set-images>.set').forEach(p=>{p.classList.toggle('ml-filter',!!term&&!((p.dataset.package||'').toLowerCase().includes(term)||[...p.querySelectorAll('button[data-scenario]')].some(b=>(b.title+' '+b.value).toLowerCase().includes(term))));});document.querySelectorAll('#set-content button[data-scenario]').forEach(b=>{b.classList.toggle('ml-filter',!!term&&!(q('#set-images>.set.click')?.dataset.package||'').toLowerCase().includes(term)&&!(b.title+' '+b.value).toLowerCase().includes(term));});}
   function annotate(){document.querySelectorAll('#set-content button[data-scenario],#split-scenarios button[data-scenario]').forEach(b=>{try{const d=JSON.parse(b.dataset.scenario);b.dataset.caption=d.name||b.value;b.dataset.mode=d.expert?'전문가':'일반';b.setAttribute('aria-label',b.dataset.caption+' '+b.dataset.mode);}catch{}});filter();}
@@ -54,7 +54,11 @@
   const oldHero=SetHero;SetHero=function(...a){const r=oldHero.apply(this,a);queueMicrotask(refresh);return r;};
   const observer=new MutationObserver(()=>{annotate();refresh();});observer.observe(q('#set-content'),{childList:true,subtree:true});observer.observe(q('#split-scenarios'),{childList:true,subtree:true});
   [left,right].forEach(x=>x.addEventListener('click',()=>queueMicrotask(refresh)));
-  window.addEventListener('setup-catalog-ready',()=>{catalogReady=true;refresh();});
+  function ready(){catalogReady=true;const sets=[...document.querySelectorAll('#set-images>.set:not(.disable)')];catalogStatus.textContent=sets.length?'확장팩을 선택한 다음 빌런 카드를 선택하세요.':'사용 가능한 시나리오가 없습니다.';if(!q('#set-images>.set.click')&&sets.length&&!scenario)sets[0].click();annotate();refresh();}
+  function failed(){catalogStatus.textContent='시나리오 목록을 불러오지 못했습니다.';catalogStatus.append(button('다시 시도',()=>location.reload()));}
+  window.addEventListener('setup-catalog-ready',ready);
+  window.addEventListener('setup-catalog-error',failed);
+  if(catalogReady)ready();else if(window.setupCatalogError)failed();
   window.MarvelSetup={back:()=>{if(stage){go(stage-1);return true;}return false;}};
   image(himage,'');annotate();go(0);
 })();
