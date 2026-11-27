@@ -299,7 +299,6 @@ const sinisterDraft: Record<string, {name:string; text?:string}> = {
     "text": "행동: 버린 더미에 있는 멀티버스행 티켓을 덱에 섞거나 George Stacy를 준비하는 것 중 하나를 선택합니다. (라운드마다 1회 제한.)"
   }
 };
-const localCards = {...readKoCache(), ...bundledKo};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...wreckingCrewDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
@@ -309,14 +308,20 @@ const verifiedNames: Record<string,string> = {'07019':'천둥강타','07034':'�
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
 const draftCards = {...reviewedDrafts, ...koCards};
 const sources: Record<string,'verified'|'community'|'draft'> = Object.create(null);
-for (const id of new Set([...Object.keys(draftCards), ...Object.keys(localCards)])) {
+export function refreshKoCards() {
+    const localCards = {...readKoCache(), ...bundledKo};
+    for (const id of Object.keys(normalizedCards)) delete normalizedCards[id];
+    for (const id of Object.keys(sources)) delete sources[id];
+    for (const id of new Set([...Object.keys(draftCards), ...Object.keys(localCards)])) {
     const verified = physicalVerified.has(id);
     const community = !verified && Object.prototype.hasOwnProperty.call(localCards,id);
     const entry = (community ? localCards[id] : draftCards[id]) ?? localCards[id];
     if (!entry) continue;
     normalizedCards[id] = {name:verifiedNames[id] ?? entry.name, text:entry.text === undefined ? undefined : (community ? entry.text : normalizeKoCardText(entry.text))};
     sources[id] = verified ? 'verified' : community ? 'community' : 'draft';
+    }
 }
+refreshKoCards();
 // Reprints inherit the original description only when no exact-ID translation exists.
 function originalId(id: string): string {
     const seen = new Set<string>();

@@ -351,6 +351,8 @@ class MobileRegression(unittest.TestCase):
             self.assertRegex(result["sample"], "[가-힣]")
 
     def test_ko_library_import_filter(self):
+        # Prevent a real asynchronous download from racing the synthetic cache.
+        self.page.route('https://raw.githubusercontent.com/**', lambda route: route.abort())
         self.goto("/main")
         result = self.page.evaluate("""async () => {
             const m = await import('/public/js/marvel/ko-local.js');
@@ -360,8 +362,9 @@ class MobileRegression(unittest.TestCase):
                 {code:'03003',name:'Not in engine',text:'번역'},
                 {code:'04001a',name:'Other pack',text:'번역'}
             ], new Set(['03001a','03002','04001a']), '03');
+            const {koCard,koCardSource,refreshKoCards} = await import('/public/js/marvel/ko-cards.js');
             localStorage.setItem(m.KO_CACHE_KEY,JSON.stringify({rev:m.KO_SOURCE_REV,cards:c}));
-            const {koCard,koCardSource} = await import('/public/js/marvel/ko-cards.js');
+            refreshKoCards();
             return {ids:Object.keys(c), name:koCard('03001a')?.name, text:koCard('03001a')?.text,
                     source:koCardSource('03001a'), draft:koCard('27002')?.name, goblin:koCard('02033')?.name, core:koCard('01001a')?.name};
         }""")
@@ -379,7 +382,7 @@ class MobileRegression(unittest.TestCase):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
             const {koCard, koCards} = await import('/public/js/marvel/ko-cards.js');
-            return {count:Object.keys(koCards).length, hero:koCard('01001a').name,
+            return {count:Object.keys(koCards).filter(id=>id.startsWith('01')).length, hero:koCard('01001a').name,
                     name:koCard('01005').name, text:koCard('01005').text,
                     unknown:koCard('99999') === undefined};
         }""")
@@ -388,6 +391,21 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["name"], "거미줄 날아차기")
         self.assertIn("피해 8", result["text"])
         self.assertTrue(result["unknown"])
+
+    def test_ko_wrecking_crew(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koCard,koCardSource} = await import('/public/js/marvel/ko-cards.js');
+            const ids = ['07001a','07001b',...Array.from({length:58},(_,i)=>String(i+7002).padStart(5,'0'))];
+            return {missing:ids.filter(id=>!koCard(id)?.text || !/[가-힣]/.test(koCard(id).text)),
+                    verified:ids.filter(id=>koCardSource(id)==='verified').sort(),
+                    titles:['07019','07034','07048'].map(id=>koCard(id).name),
+                    names:['07002','07017','07032','07046'].map(id=>koCard(id).name)};
+        }""")
+        self.assertEqual(result["missing"], [])
+        self.assertEqual(result["verified"], ["07001a","07001b","07004"])
+        self.assertEqual(result["titles"], ["천둥강타","강화하다!","길을 비켜라"])
+        self.assertEqual(result["names"], ["Wrecker","Thunderball","Piledriver","Bulldozer"])
 
     def test_save_slot_delete_confirmation(self):
         # Only the isolated CI checkout gets a synthetic save file.
@@ -546,7 +564,7 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(self.page.evaluate("""() => [
             parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-width')),
             parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-height'))
-        ]"""), [145, 200])
+        ]"""), [155, 214])
         self.screenshot("hand")
         # The desktop top piles deliberately use negative board coordinates.
         # Mobile must put real top cards entirely inside the camera clip.

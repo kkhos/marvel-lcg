@@ -173,7 +173,7 @@ window.MarvelSetup={back:()=>{const d=document.getElementById('saved-games');if(
 <script type="module">
     // Android personal-use cache: fetch once without blocking the game launcher.
     import { importKoCards, KO_COMPLETE_KEY, KO_SOURCE_REV, readKoCache } from '/public/js/marvel/ko-local.js';
-    import { bundledKoCount } from '/public/js/marvel/ko-cards.js';
+    import { bundledKoCount, refreshKoCards } from '/public/js/marvel/ko-cards.js';
     if (navigator.userAgent.includes('MarvelAndroid') && !bundledKoCount) {
         try {
             if (localStorage.getItem(KO_COMPLETE_KEY) !== KO_SOURCE_REV || Object.keys(readKoCache()).length < 250) {
@@ -182,6 +182,7 @@ window.MarvelSetup={back:()=>{const d=document.getElementById('saved-games');if(
                 document.querySelector('.brand-meta').append(status);
                 status.textContent='한국어 카드 설명 준비 중';
                 importKoCards(message=>status.textContent=message).then(result=>{
+                    refreshKoCards();
                     status.textContent=result.failures.length?'번역 일부 저장 · 카드 이미지 · 번역 메뉴에서 재시도 가능':'한국어 카드 설명 '+result.count+'개 저장 완료';
                 }).catch(()=>status.textContent='번역 다운로드 미완료 · 카드 이미지 · 번역 메뉴에서 재시도 가능');
             }

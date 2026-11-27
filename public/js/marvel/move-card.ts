@@ -42,11 +42,11 @@ export class MoveCard {
         const sceneWidth = parseFloat(MoveCard.rootStyles.getPropertyValue('--scene-width'));
         if (parent.id === 'player-all-hand-cards' && document.body.classList.contains('mobile-layout')) {
             const n = shown_cards_els.length;
-            const step = Math.min(164, (sceneWidth - 720) / Math.max(1, n - 1));
+            const step = Math.min(176, (sceneWidth - 720) / Math.max(1, n - 1));
             shown_cards_els.forEach((card, i) => {
                 const d = n > 1 ? (i - (n - 1) / 2) / ((n - 1) / 2) : 0;
                 card.style.setProperty('--x', String(Math.round((sceneWidth - MoveCard.cardWidth) / 2 + (i - (n - 1) / 2) * step)));
-                card.style.setProperty('--y', String(Math.round(850 + 8 * d * d)));
+                card.style.setProperty('--y', String(Math.round(882 + 8 * d * d)));
                 card.style.setProperty('--hand-angle', `${d * 10}deg`);
             });
             return;
