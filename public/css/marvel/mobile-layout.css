@@ -212,3 +212,21 @@ body.mobile-layout #mobile-action-confirm > .button:disabled { display: none; }
     body.mobile-layout #mobile-action-rail #prompt-box-container { max-height: 32%; }
     body.mobile-layout #mobile-action-confirm > .button { min-height: 32px; }
 }
+
+
+/* Desktop piles intentionally peek out above the camera (-100/-135).
+   On touch screens the entire top card must be available without hover.
+   Use the parent coordinates consumed by MoveCard, not image transforms. */
+body.mobile-layout #scene .encounter-deck,
+body.mobile-layout #scene #victory-display,
+body.mobile-layout #scene #area-removed,
+body.mobile-layout #scene #removed-pool,
+body.mobile-layout #scene #nemesis-pool,
+body.mobile-layout #scene #area-advanced {
+    --y: 12;
+}
+body.mobile-layout #scene .encounter-discard-pile { --y: 205; }
+/* Reserve the upper-right row for set-aside piles; the main scheme and
+   its attachments begin below it with enough room for a vertical card. */
+body.mobile-layout #scene #area-schemes-main { --y: 215; }
+body.mobile-layout #scene #area-schemes-side { --y: 415; }

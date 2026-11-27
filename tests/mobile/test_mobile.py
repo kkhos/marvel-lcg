@@ -187,6 +187,43 @@ class MobileRegression(unittest.TestCase):
         for card in hand.all():
             self.bounds(card)
         self.screenshot("hand")
+        # The desktop top piles deliberately use negative board coordinates.
+        # Mobile must put real top cards entirely inside the camera clip.
+        self.page.wait_for_function("""() => {
+            const camera = document.getElementById('camera').getBoundingClientRect();
+            const piles = ['encounter-deck-0','nemesis-pool','area-advanced'];
+            return piles.every(id => {
+                const cards = [...document.getElementById(id).querySelectorAll('.card:not(.hide)')];
+                const top = cards.at(-1);
+                if (!top) return false;
+                const r = top.getBoundingClientRect();
+                return r.width > 0 && r.height > 0 &&
+                    r.top >= camera.top - 1 && r.bottom <= camera.bottom + 1 &&
+                    r.left >= camera.left - 1 && r.right <= camera.right + 1;
+            });
+        }""")
+        self.page.evaluate("""() => {
+            const scene = document.getElementById('scene');
+            const piles = [...scene.querySelectorAll('.encounter-deck,.encounter-discard-pile,#nemesis-pool,#area-advanced,#victory-display,#area-removed')];
+            for (const pile of piles) {
+                const s = getComputedStyle(pile);
+                const y = Number(s.getPropertyValue('--y'));
+                const x = Number(s.getPropertyValue('--x'));
+                const h = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-height'));
+                const w = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-width'));
+                if (!Number.isFinite(x) || !Number.isFinite(y) || x < 0 || y < 0 ||
+                    x + w > scene.offsetWidth || y + h > scene.offsetHeight) {
+                    throw new Error('Clipped pile: ' + pile.id);
+                }
+            }
+            const top = id => Number(getComputedStyle(document.getElementById(id)).getPropertyValue('--y'));
+            const h = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-height'));
+            if (top('encounter-deck-0') + h > top('encounter-discard-pile-0') ||
+                top('nemesis-pool') + h > top('area-schemes-main') - 25) {
+                throw new Error('Overlapping mobile pile rows');
+            }
+        }""")
+        self.screenshot("top-piles")
         self.page.locator("#right-side-bar-handle").tap()
         dialog = self.page.locator("#mobile-settings-dialog")
         expect(dialog).to_be_visible()
