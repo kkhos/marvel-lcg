@@ -328,6 +328,10 @@ export class TouchControls {
                 if (settings.open) { settings.close(); return true; }
                 if (dialog.open) { dialog.close(); return true; }
                 if (pile.open) { pile.close(); return true; }
+                const result = document.querySelector('#game-over-box-container');
+                if (result?.querySelector('#game-over-box.active') && !result.classList.contains('minimize')) {
+                    result.classList.add('minimize'); return true;
+                }
                 if (gesture) { suppress(gesture.card); stop(); return true; }
                 const sidebar = document.querySelector('#right-side-bar.clicked');
                 if (sidebar) { sidebar.classList.remove('clicked'); return true; }

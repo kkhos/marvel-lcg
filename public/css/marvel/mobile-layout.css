@@ -391,3 +391,87 @@ body.mobile-layout #mobile-progress-bar #prompt-text {
 }
 
 #mobile-history-dialog .mobile-history-tools:not([open]) #ex-buttons { display: none; }
+
+/* Game results: reserve a fixed header and footer; scroll only the statistics. */
+body.mobile-layout #game-over-box-container {
+    position: fixed; inset: 0; min-height: 0; max-height: none;
+    padding: 0; pointer-events: none;
+}
+body.mobile-layout #game-over-box {
+    inset: 8px; width: auto; height: auto; min-height: 0; max-height: none;
+    box-sizing: border-box; padding: 10px 12px; border: 1px solid #527b63;
+    background: #11231bf5; border-radius: 10px; overflow: hidden;
+    display: flex; align-items: stretch; justify-content: stretch;
+    visibility: hidden; pointer-events: none; transition: none;
+    z-index: 10001;
+}
+body.mobile-layout #game-over-box.active { visibility: visible; pointer-events: auto; }
+body.mobile-layout #game-over-message {
+    flex: 1; min-height: 0; max-height: none; height: auto; width: 100%;
+    display: grid; grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0,1fr) auto;
+    grid-template-areas: "title" "reason" "stats" "buttons";
+    align-items: stretch; justify-items: stretch; gap: 6px;
+}
+body.mobile-layout #game-over-text {
+    grid-area: title; font: 850 clamp(25px, 8dvh, 36px)/1.15 system-ui,sans-serif;
+    color: #a5e5c6; letter-spacing: .04em; text-shadow: none;
+    padding: 0 105px; text-align: center;
+}
+body.mobile-layout #game-over-text-2 {
+    grid-area: reason; font: 650 13px/1.35 system-ui,sans-serif;
+    text-align: center; text-decoration: none; color: #e8f1eb;
+    overflow-wrap: anywhere; max-height: 15dvh; overflow: auto;
+}
+body.mobile-layout #session-statistics-container {
+    grid-area: stats; margin: 0; width: 100%; min-height: 0; height: auto; max-height: none;
+    overflow: auto; overscroll-behavior: contain; touch-action: pan-y;
+    background: #172a23; border: 1px solid #527b63; border-radius: 6px;
+}
+body.mobile-layout #session-statistics {
+    width: 100%; table-layout: fixed; font: 13px/1.25 system-ui,sans-serif;
+    color: #e8f1eb;
+}
+body.mobile-layout #session-statistics th,
+body.mobile-layout #session-statistics td {
+    padding: 4px 5px; text-align: center; border-color: #456957; overflow-wrap: anywhere;
+}
+body.mobile-layout #session-statistics th {
+    background: #30493e; color: #f1f6f3; font-size: 12px;
+}
+body.mobile-layout #session-statistics th:first-child { width: 56px; }
+body.mobile-layout #session-statistics td:first-child { padding: 2px; }
+body.mobile-layout #session-statistics td img {
+    display: block; width: 38px !important; height: auto; margin: auto;
+}
+body.mobile-layout #game-over-buttons {
+    grid-area: buttons; position: static; display: flex; flex-direction: row;
+    flex-wrap: wrap; justify-content: center; gap: 8px; padding: 0;
+}
+body.mobile-layout #game-over-buttons button {
+    margin: 0; width: auto; min-width: 112px; height: auto; min-height: 36px;
+    padding: 5px 12px; font: 700 13px/1.25 system-ui,sans-serif;
+    background: #30493e; border: 1px solid #83b79a; border-radius: 6px;
+    color: #fff;
+}
+body.mobile-layout #game-over-buttons button.save-replay { background: #2e6b57; }
+body.mobile-layout #game-over-close {
+    top: 8px; right: 8px; font: 700 12px/1.2 system-ui,sans-serif;
+    min-height: 32px; padding: 5px 8px; border-radius: 6px;
+    border: 1px solid #83b79a; background: #30493e; color: #e8f1eb;
+}
+body.mobile-layout #game-over-close i.fa { border: 0; padding: 0; background: none; }
+body.mobile-layout #game-over-close::after { content: " 결과 숨기기"; }
+body.mobile-layout #game-over-box-container.minimize #game-over-box {
+    border-color: transparent; background: none; pointer-events: none;
+}
+body.mobile-layout #game-over-box-container.minimize #game-over-message { display: none; }
+body.mobile-layout #game-over-box-container.minimize #game-over-close::after { content: " 결과 보기"; }
+body.mobile-layout:has(#game-over-box-container:not(.minimize) #game-over-box.active) > #right-side-bar-handle {
+    visibility: hidden;
+}
+@media (max-height: 340px) {
+    body.mobile-layout #game-over-box { inset: 5px; padding: 7px 10px; }
+    body.mobile-layout #game-over-message { gap: 4px; }
+    body.mobile-layout #game-over-buttons button { min-height: 32px; }
+}

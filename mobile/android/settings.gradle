@@ -5,7 +5,9 @@ pluginManagement {
                 excludeGroupByRegex('com[.]chaquo[.]python([.].*)?')
             }
         }
-        mavenCentral()
+        if (System.getenv('MARVEL_CENTRAL_MIRROR') == '1') {
+            maven { url = uri('https://maven-central.storage-download.googleapis.com/maven2/') }
+        } else { mavenCentral() }
         gradlePluginPortal()
     }
     // Resolve the published implementation directly instead of relying on
@@ -20,7 +22,12 @@ pluginManagement {
 }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories { google(); mavenCentral() }
+    repositories {
+        google()
+        if (System.getenv('MARVEL_CENTRAL_MIRROR') == '1') {
+            maven { url = uri('https://maven-central.storage-download.googleapis.com/maven2/') }
+        } else { mavenCentral() }
+    }
 }
 rootProject.name = 'MarvelLcgMobile'
 include ':app'

@@ -263,6 +263,21 @@ export function koStatistic(value: string): string {
     };
     return Object.prototype.hasOwnProperty.call(events, value) ? events[value] : koLabel(value);
 }
+export function koGameOverReason(value: string): string {
+    const reasons: Record<string,string> = {
+        'There were no cards in either the encounter deck or the encounter discard pile': '조우 덱과 조우 버린 카드 더미에 카드가 없습니다',
+        'All players were eliminated': '모든 플레이어가 탈락했습니다',
+        'The Final Stage of the Villain was Defeated': '빌런의 마지막 단계를 격파했습니다',
+        'The Final Stage of the Main Scheme was Completed': '주요 음모의 마지막 단계가 달성되었습니다',
+        'The Main Scheme was Completed': '주요 음모가 달성되었습니다',
+        'Players Won': '플레이어가 승리했습니다',
+        'Players Lost': '플레이어가 패배했습니다'
+    };
+    for (const [en, ko] of Object.entries(reasons)) {
+        if (value.toLowerCase().startsWith(en.toLowerCase())) return ko + value.slice(en.length);
+    }
+    return koText(value);
+}
 export function koText(value: string): string {
     const direct = koLabel(value);
     if (direct !== value) return direct;

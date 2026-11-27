@@ -312,6 +312,42 @@ class MobileRegression(unittest.TestCase):
             });
         }""", timeout=60000)
 
+    def test_mobile_game_over_layout(self):
+        self.start_game()
+        # Render a deterministic result without ending the actual server game.
+        self.page.evaluate("""async () => {
+            const {Message} = await import('/public/js/marvel/message.js');
+            Message.showGameOverMessage('The Main Scheme was Completed (The Break-In!)');
+            const table = document.getElementById('session-statistics');
+            table.replaceChildren();
+            const header = table.createTHead().insertRow();
+            for (const label of ['카드','준 피해','받은 피해','제거한 위협','플레이 영역 진입 횟수']) {
+                const th = document.createElement('th'); th.textContent = label; header.append(th);
+            }
+            const body = table.createTBody();
+            for (let i=0; i<25; i++) {
+                const row = body.insertRow();
+                for (let j=0; j<5; j++) row.insertCell().textContent = String(i+j);
+            }
+        }""")
+        expect(self.page.locator("#game-over-text-2")).to_have_text("주요 음모가 달성되었습니다 (The Break-In!)")
+        for width, height in [(915,412), (740,360)]:
+            self.page.set_viewport_size({"width":width,"height":height})
+            for selector in ["#game-over-box","#game-over-text-2","#session-statistics-container",
+                             "#game-over-close","#game-over-buttons .save-replay","#game-over-buttons .share-replay"]:
+                self.bounds(self.page.locator(selector))
+            expect(self.page.locator("#right-side-bar-handle")).to_be_hidden()
+            stats = self.page.locator("#session-statistics-container")
+            self.assertTrue(stats.evaluate("(el) => { el.scrollTop=el.scrollHeight; return el.scrollTop>0; }"))
+            self.assertGreater(stats.bounding_box()["height"], 80)
+            self.screenshot(f"result-{width}")
+        self.page.locator("#game-over-close").tap()
+        expect(self.page.locator("#game-over-message")).to_be_hidden()
+        expect(self.page.locator("#right-side-bar-handle")).to_be_visible()
+        self.page.locator("#game-over-close").tap()
+        expect(self.page.locator("#game-over-message")).to_be_visible()
+        self.assertEqual(self.errors, [])
+
     def test_gameplay_settings_and_mulligan(self):
         self.start_game()
         self.wait_hand_images()

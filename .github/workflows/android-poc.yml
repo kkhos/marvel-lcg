@@ -125,7 +125,11 @@ jobs:
               exit 1
             fi
             echo "::warning::Dependency resolution failed on attempt $attempt; retrying."
-            sleep $((attempt * 10))
+            if grep -Eiq '429 Too Many Requests|status code 429' "$log"; then
+              export MARVEL_CENTRAL_MIRROR=1
+              echo "::warning::Maven Central rate-limited the runner; retrying via Google Cloud's Central mirror."
+            fi
+            sleep $((attempt * 20))
           done
       - name: Verify bundled splash assets
         run: |

@@ -1,4 +1,4 @@
-import { koText, koHtml, koLabel } from "./ko-game.js";
+import { koText, koHtml, koLabel, koGameOverReason } from "./ko-game.js";
 import { Command } from "./command.js";
 import { Game } from "./game.js";
 import { Replay } from "./replay.js";
@@ -53,7 +53,7 @@ export class Message {
         } else {
             Message.end_messageElement.textContent = koLabel(Replay.is_watching ? "Replay complete — DEFEAT" : "DEFEAT");
         }
-        Message.end_messageElementText.textContent = koText(text)
+        Message.end_messageElementText.textContent = koGameOverReason(text)
     }
 
     static showMessage(text: string, original_duration: number|null = 1200) {
