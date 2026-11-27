@@ -324,7 +324,7 @@ public class MainActivity extends Activity {
                 // The actionable exception is at the end of a Python traceback.
                 String[] lines = message.trim().split("\\r?\\n");
                 String summary = lines.length == 0 ? message : lines[lines.length - 1];
-                status.setText(summary + "\\n\\n" + message);
+                status.setText(summary + "\n\n" + message);
                 return; // do not reset the user's diagnostic scroll every second
             }
             handler.postDelayed(this, 1000);
