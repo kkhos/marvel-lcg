@@ -8,7 +8,6 @@ import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
 import android.graphics.Insets;
-import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.net.Uri;
@@ -19,7 +18,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View;
-import android.view.Gravity;
 import android.widget.FrameLayout;
 import com.chaquo.python.Python;
 import com.chaquo.python.PyObject;
@@ -42,7 +40,6 @@ public class MainActivity extends Activity {
     private WebView web;
     private TextView status;
     private Button start;
-    private Button back;
     private static final String UI_REVISION = "21";
     private String loadedUrl = "";
 
@@ -59,24 +56,13 @@ public class MainActivity extends Activity {
         layout.addView(start);
         web = new WebView(this);
         web.getSettings().setUseWideViewPort(true);
+        // Use the existing wizard's native-app marker to suppress its Back button.
+        web.getSettings().setUserAgentString(web.getSettings().getUserAgentString() + " MarvelAndroid");
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
         web.getSettings().setAllowFileAccess(false);
         web.getSettings().setAllowContentAccess(false);
         web.setWebViewClient(new WebViewClient() {
-            @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
-                if (back != null) back.setVisibility(View.VISIBLE);
-            }
-            @Override public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                // Hide the redundant native overlay only when the wizard initialized.
-                view.evaluateJavascript("!!window.MarvelSetup", result -> {
-                    if (!isDestroyed() && url.equals(view.getUrl()) && back != null) {
-                        back.setVisibility("true".equals(result) ? View.GONE : View.VISIBLE);
-                    }
-                });
-            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri u = request.getUrl();
                 return !("http".equals(u.getScheme()) && "127.0.0.1".equals(u.getHost()) && u.getPort() == 2345);
@@ -85,21 +71,10 @@ public class MainActivity extends Activity {
         web.setVisibility(View.GONE);
         FrameLayout content = new FrameLayout(this);
         content.addView(web, new FrameLayout.LayoutParams(-1, -1));
-        back = new Button(this);
-        back.setText("‹");
-        back.setTextSize(24);
-        back.setContentDescription("뒤로가기");
-        back.setPadding(0, 0, 0, 0);
-        back.setAlpha(0.8f);
-        back.setVisibility(View.GONE);
-        int size = (int) (48 * getResources().getDisplayMetrics().density);
-        FrameLayout.LayoutParams backParams = new FrameLayout.LayoutParams(size, size, Gravity.TOP | Gravity.START);
-        content.addView(back, backParams);
-        back.setOnClickListener(v -> handleBack());
         layout.addView(content, new LinearLayout.LayoutParams(-1, 0, 1));
         setContentView(layout);
         // Android 15+ enforces edge-to-edge for targetSdk 35. Keep the
-        // WebView and native Back button outside system bars/cutouts.
+        // WebView outside system bars/cutouts until fullscreen is applied.
         if (Build.VERSION.SDK_INT >= 30) {
             getWindow().setDecorFitsSystemWindows(false);
             layout.setOnApplyWindowInsetsListener((v, insets) -> {
@@ -132,7 +107,7 @@ public class MainActivity extends Activity {
             }
         });
         // Fullscreen isolation step 1: hide system bars after content attachment.
-        // Native Back button and legacy onBackPressed remain unchanged.
+        // Legacy onBackPressed remains unchanged.
         layout.post(() -> {
             if (isDestroyed() || isFinishing()) return;
             try {
@@ -202,7 +177,6 @@ public class MainActivity extends Activity {
                                     if (isDestroyed() || url.equals(loadedUrl)) return;
                                     loadedUrl = url;
                                     web.setVisibility(View.VISIBLE);
-                                    back.setVisibility(View.VISIBLE);
                                     status.setVisibility(View.GONE);
                                     start.setVisibility(View.GONE);
                                     web.loadUrl(url);
@@ -212,7 +186,6 @@ public class MainActivity extends Activity {
                     }
                     if (launching && url.isEmpty() && !loadedUrl.isEmpty()) {
                         web.setVisibility(View.GONE);
-                        back.setVisibility(View.GONE);
                         status.setVisibility(View.VISIBLE);
                         loadedUrl = "";
                     }
