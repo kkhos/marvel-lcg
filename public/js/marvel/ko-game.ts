@@ -337,7 +337,7 @@ export function koText(value: string): string {
             .replace(/\bwere removed from\b/g, "제거됨 · 기존 위치:")
             .replace(/\bwould be removed from game\b/g, "게임에서 제거 예정")
             .replace(/\bwere placed on table\b/g, "플레이 영역에 놓임")
-            .replace(/\bwere set aside\b/g, "예비로 둠")
+            .replace(/\bwere set aside\b/g, "따로 놓아둠")
             .replace(/\b(?:was|were) flipped\b/g, "뒤집힘")
             .replace(/\bswapped\b/g, "교체됨")
             .replace(/\bis entering play\b/g, "플레이 영역에 들어오는 중")

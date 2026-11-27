@@ -220,6 +220,26 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["unchanged"], "반응 능력 1개를 해결합니다. 카드 3장. 피해량만큼 위협을 놓습니다.")
         self.assertIn("피해 3점을 입힙니다", result["other"])
 
+    def test_ko_additional_physical_cards(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koCard,koCardSource} = await import('/public/js/marvel/ko-cards.js');
+            const {normalizeKoCardText,koGlossary} = await import('/public/js/marvel/ko-glossary.js');
+            const ids = ['01004','01008','01009','01186','01190'];
+            return {texts:ids.map(id=>koCard(id).text), sources:ids.map(koCardSource),
+                scheme:koGlossary['scheme (verb)'],
+                normalized:normalizeKoCardText('예비로 둔 카드. 사용 (카운터 3).')};
+        }""")
+        self.assertEqual(result["sources"], ["verified"] * 5)
+        self.assertIn('그 카드의 "공개될 때" 효과를 모두 무효화합니다', result["texts"][0])
+        self.assertIn("카운터가 모두 사라지면 이 카드를 버립니다", result["texts"][1])
+        self.assertIn("대신 거미줄 포획을 버립니다", result["texts"][2])
+        self.assertEqual(result["texts"][3], "공개될 때: 빌런이 암약합니다.")
+        self.assertIn("따로 놓아둔 당신의 숙적 하수인", result["texts"][4])
+        self.assertIn("이 카드는 쇄도를 얻습니다", result["texts"][4])
+        self.assertEqual(result["scheme"], "암약")
+        self.assertEqual(result["normalized"], "따로 놓아둔 카드. 사용(카운터 3).")
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

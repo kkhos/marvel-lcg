@@ -23,7 +23,7 @@ export const koCards: Record<string, {name: string; text?: string}> = {
   },
   "01004": {
     "name": "향상된 스파이더센스",
-    "text": "히어로 난입: 조우 덱에서 배반 카드가 공개될 때, 그 카드의 모든 '공개될 때' 효과를 무효화합니다."
+    "text": "히어로 난입: 조우 덱에서 배반 카드가 공개될 때, 그 카드의 \"공개될 때\" 효과를 모두 무효화합니다."
   },
   "01005": {
     "name": "거미줄 날아차기",
@@ -39,11 +39,11 @@ export const koCards: Record<string, {name: string; text?: string}> = {
   },
   "01008": {
     "name": "웹슈터",
-    "text": "사용 (웹 카운터 3개).\n히어로 자원: 웹슈터를 소진하고 웹 카운터 1개를 제거합니다 → 만능 자원 1개를 생성합니다."
+    "text": "사용(웹 카운터 3). (카운터를 3만큼 놓은 채로 플레이 영역에 들어옵니다. 카운터가 모두 사라지면 이 카드를 버립니다).\n히어로 자원: 웹슈터를 소진하고 이 카드에서 웹 카운터를 1만큼 제거 → 만능 자원을 생성."
   },
   "01009": {
     "name": "거미줄 포획",
-    "text": "히어로 형태 전용. 적 하나에게 장착합니다. 적마다 최대 1장.\n강제 난입: 장착된 적이 공격하려 할 때, 대신 이 카드를 버립니다. 그런 다음 그 적을 기절시킵니다."
+    "text": "히어로 형태 전용. 적 하나에게 장착합니다.\n적마다 최대 1장.\n강제 난입: 장착된 적이 공격을 하려 할 때, 대신 거미줄 포획을 버립니다.\n그리고 나서 그 적을 기절시킵니다."
   },
   "01058": {
     "name": "Daredevil",
@@ -238,7 +238,7 @@ export const koCards: Record<string, {name: string; text?: string}> = {
   },
   "01190": {
     "name": "과거의 그림자",
-    "text": "공개될 때: 예비로 둔 당신의 숙적 하수인을 공개해 당신과 교전한 상태로 플레이 영역에 놓습니다. 숙적 부가 음모를 공개해 플레이 영역에 놓습니다. 나머지 숙적 조우 세트를 조우 덱에 섞습니다. 숙적 하수인이 게임에 들어오지 않았다면 이 카드는 쇄도를 얻습니다."
+    "text": "공개될 때: 따로 놓아둔 당신의 숙적 하수인을 공개하고 당신과 교전 중인 채로 플레이 영역에 내려놓습니다. 따로 놓아둔 당신의 숙적 부가 음모를 공개하고 플레이 영역에 내려놓습니다. 따로 놓아둔 당신의 나머지 숙적 조우 세트를 조우 덱에 섞어 넣습니다. 당신의 숙적 하수인이 이렇게 게임에 들어오지 않는다면, 이 카드는 쇄도를 얻습니다."
   }
 };
 // Draft names and effects for the first Sinister Motives hero; compare physical Korean cards.
@@ -287,8 +287,8 @@ const sinisterDraft: Record<string, {name:string; text?:string}> = {
 const localCards = {...readKoCache(), ...bundledKo};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...goblinDraft, ...sinisterDraft};
-// Only the three photographed faces are marked physically verified.
-const physicalVerified = new Set(['01005','02021','27002']);
+// Only photographed faces are marked physically verified.
+const physicalVerified = new Set(['01005','02021','27002','01004','01008','01009','01186','01190']);
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
 for (const [id, entry] of Object.entries({...localCards, ...reviewedDrafts, ...koCards})) {
     normalizedCards[id] = {name:entry.name, text:entry.text === undefined ? undefined : normalizeKoCardText(entry.text)};
