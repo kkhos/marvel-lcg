@@ -116,7 +116,21 @@ jobs:
             rm -f "$dest.tmp"
             echo "::warning::Doom backdrop unavailable; using built-in green gradient."
           fi
-      - run: gradle -p mobile/android :app:assembleDebug --stacktrace
+      - name: Assemble Android APK (retry transient repository failures)
+        shell: bash
+        run: |
+          set -euo pipefail
+          log="$RUNNER_TEMP/gradle-assemble.log"
+          for attempt in 1 2 3; do
+            if gradle -p mobile/android :app:assembleDebug --stacktrace --info 2>&1 | tee "$log"; then
+              exit 0
+            fi
+            if [[ "$attempt" == 3 ]] || ! grep -Eiq 'UnknownPluginException|could not resolve plugin artifact|Could not (GET|HEAD|resolve|download)|Read timed out|Connection reset|status code (429|50[0234])' "$log"; then
+              exit 1
+            fi
+            echo "::warning::Dependency resolution failed on attempt $attempt; retrying."
+            sleep $((attempt * 10))
+          done
       - name: Verify bundled splash assets
         run: |
           python -c 'import zipfile; z=zipfile.ZipFile("mobile/android/app/build/outputs/apk/debug/app-debug.apk"); assert "assets/splash/champions.png" in z.namelist(); print("Doom backdrop bundled:", "assets/splash/doom.webp" in z.namelist())'
