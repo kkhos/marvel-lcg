@@ -23,45 +23,17 @@ permissions:
   contents: read
 
 jobs:
-  pin-backdrop:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 5
-    permissions:
-      contents: write
-    outputs:
-      source: ${{ steps.pin.outputs.source }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Pin existing splash artwork once
-        id: pin
-        shell: bash
-        run: |
-          set -euo pipefail
-          dest=mobile/android/app/src/main/assets/splash/doom.webp
-          if [[ ! -s "$dest" ]]; then
-            [[ "$GITHUB_REF" == refs/heads/mobile/android-poc ]]
-            curl --fail --location --retry 2 --connect-timeout 10 --max-time 45 \
-              'https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/002085A1CE8A7388B940AF1093C7A3D1B8A3B0C17A424070D7AE2D25D701C2D1/compose?format=webp&width=2560' -o "$dest.tmp"
-            python -c 'import sys; d=open(sys.argv[1],"rb").read(12); assert d[:4]==b"RIFF" and d[8:12]==b"WEBP"' "$dest.tmp"
-            mv "$dest.tmp" "$dest"
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add -- "$dest"
-            git commit -m "Pin Doom splash artwork for offline builds"
-            git push origin HEAD:refs/heads/mobile/android-poc
-          fi
-          echo "source=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
   mobile-ui:
-    needs: pin-backdrop
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.pin-backdrop.outputs.source }}
           persist-credentials: false
       - name: Stage checked-in home background for UI tests
-        run: cp mobile/android/app/src/main/assets/splash/doom.webp public/images/home/doom.webp
+        run: |
+          test -s mobile/android/app/src/main/assets/splash/doom.webp
+          cp mobile/android/app/src/main/assets/splash/doom.webp public/images/home/doom.webp
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -91,13 +63,12 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
   assemble:
-    needs: [pin-backdrop, mobile-ui]
+    needs: mobile-ui
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ needs.pin-backdrop.outputs.source }}
           persist-credentials: false
       - uses: actions/setup-java@v4
         with:
