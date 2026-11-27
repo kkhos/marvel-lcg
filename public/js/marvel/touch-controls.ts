@@ -89,15 +89,18 @@ export class TouchControls {
         }
         function stop() {
             if (!gesture) return;
-            clearTimeout(gesture.timer);
-            if (gesture.card.hasPointerCapture(gesture.id)) gesture.card.releasePointerCapture(gesture.id);
+            const g = gesture;
             gesture = null;
+            clearTimeout(g.timer);
+            if (g.card.hasPointerCapture(g.id)) g.card.releasePointerCapture(g.id);
             ghost.hidden = true; zone.hidden = true;
             CardImages.setBackground(ghost, 'background-image', '');
         }
         document.addEventListener('pointerdown', e => {
             if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return;
             if (!e.isPrimary || gesture) { if (gesture) { suppress(gesture.card); stop(); } return; }
+            // A fresh deliberate tap must not be swallowed by the prior drag.
+            suppressUntil = 0;
             const card = cardAt(e.target);
             if (!card || dialog.open || (e.target as Element).closest('button,input,a,.auto-activate')) return;
             const g: Gesture = { id: e.pointerId, card, x: e.clientX, y: e.clientY, timer: 0, dragging: false, held: false };
@@ -168,6 +171,10 @@ export class TouchControls {
                 e.preventDefault(); e.stopImmediatePropagation();
             }
         }, true);
+        const sidebarHandle = document.getElementById('right-side-bar-handle');
+        sidebarHandle?.addEventListener('click', () => {
+            document.getElementById('right-side-bar')?.classList.toggle('clicked');
+        });
         window.addEventListener('blur', () => { if (gesture) { suppress(gesture.card); stop(); } });
         (window as unknown as { MarvelTouch: { back: () => boolean } }).MarvelTouch = {
             back: () => {

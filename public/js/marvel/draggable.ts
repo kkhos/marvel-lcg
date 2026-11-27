@@ -7,7 +7,7 @@ draggables.forEach(draggable => {
 
     draggable.addEventListener('pointerdown', e => {
         if (!e.isPrimary || e.button !== 0 || pointerId !== null) return;
-        if ((e.target as Element).closest('button,input,select,textarea,a,[role="button"]')) return;
+        if ((e.target as Element).closest('button,input,select,textarea,a,[role="button"],#prompt-box-close,#prompt-box-lock')) return;
         pointerId = e.pointerId;
         offsetX = e.clientX - draggable.getBoundingClientRect().left;
         offsetY = e.clientY - draggable.getBoundingClientRect().top;
