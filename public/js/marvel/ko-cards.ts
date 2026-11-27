@@ -7,6 +7,17 @@ import { koAliases } from './ko-aliases.js';
 // Core Korean display translations, terminology cross-checked against the NamuWiki mirror (Marvel Champions core cards, heroes and villains); not verified against physical Korean cards.
 // Presentation only: never use these names or text as rule identifiers.
 export const koCards: Record<string, {name: string; text?: string}> = {
+  "07001a": {
+    "name": "탈옥"
+  },
+  "07001b": {
+    "name": "탈옥",
+    "text": "★ 강제 반응: 빌런 페이즈의 1단계를 해결한 후, 모든 부가 음모에 위협을 1만큼씩 놓습니다. 자신의 부가 음모에 위협이 가장 많은 빌런에게로 활성 카운터를 이동합니다(위협의 숫자가 같다면 시작 플레이어가 선택합니다).\n이 스테이지가 달성되면, 플레이어들은 게임에서 패배합니다."
+  },
+  "07004": {
+    "name": "응징의 날",
+    "text": "Wrecker의 부가 음모\nWrecker가 플레이 영역에 있는 한, 이 카드는 플레이 영역을 떠날 수 없습니다.\n강타자 - 강제 반응: 이 카드에 위협을 놓은 후, 이 카드에 놓인 위협이 10 이상이라면 모든 아군 캐릭터에게 피해를 2점씩 입힙니다. 이 음모에서 위협을 3만큼만 남기고 모두 제거합니다."
+  },
   "01001a": {
     "name": "Spider-Man",
     "text": "스파이더센스 — 난입: 빌런이 당신에게 공격을 개시할 때, 카드 1장을 뽑습니다."
@@ -290,7 +301,7 @@ const localCards = {...readKoCache(), ...bundledKo};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
-const physicalVerified = new Set(['01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b']);
+const physicalVerified = new Set(['07001b','07004','01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b']);
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
 const draftCards = {...reviewedDrafts, ...koCards};
 const sources: Record<string,'verified'|'community'|'draft'> = Object.create(null);

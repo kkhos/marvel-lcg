@@ -183,7 +183,12 @@ export const koGlossary = {
     'engaged': '교전 중',
     'surge': '쇄도',
     'set aside': '따로 놓아둠',
-    'put into play': '플레이 영역에 내려놓음'
+    'put into play': '플레이 영역에 내려놓음',
+    'active counter': '활성 카운터',
+    'friendly character': '아군 캐릭터',
+    'in play': '플레이 영역',
+    'villain phase': '빌런 페이즈',
+    'leave play': '플레이 영역을 떠나다'
 } as const;
 
 export function normalizeKoCardText(value: string): string {
