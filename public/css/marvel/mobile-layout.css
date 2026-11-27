@@ -383,3 +383,5 @@ body.mobile-layout #mobile-progress-bar #prompt-text {
 #mobile-history-dialog #contextMenu button {
     color: inherit; min-height: 38px; padding: 6px 12px; font: 13px system-ui,sans-serif;
 }
+
+#mobile-history-dialog .mobile-history-tools:not([open]) #ex-buttons { display: none; }
