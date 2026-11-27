@@ -1,4 +1,5 @@
 import { readKoCache } from './ko-local.js';
+import { goblinDraft } from './ko-goblin.js';
 // Core Korean display translations, terminology cross-checked against the NamuWiki mirror (Marvel Champions core cards, heroes and villains); not verified against physical Korean cards.
 // Presentation only: never use these names or text as rule identifiers.
 export const koCards: Record<string, {name: string; text?: string}> = {
@@ -282,5 +283,6 @@ const sinisterDraft: Record<string, {name:string; text?:string}> = {
   }
 };
 const localCards = readKoCache();
-export function koCard(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? koCards[id] : Object.prototype.hasOwnProperty.call(sinisterDraft,id) ? sinisterDraft[id] : localCards[id]; }
-export function koCardSource(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) || Object.prototype.hasOwnProperty.call(sinisterDraft,id) ? 'draft' : localCards[id] ? 'community' : undefined; }
+const reviewedDrafts = {...goblinDraft, ...sinisterDraft};
+export function koCard(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) ? koCards[id] : Object.prototype.hasOwnProperty.call(reviewedDrafts,id) ? reviewedDrafts[id] : localCards[id]; }
+export function koCardSource(id: string) { return Object.prototype.hasOwnProperty.call(koCards,id) || Object.prototype.hasOwnProperty.call(reviewedDrafts,id) ? 'draft' : localCards[id] ? 'community' : undefined; }

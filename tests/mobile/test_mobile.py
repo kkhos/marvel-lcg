@@ -209,13 +209,14 @@ class MobileRegression(unittest.TestCase):
             localStorage.setItem(m.KO_CACHE_KEY,JSON.stringify({rev:m.KO_SOURCE_REV,cards:c}));
             const {koCard,koCardSource} = await import('/public/js/marvel/ko-cards.js');
             return {ids:Object.keys(c), name:koCard('03001a')?.name, text:koCard('03001a')?.text,
-                    source:koCardSource('03001a'), draft:koCard('27002')?.name, core:koCard('01001a')?.name};
+                    source:koCardSource('03001a'), draft:koCard('27002')?.name, goblin:koCard('02033')?.name, core:koCard('01001a')?.name};
         }""")
         self.assertEqual(result["ids"], ["03001a"])
         self.assertEqual(result["name"], "Captain America")
         self.assertEqual(result["text"], "행동: 카드 1장. 정신력")
         self.assertEqual(result["source"], "community")
         self.assertEqual(result["draft"], "고스트 킥")
+        self.assertEqual(result["goblin"], "고블린 글라이더")
         self.assertEqual(result["core"], "Spider-Man")
 
     def test_ko_core_dictionary(self):
