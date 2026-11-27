@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
     private TextView status;
     private Button start;
     private Button back;
-    private static final String UI_REVISION = "5";
+    private static final String UI_REVISION = "6";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
