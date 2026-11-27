@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Build;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.graphics.Insets;
 import android.graphics.Bitmap;
 import android.os.Handler;
@@ -110,9 +111,28 @@ public class MainActivity extends Activity {
             });
             layout.requestApplyInsets();
         }
-        // Fullscreen isolation step 1: hide only system bars after the
-        // content view is attached. The cutout policy, native Back button
-        // and legacy onBackPressed remain unchanged.
+        // Fullscreen isolation step 3: extend into the display cutout
+        // only after the content is attached. If the window policy fails,
+        // keep the tested step-2 inset listener and safe padding.
+        layout.post(() -> {
+            if (isDestroyed() || isFinishing() || Build.VERSION.SDK_INT < 30) return;
+            try {
+                WindowManager.LayoutParams attrs = getWindow().getAttributes();
+                attrs.layoutInDisplayCutoutMode =
+                        WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+                getWindow().setAttributes(attrs);
+                layout.setOnApplyWindowInsetsListener((v, insets) -> {
+                    v.setPadding(0, 0, 0, 0);
+                    return insets;
+                });
+                layout.setPadding(0, 0, 0, 0);
+                layout.requestApplyInsets();
+            } catch (RuntimeException e) {
+                android.util.Log.w("MarvelChampions", "Cutout extension unavailable; keeping safe insets", e);
+            }
+        });
+        // Fullscreen isolation step 1: hide system bars after content attachment.
+        // Native Back button and legacy onBackPressed remain unchanged.
         layout.post(() -> {
             if (isDestroyed() || isFinishing()) return;
             try {
