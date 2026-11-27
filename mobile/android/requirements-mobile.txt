@@ -1,0 +1,8 @@
+# Experimental Android wheel candidates, not a replacement for upstream requirements.
+packaging
+Pillow
+numpy==1.26.2
+requests
+aiohttp==3.10.10
+typing_extensions
+colorama
