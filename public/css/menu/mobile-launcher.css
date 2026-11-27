@@ -30,3 +30,22 @@ body.ml-mobile{width:100%;height:100dvh;overflow:hidden}
 .ml-shell .ml-scenario-mode.ml-expert{background:#703657;border-color:#cb82b0}
 .ml-shell .ml-scenario-pack{font-size:11px;overflow-wrap:anywhere;padding:5px 0 0}
 .ml-shell .ml-footer .ml-muted{min-width:0;overflow-wrap:anywhere}
+
+/* Mobile wizard uses its own back button. The native overlay is hidden on this page. */
+.ml-shell{padding-left:12px}
+.ml-shell .ml-scenario-detail{display:flex;flex-direction:column;overflow:hidden}
+.ml-shell .ml-scenario-heading{position:static;flex:0 0 auto;padding:4px 5px 6px;margin:0 0 6px;box-shadow:none}
+.ml-shell .ml-scenario-heading .ml-scenario-name{margin:2px 0 4px}
+.ml-shell .ml-detail-scroll{flex:1 1 0;min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain}
+.ml-shell .ml-scenario-detail .ml-big{cursor:zoom-in;height:clamp(90px,32dvh,190px)}
+.ml-shell button.right-clicked:has(img){scale:1!important;z-index:auto!important}
+.ml-shell button:has(.ml-preview-icon){position:relative}
+.ml-shell .ml-preview-icon{position:absolute;right:3px;top:3px;z-index:3;display:grid;place-items:center;width:30px;height:30px;border:1px solid #a9b8ed;border-radius:7px;background:#17264beF;color:white;font:900 24px/1 system-ui;text-shadow:none;touch-action:manipulation}
+.ml-shell #set-content button.click::after,.ml-shell #split-scenarios button.click::after{color:#fff!important}
+.ml-card-preview{position:fixed;inset:0;width:100%;height:100%;max-width:none;max-height:none;margin:0;padding:8px 62px;border:0;background:#080d1bea;color:#fff;overflow:hidden}
+.ml-card-preview[open]{display:flex;align-items:center;justify-content:center;gap:12px}
+.ml-card-preview::backdrop{background:#080d1b}
+.ml-card-preview img{display:block;width:auto;height:calc(100dvh - 18px);max-width:calc(100vw - 160px);object-fit:contain;cursor:zoom-out;border-radius:9px}
+.ml-preview-title{position:absolute;top:12px;left:12px;max-width:22vw;overflow-wrap:anywhere;font:700 14px system-ui;color:#dbe4ff}
+.ml-preview-close{position:absolute;top:8px;right:8px;padding:8px 12px;min-height:40px;color:white;background:#344b86;border:1px solid #879be0;border-radius:8px;font:700 14px system-ui;touch-action:manipulation}
+@media(orientation:portrait){.ml-card-preview{padding:50px 8px 8px}.ml-card-preview img{width:100%;height:auto;max-width:100%;max-height:calc(100dvh - 60px)}.ml-preview-title{max-width:60vw}}

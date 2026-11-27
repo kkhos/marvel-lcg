@@ -7,18 +7,65 @@
   const [sc,split,standard,modular,hero,game]=fields;
   const shell=el('main','ml-shell'),header=el('header','ml-header'),title=el('h1'),steps=el('span','ml-steps'),body=el('div','ml-body'),foot=el('footer','ml-footer'),msg=el('span','ml-muted');
   let stage=0,slot=1,selected=null,loaded=false,kind='starter',catalogReady=!!window.setupCatalogReady;
-  const back=button('‹ 이전',()=>{if(stage)go(stage-1);else history.back();});
+  const back=button('‹ 이전',()=>{if(preview.open){preview.close();return;}if(stage)go(stage-1);else if(history.length>1)history.back();else location.assign('/');});
   const next=button('',()=>{if(stage<2)go(stage+1);else doCreateNewGame(Object.values(heroes).filter(Boolean).length>1?'hot_seat':'');},'ml-primary');
   header.append(back,title,steps);foot.append(msg,next);shell.append(header,body,foot);document.body.prepend(shell);document.body.classList.add('ml-mobile');
   const panels=[0,1,2].map(()=>el('section','ml-panel'));body.append(...panels);
   const left=el('div','ml-scroll'),right=el('aside','ml-scroll ml-detail'),search=el('input','ml-search');search.type='search';search.placeholder='빌런 / 확장팩 검색';
   const scenarioName=el('h2','ml-scenario-name','시나리오를 선택하세요'),scenarioImage=el('img','ml-big'),mode=el('p','ml-scenario-mode'),scenarioPack=el('p','ml-muted ml-scenario-pack'),scenarioHeading=el('div','ml-scenario-heading');scenarioImage.alt='';scenarioHeading.append(el('span','ml-muted','선택한 시나리오'),scenarioName,mode,scenarioPack);scenarioHeading.setAttribute('aria-live','polite');
-  const encounter=el('details','ml-settings');encounter.open=false;encounter.append(el('summary','','조우 세트 설정'),standard,modular);
-  const originalFile=q('#scenario-1')?.parentElement;if(originalFile){right.append(originalFile);originalFile.classList.add('ml-file');right.append(button('시나리오 파일 가져오기',()=>q('#scenario-1')?.click()));}
-  const catalogStatus=el('p','ml-muted','확장팩을 불러오는 중…');left.append(search,catalogStatus,sc);right.prepend(scenarioHeading,scenarioImage);right.append(split,encounter);panels[0].append(left,right);
+  const encounter=el('details','ml-settings');encounter.open=false;encounter.append(el('summary','','조우 세트 설정'),el('p','ml-muted','카드 터치: 선택 · 길게 누르기 또는 확대 아이콘: 미리보기'),standard,modular);
+  // Keep the legacy file input available to desktop code, but remove it from the mobile wizard.
+  const originalFile=q('#scenario-1')?.parentElement;if(originalFile){right.append(originalFile);originalFile.classList.add('ml-file');}
+  const catalogStatus=el('p','ml-muted','확장팩을 불러오는 중…');left.append(search,catalogStatus,sc);const detailScroll=el('div','ml-detail-scroll');
+  right.classList.add('ml-scenario-detail');
+  right.prepend(scenarioHeading);detailScroll.append(scenarioImage,split,encounter);right.append(detailScroll);panels[0].append(left,right);
+  // A top-layer modal is not clipped by a scrolling panel or its stacking context.
+  const preview=el('dialog','ml-card-preview'),previewImg=el('img'),previewTitle=el('span','ml-preview-title'),previewClose=button('닫기 ×',()=>preview.close(),'ml-preview-close');
+  previewImg.alt='카드 미리보기';previewImg.onclick=()=>preview.close();
+  preview.append(previewTitle,previewImg,previewClose);
+  document.body.append(preview);
+  preview.addEventListener('click',e=>{if(e.target===preview)preview.close();});
+  function openPreview(img,label){
+    if(!img?.getAttribute('src'))return;
+    previewImg.src=img.currentSrc||img.src;previewTitle.textContent=label||'카드 미리보기';
+    if(!preview.open)preview.showModal();
+  }
+  scenarioImage.onclick=()=>openPreview(scenarioImage,scenarioName.textContent);
+  const previewSelector='#encounter-sets button:has(img),#modular-sets button:has(img),#set-content button[data-scenario]:has(img),#split-scenarios button[data-scenario]:has(img)';
+  function showButtonCard(b){openPreview(b.querySelector('img'),b.dataset.caption||b.dataset.display||b.dataset.name||b.title||'카드 미리보기');}
+  function addPreviewIcons(){
+    document.querySelectorAll(previewSelector).forEach(b=>{
+      b.classList.remove('right-clicked');
+      if(b.querySelector('.ml-preview-icon'))return;
+      const icon=el('span','ml-preview-icon','⌕');icon.setAttribute('aria-label','카드 확대');icon.title='카드 확대';
+      b.append(icon);
+    });
+  }
+  let hold=null,suppressButton=null,suppressUntil=0;
+  function cancelHold(){if(hold){clearTimeout(hold.timer);hold=null;}}
+  function previewButton(b){cancelHold();suppressButton=b;suppressUntil=performance.now()+1000;showButtonCard(b);}
+  document.addEventListener('pointerdown',e=>{
+    cancelHold();
+    if(e.pointerType!=='touch'||e.target.closest('.ml-preview-icon'))return;
+    const b=e.target.closest(previewSelector);if(!b)return;
+    hold={b,id:e.pointerId,x:e.clientX,y:e.clientY,timer:setTimeout(()=>previewButton(b),500)};
+  },true);
+  document.addEventListener('pointermove',e=>{if(hold&&hold.id===e.pointerId&&Math.hypot(e.clientX-hold.x,e.clientY-hold.y)>12)cancelHold();},true);
+  document.addEventListener('pointerup',cancelHold,true);
+  document.addEventListener('pointercancel',cancelHold,true);
+  document.addEventListener('contextmenu',e=>{
+    const b=e.target.closest(previewSelector);if(!b)return;
+    e.preventDefault();e.stopImmediatePropagation();previewButton(b);
+  },true);
+  document.addEventListener('click',e=>{
+    const b=e.target.closest(previewSelector);if(!b)return;
+    if(e.target.closest('.ml-preview-icon')){e.preventDefault();e.stopImmediatePropagation();previewButton(b);}
+    else if(suppressButton===b&&performance.now()<suppressUntil){e.preventDefault();e.stopImmediatePropagation();suppressButton=null;}
+  },true);
+
   function image(img,id){if(id){img.hidden=false;const name=get_name(id);if(img.getAttribute('src')!==name)img.src=name;}else{img.hidden=true;img.removeAttribute('src');}}
   function filter(){const term=search.value.trim().toLowerCase();document.querySelectorAll('#set-images>.set').forEach(p=>{p.classList.toggle('ml-filter',!!term&&!((p.dataset.package||'').toLowerCase().includes(term)||[...p.querySelectorAll('button[data-scenario]')].some(b=>(b.title+' '+b.value).toLowerCase().includes(term))));});document.querySelectorAll('#set-content button[data-scenario]').forEach(b=>{b.classList.toggle('ml-filter',!!term&&!(q('#set-images>.set.click')?.dataset.package||'').toLowerCase().includes(term)&&!(b.title+' '+b.value).toLowerCase().includes(term));});}
-  function annotate(){document.querySelectorAll('#set-content button[data-scenario],#split-scenarios button[data-scenario]').forEach(b=>{try{const d=JSON.parse(b.dataset.scenario);b.dataset.caption=d.name||b.value;b.dataset.mode=d.expert?'전문가':'일반';b.setAttribute('aria-label',b.dataset.caption+' '+b.dataset.mode);}catch{}});filter();}
+  function annotate(){document.querySelectorAll('#set-content button[data-scenario],#split-scenarios button[data-scenario]').forEach(b=>{try{const d=JSON.parse(b.dataset.scenario);b.dataset.caption=d.name||b.value;b.dataset.mode=d.expert?'전문가':'일반';b.setAttribute('aria-label',b.dataset.caption+' '+b.dataset.mode);}catch{}});addPreviewIcons();filter();}
   search.oninput=filter;
   const hleft=el('div','ml-scroll'),hright=el('aside','ml-scroll ml-detail'),hsearch=el('input','ml-search');hsearch.type='search';hsearch.placeholder='히어로 / 덱 검색';
   const tabs=el('div','ml-tabs'),grid=el('div','ml-grid'),status=el('p','ml-muted','덱 목록을 준비합니다.'),himage=el('img','ml-big'),hname=el('h2','','히어로 선택'),hinfo=el('p','ml-muted'),slots=el('div','ml-slots');himage.alt='';
@@ -58,13 +105,13 @@
   hsearch.oninput=render;
   const oldScenario=SetScenario;SetScenario=function(...a){const r=oldScenario.apply(this,a);queueMicrotask(refresh);return r;};
   const oldHero=SetHero;SetHero=function(...a){const r=oldHero.apply(this,a);queueMicrotask(refresh);return r;};
-  const observer=new MutationObserver(()=>{annotate();refresh();});observer.observe(q('#set-content'),{childList:true,subtree:true});observer.observe(q('#split-scenarios'),{childList:true,subtree:true});
+  const observer=new MutationObserver(()=>{annotate();refresh();});observer.observe(q('#set-content'),{childList:true,subtree:true});observer.observe(q('#split-scenarios'),{childList:true,subtree:true});observer.observe(q('#encounter-sets'),{childList:true,subtree:true});observer.observe(q('#modular-sets'),{childList:true,subtree:true});
   [left,right].forEach(x=>x.addEventListener('click',()=>queueMicrotask(refresh)));
   function ready(){catalogReady=true;const sets=[...document.querySelectorAll('#set-images>.set:not(.disable)')];catalogStatus.textContent=sets.length?'확장팩을 선택한 다음 빌런 카드를 선택하세요.':'사용 가능한 시나리오가 없습니다.';if(!q('#set-images>.set.click')&&sets.length&&!scenario)sets[0].click();annotate();refresh();}
   function failed(){catalogStatus.textContent='시나리오 목록을 불러오지 못했습니다.';catalogStatus.append(button('다시 시도',()=>location.reload()));}
   window.addEventListener('setup-catalog-ready',ready);
   window.addEventListener('setup-catalog-error',failed);
   if(catalogReady)ready();else if(window.setupCatalogError)failed();
-  window.MarvelSetup={back:()=>{if(stage){go(stage-1);return true;}return false;}};
+  window.MarvelSetup={back:()=>{if(preview.open){preview.close();return true;}if(stage){go(stage-1);return true;}return false;}};
   image(himage,'');annotate();go(0);
 })();

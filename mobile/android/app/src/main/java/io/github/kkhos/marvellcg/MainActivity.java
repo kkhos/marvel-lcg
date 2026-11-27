@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Build;
 import android.view.WindowInsets;
 import android.graphics.Insets;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.net.Uri;
@@ -40,7 +41,7 @@ public class MainActivity extends Activity {
     private TextView status;
     private Button start;
     private Button back;
-    private static final String UI_REVISION = "11";
+    private static final String UI_REVISION = "12";
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -61,6 +62,19 @@ public class MainActivity extends Activity {
         web.getSettings().setAllowFileAccess(false);
         web.getSettings().setAllowContentAccess(false);
         web.setWebViewClient(new WebViewClient() {
+            @Override public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                if (back != null) back.setVisibility(View.VISIBLE);
+            }
+            @Override public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+                // Hide the redundant native overlay only when the wizard initialized.
+                view.evaluateJavascript("!!window.MarvelSetup", result -> {
+                    if (!isDestroyed() && url.equals(view.getUrl()) && back != null) {
+                        back.setVisibility("true".equals(result) ? View.GONE : View.VISIBLE);
+                    }
+                });
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri u = request.getUrl();
                 return !("http".equals(u.getScheme()) && "127.0.0.1".equals(u.getHost()) && u.getPort() == 2345);

@@ -348,7 +348,7 @@
 
         <div id="set-content">
             <label for="scenario-1" style="width: fit-content;">
-                <input id="scenario-1" type="file" name="scenario" accept=".json" onclick="Reset(this)" onchange="Load(this)" />
+                <input id="scenario-1" type="file" name="scenario" accept=".json" onclick="this.value = ''" onchange="Load(this)" />
                 <img id="img-scenario">
             </label>
         </div>
@@ -953,19 +953,19 @@ async function createSets() {
         <legend>히어로</legend>
         <div style="display: flex; flex-direction: row; gap:5px">
             <label for="heroes-1">
-            <input id="heroes-1" type="file" name="heroes" accept=".json" onclick="Reset(this)" onchange="Load(this)"/>
+            <input id="heroes-1" type="file" name="heroes" accept=".json" onclick="this.value = ''" onchange="Load(this)"/>
             <img id="img-heroes-1">
             </label>
             <label for="heroes-2">
-            <input id="heroes-2" type="file" name="heroes" accept=".json" onclick="Reset(this)" onchange="Load(this)"/>
+            <input id="heroes-2" type="file" name="heroes" accept=".json" onclick="this.value = ''" onchange="Load(this)"/>
             <img id="img-heroes-2">
             </label>
             <label for="heroes-3">
-            <input id="heroes-3" type="file" name="heroes" accept=".json" onclick="Reset(this)" onchange="Load(this)"/>
+            <input id="heroes-3" type="file" name="heroes" accept=".json" onclick="this.value = ''" onchange="Load(this)"/>
             <img id="img-heroes-3">
             </label>
             <label for="heroes-4">
-            <input id="heroes-4" type="file" name="heroes" accept=".json" onclick="Reset(this)" onchange="Load(this)"/>
+            <input id="heroes-4" type="file" name="heroes" accept=".json" onclick="this.value = ''" onchange="Load(this)"/>
             <img id="img-heroes-4">
             </label>
         </div>
@@ -2317,7 +2317,21 @@ p:has(#timeout_text) {
         }
 
         async function Load(e) {
-            let j = await LoadJson(e)
+            // Cancelling the chooser must not clear the current selection.
+            if (!e.files?.length) return;
+            let j;
+            try {
+                j = await LoadJson(e);
+                const type = get_this_type(e);
+                if (!j || typeof j !== 'object' ||
+                    (type === 'player' && (!Array.isArray(j.hero) || !j.hero.length || !Array.isArray(j.player_deck))) ||
+                    (type === 'villain' && (!Array.isArray(j.villain) || !Array.isArray(j.schemes) || !Array.isArray(j.encounters) || !Array.isArray(j.encounter_sets) || !Array.isArray(j.modular_sets)))) {
+                    throw new Error('Invalid deck or scenario');
+                }
+            } catch (error) {
+                alert('올바른 시나리오 또는 덱 JSON 파일을 선택하세요.');
+                return;
+            }
             let i = get_id(e)
             if( get_this_type(e) == 'player' ) {
                 SetHero(j, i)
