@@ -225,6 +225,10 @@ class MobileRegression(unittest.TestCase):
         for card in hand.all():
             self.bounds(card)
         self.assertTrue(self.page.evaluate("""() => [...document.querySelectorAll('#player-all-hand-cards .card:not(.hide)')].every(c => c.style.getPropertyValue('--hand-angle') !== '')"""))
+        self.assertEqual(self.page.evaluate("""() => [
+            parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-width')),
+            parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-height'))
+        ]"""), [145, 200])
         self.screenshot("hand")
         # The desktop top piles deliberately use negative board coordinates.
         # Mobile must put real top cards entirely inside the camera clip.
@@ -350,13 +354,23 @@ class MobileRegression(unittest.TestCase):
                 const h = document.getElementById('mobile-progress-bar').getBoundingClientRect();
                 return b.width > 0 && b.right <= innerWidth + 1 && b.right > r.left &&
                     b.top >= h.bottom - 1 && b.bottom <= innerHeight + 1 &&
-                    r.width <= 131 && h.height <= 34;
+                    r.width <= 131 && h.height <= 44;
             }""")
             prompt = self.page.locator("#prompt-box-container")
             options = self.page.locator("#option-buttons")
             ok = self.page.locator("#btn-ok")
             for element in [prompt, options, ok]:
                 self.bounds(element)
+            self.page.evaluate("""() => {
+                const p = document.getElementById('prompt-box-container');
+                const t = document.getElementById('prompt-text');
+                const pr = p.getBoundingClientRect(), tr = t.getBoundingClientRect();
+                if (tr.top < pr.top || tr.bottom > pr.bottom + 1 || t.scrollHeight <= t.clientHeight)
+                    throw new Error('Long mobile prompt must start at the top and scroll');
+                t.scrollTop = t.scrollHeight;
+                if (t.scrollTop <= 0) throw new Error('Prompt cannot scroll');
+                t.scrollTop = 0;
+            }""")
             p, o, c = prompt.bounding_box(), options.bounding_box(), ok.bounding_box()
             self.assertLessEqual(p["y"] + p["height"], o["y"] + 1)
             self.assertLessEqual(o["y"] + o["height"], c["y"] + 1)

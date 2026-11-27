@@ -11,6 +11,11 @@ export class MoveCard {
     static cardWidth = parseFloat(MoveCard.rootStyles.getPropertyValue('--card-width'));
     static cardHeight = parseFloat(MoveCard.rootStyles.getPropertyValue('--card-height'));
 
+    static refreshCardSize() {
+        MoveCard.cardWidth = parseFloat(MoveCard.rootStyles.getPropertyValue('--card-width'));
+        MoveCard.cardHeight = parseFloat(MoveCard.rootStyles.getPropertyValue('--card-height'));
+    }
+
     static timer: Record<string, number> = {}
     static updating_area: Set<HTMLElement> = new Set()
     static updating_in_deck_cards: Set<HTMLElement> = new Set()
@@ -37,11 +42,11 @@ export class MoveCard {
         const sceneWidth = parseFloat(MoveCard.rootStyles.getPropertyValue('--scene-width'));
         if (parent.id === 'player-all-hand-cards' && document.body.classList.contains('mobile-layout')) {
             const n = shown_cards_els.length;
-            const step = Math.min(142, (sceneWidth - 660) / Math.max(1, n - 1));
+            const step = Math.min(164, (sceneWidth - 720) / Math.max(1, n - 1));
             shown_cards_els.forEach((card, i) => {
                 const d = n > 1 ? (i - (n - 1) / 2) / ((n - 1) / 2) : 0;
                 card.style.setProperty('--x', String(Math.round((sceneWidth - MoveCard.cardWidth) / 2 + (i - (n - 1) / 2) * step)));
-                card.style.setProperty('--y', String(Math.round(850 + 22 * d * d)));
+                card.style.setProperty('--y', String(Math.round(850 + 8 * d * d)));
                 card.style.setProperty('--hand-angle', `${d * 10}deg`);
             });
             return;
@@ -215,11 +220,16 @@ export class MoveCard {
         let offset_x = 0;
         let over_screen = false;
         if (parent.classList.contains('area-center')) {
+            // Two independent lanes for allies and supports keep the hero row clear.
+            const mobile = document.body.classList.contains('mobile-layout');
+            const split = mobile && (parent.id === 'player-all-allies' || parent.id === 'player-all-supports');
+            const laneCenter = split ? sceneWidth * (parent.id === 'player-all-supports' ? .29 : .67) : sceneWidth * .5;
+            if (split) sceneWidth2 = sceneWidth * .30;
             if (all_cards_width > sceneWidth2) {
                 all_cards_width = sceneWidth2;
                 over_screen = true;
             }
-            offset_x = Math.round((sceneWidth - all_cards_width) * 0.5);
+            offset_x = Math.round(laneCenter - all_cards_width * 0.5);
             if (offset_x.toString() !== parent.style.getPropertyValue('--x')) {
                 parent.style.setProperty('--x', offset_x.toString());
             }

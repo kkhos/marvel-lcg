@@ -5,10 +5,10 @@ body.mobile-layout {
     --card-scale-active: 1;
 }
 body.mobile-layout #area-villain { --y: 12; }
-body.mobile-layout #player-all-engaged-minions { --y: 185; }
-body.mobile-layout #player-all-allies { --y: 360; }
-body.mobile-layout #player-all-supports { --y: 535; }
-body.mobile-layout #player-all-area-hero { --y: 710; }
+body.mobile-layout #player-all-engaged-minions { --y: 215; }
+body.mobile-layout #player-all-allies { --y: 420; }
+body.mobile-layout #player-all-supports { --y: 420; }
+body.mobile-layout #player-all-area-hero { --y: 625; }
 body.mobile-layout #player-all-hand-cards { --y: 885; --total-deg: 0deg; }
 body.mobile-layout #player-all-hand-cards .card,
 body.mobile-layout #player-all-hand-cards:hover .card {
@@ -117,7 +117,7 @@ body.mobile-layout {
     --mobile-vp-top: 0px;
     --mobile-vp-width: 100vw;
     --mobile-vp-height: 100dvh;
-    --mobile-header-height: 34px;
+    --mobile-header-height: 44px;
     --mobile-controls-width: clamp(104px, 14vw, 130px);
     --mobile-settings-space: 48px;
 }
@@ -223,7 +223,7 @@ body.mobile-layout > #right-side-bar-handle {
     min-width: 60px; min-height: 36px; padding: 4px 8px; box-sizing: border-box;
 }
 @media (max-height: 340px) {
-    body.mobile-layout { --mobile-header-height: 30px; --mobile-settings-space: 44px; }
+    body.mobile-layout { --mobile-header-height: 40px; --mobile-settings-space: 44px; }
     body.mobile-layout #mobile-action-rail { gap: 3px; }
     body.mobile-layout #mobile-action-confirm > .button { min-height: 32px; }
 }
@@ -239,11 +239,11 @@ body.mobile-layout #scene #nemesis-pool,
 body.mobile-layout #scene #area-advanced {
     --y: 36;
 }
-body.mobile-layout #scene .encounter-discard-pile { --y: 232; }
+body.mobile-layout #scene .encounter-discard-pile { --y: 252; }
 /* Reserve the upper-right row for set-aside piles; the main scheme and
    its attachments begin below it with enough room for a vertical card. */
-body.mobile-layout #scene #area-schemes-main { --y: 250; }
-body.mobile-layout #scene #area-schemes-side { --y: 450; }
+body.mobile-layout #scene #area-schemes-main { --y: 280; }
+body.mobile-layout #scene #area-schemes-side { --y: 510; }
 
 /* Floating controls do not reserve a column. Keep the upper-right piles
    above the action buttons, and leave the transparent container inert. */
@@ -262,14 +262,14 @@ body.mobile-layout #mobile-progress-bar #prompt-box-container {
 body.mobile-layout #player-all-hand-cards .card,
 body.mobile-layout #player-all-hand-cards:hover .card {
     --top: calc(var(--y) * 1px) !important;
-    transform: translate3d(var(--left),var(--top),var(--t-z)) rotate(var(--hand-angle,0deg)) scale(1.16);
+    transform: translate3d(var(--left),var(--top),var(--t-z)) rotate(var(--hand-angle,0deg)) scale(1.10);
     transform-origin: center bottom;
 }
 body.mobile-layout #player-all-hand-cards .card.selected {
-    transform: translate3d(var(--left),calc(var(--top) - 42px),var(--t-z)) rotate(0deg) scale(1.16);
+    transform: translate3d(var(--left),calc(var(--top) - 20px),var(--t-z)) rotate(0deg) scale(1.10);
     z-index: 5;
 }
-body.mobile-layout #player-all-area-hero { --y: 650; }
+body.mobile-layout #player-all-area-hero { --y: 625; }
 
 /* Keep compact game typography local to the overlay. Card images are unchanged. */
 body.mobile-layout #mobile-action-rail #option-buttons > .button,
@@ -281,4 +281,28 @@ body.mobile-layout > #right-side-bar-handle {
 }
 body.mobile-layout #mobile-progress-bar #prompt-box-close {
     height: 26px; width: 24px; line-height: 26px;
+}
+
+/* Larger physical cards and a top-aligned, independently scrollable prompt. */
+:root:has(body.mobile-layout) {
+    --card-width: 145px;
+    --card-height: 200px;
+}
+body.mobile-layout #mobile-progress-bar #prompt-box-container {
+    display: block;
+    overflow: hidden;
+    padding: 3px 26px 3px 8px;
+    cursor: default;
+}
+body.mobile-layout #mobile-progress-bar #prompt-box-container.hide { display: none; }
+body.mobile-layout #mobile-progress-bar #prompt-box-container:has(#prompt-box-lock.locked) {
+    pointer-events: auto;
+}
+body.mobile-layout #mobile-progress-bar #prompt-text {
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+    line-height: 1.25;
 }

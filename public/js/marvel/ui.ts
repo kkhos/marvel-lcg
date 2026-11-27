@@ -212,6 +212,9 @@ class PromptBox {
                 PromptBox.prompt_text_div.innerHTML = koHtml(PromptBox.prompt_text + "<hr/>" + text)
                 // PromptBox.prompt_text_div.classList.add('none-events')
             }
+            if (document.body.classList.contains('mobile-layout')) {
+                PromptBox.prompt_text_div.scrollTop = 0;
+            }
             PromptBox.restartPromptTextAnimation()
             PromptBox.prompt_box_div.classList.remove('hide')
             if( PromptBox.prompt_box_lock.classList.contains('locked') ) {

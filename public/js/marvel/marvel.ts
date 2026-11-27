@@ -61,11 +61,13 @@ import { TouchControls } from './touch-controls.js';
 import { Client } from './client.js';
 
 import { Scene } from './scene.js';
+import { MoveCard } from './move-card.js';
 import { AutoActivate } from './auto_activate.js';
 import { ErrorDialog } from './error_dialog.js';
 import { Message } from './message.js';
 import { FullSearchPresentation } from './full_search_presentation.js';
 Scene.init()
+MoveCard.refreshCardSize()
 
 UI.init()
 ErrorDialog.init()

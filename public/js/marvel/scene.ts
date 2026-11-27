@@ -129,8 +129,8 @@ export function adjustSceneScale() {
         document.documentElement.style.setProperty('--scene-width', String(Scene.mobileBoardWidth));
         // Give each upper-right pile room even for a landscape scheme card.
         const anchors: Record<string, number> = {
-            'victory-display': 760, 'area-removed': 570, 'removed-pool': 570,
-            'nemesis-pool': 380, 'area-advanced': 190,
+            'victory-display': 880, 'area-removed': 660, 'removed-pool': 660,
+            'nemesis-pool': 440, 'area-advanced': 220,
             'area-schemes-main': 40, 'area-schemes-side': 40
         };
         for (const [id, inset] of Object.entries(anchors)) {
