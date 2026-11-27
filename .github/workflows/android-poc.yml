@@ -23,11 +23,45 @@ permissions:
   contents: read
 
 jobs:
+  pin-backdrop:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    outputs:
+      source: ${{ steps.pin.outputs.source }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pin existing splash artwork once
+        id: pin
+        shell: bash
+        run: |
+          set -euo pipefail
+          dest=mobile/android/app/src/main/assets/splash/doom.webp
+          if [[ ! -s "$dest" ]]; then
+            [[ "$GITHUB_REF" == refs/heads/mobile/android-poc ]]
+            curl --fail --location --retry 2 --connect-timeout 10 --max-time 45 \
+              'https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/002085A1CE8A7388B940AF1093C7A3D1B8A3B0C17A424070D7AE2D25D701C2D1/compose?format=webp&width=2560' -o "$dest.tmp"
+            python -c 'import sys; d=open(sys.argv[1],"rb").read(12); assert d[:4]==b"RIFF" and d[8:12]==b"WEBP"' "$dest.tmp"
+            mv "$dest.tmp" "$dest"
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git add -- "$dest"
+            git commit -m "Pin Doom splash artwork for offline builds"
+            git push origin HEAD:refs/heads/mobile/android-poc
+          fi
+          echo "source=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
   mobile-ui:
+    needs: pin-backdrop
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pin-backdrop.outputs.source }}
+          persist-credentials: false
+      - name: Stage checked-in home background for UI tests
+        run: cp mobile/android/app/src/main/assets/splash/doom.webp public/images/home/doom.webp
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -57,11 +91,14 @@ jobs:
           if-no-files-found: warn
           retention-days: 7
   assemble:
-    needs: mobile-ui
+    needs: [pin-backdrop, mobile-ui]
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.pin-backdrop.outputs.source }}
+          persist-credentials: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -102,20 +139,8 @@ jobs:
           printf '%s' "$ANDROID_DEBUG_KEYSTORE_BASE64" | base64 --decode > "$key"
           keytool -list -keystore "$key" -storepass android -alias androiddebugkey >/dev/null
           echo "MARVEL_DEBUG_KEYSTORE_PATH=$key" >> "$GITHUB_ENV"
-      - name: Prepare optional offline splash backdrop
-        shell: bash
-        run: |
-          set -eu
-          dest=mobile/android/app/src/main/assets/splash/doom.webp
-          if curl --fail --location --retry 1 --connect-timeout 8 --max-time 25 \
-              'https://disney.images.edge.bamgrid.com/ripcut-delivery/v2/variant/disney/002085A1CE8A7388B940AF1093C7A3D1B8A3B0C17A424070D7AE2D25D701C2D1/compose?format=webp&width=2560' -o "$dest.tmp" && \
-              python -c 'import sys; d=open(sys.argv[1],"rb").read(12); assert d[:4]==b"RIFF" and d[8:12]==b"WEBP"' "$dest.tmp"; then
-            mv "$dest.tmp" "$dest"
-            echo "Doom backdrop bundled for offline startup."
-          else
-            rm -f "$dest.tmp"
-            echo "::warning::Doom backdrop unavailable; using built-in green gradient."
-          fi
+      - name: Verify checked-in splash backdrop
+        run: test -s mobile/android/app/src/main/assets/splash/doom.webp
       - name: Assemble Android APK (retry transient repository failures)
         shell: bash
         run: |
@@ -133,7 +158,7 @@ jobs:
           done
       - name: Verify bundled splash assets
         run: |
-          python -c 'import zipfile,struct,hashlib; z=zipfile.ZipFile("mobile/android/app/build/outputs/apk/debug/app-debug.apk"); p=z.read("assets/splash/champions.png"); assert struct.unpack(">II",p[16:24])==(804,435); assert hashlib.sha256(p).hexdigest()=="490c4c9672cb57fe0e15201096a68aac25bd8c2bbe1703b8e9b2007676d945e2"; print("High-resolution logo verified; Doom backdrop bundled:", "assets/splash/doom.webp" in z.namelist())'
+          python -c 'import zipfile,struct,hashlib; z=zipfile.ZipFile("mobile/android/app/build/outputs/apk/debug/app-debug.apk"); p=z.read("assets/splash/champions.png"); assert struct.unpack(">II",p[16:24])==(804,435); assert hashlib.sha256(p).hexdigest()=="490c4c9672cb57fe0e15201096a68aac25bd8c2bbe1703b8e9b2007676d945e2"; import io; d=z.read("assets/splash/doom.webp"); game=zipfile.ZipFile(io.BytesIO(z.read("assets/game.zip"))); assert d==game.read("public/images/home/doom.webp"); print("High-resolution logo and shared offline background verified")'
       - name: Verify APK signing certificate
         shell: bash
         run: |

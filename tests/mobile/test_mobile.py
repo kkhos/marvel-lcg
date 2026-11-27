@@ -118,6 +118,13 @@ class MobileRegression(unittest.TestCase):
             return img.complete && img.naturalWidth === 804 && img.naturalHeight === 435;
         }""")
         self.bounds(logo)
+        backdrop = Path(__file__).resolve().parents[2] / "public/images/home/doom.webp"
+        if backdrop.exists():
+            response = self.context.request.get(BASE + "/public/images/home/doom.webp")
+            self.assertTrue(response.ok)
+            self.assertEqual(response.body(), backdrop.read_bytes())
+        self.assertEqual(self.page.locator("body").evaluate(
+            "(el) => getComputedStyle(el).getPropertyValue('--mc-accent').trim()"), "#2e6b57")
         buttons = self.page.locator(".main .custom-btn")
         expect(buttons).to_have_count(8)
         for button in buttons.all():
@@ -211,6 +218,8 @@ class MobileRegression(unittest.TestCase):
 
     def test_scenario_selection_and_preview(self):
         rhino = self.open_setup()
+        self.assertEqual(self.page.locator("body").evaluate(
+            "(el) => getComputedStyle(el).getPropertyValue('--mc-accent').trim()"), "#2e6b57")
         self.screenshot("scenario")
         expect(self.page.locator(".ml-header button")).to_have_count(0)
         self.assertEqual(self.page.get_by_role("button", name="시나리오 파일 가져오기").count(), 0)

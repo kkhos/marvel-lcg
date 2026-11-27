@@ -1,3 +1,9 @@
+:root {
+    --mc-bg: #0b1612; --mc-panel: #172a23;
+    --mc-control: #30493e; --mc-border: #527b63;
+    --mc-accent: #2e6b57; --mc-highlight: #72d7a3;
+    --mc-text: #e8f1eb;
+}
 /* Shared visual identity with the native startup screen. */
 * { box-sizing: border-box; }
 html { min-height: 100%; background: #080e0c; color-scheme: dark; }
@@ -5,7 +11,7 @@ body {
     min-height: 100vh; min-height: 100dvh; margin: 0;
     display: flex; align-items: center; justify-content: center;
     padding: clamp(12px, 3vw, 36px);
-    background-color: #0b1612;
+    background-color: var(--mc-bg);
     background-image:
         linear-gradient(90deg, rgba(5,12,10,.32), rgba(5,12,10,.70) 44%, rgba(5,12,10,.94) 100%),
         linear-gradient(0deg, rgba(5,12,10,.85), transparent 65%),

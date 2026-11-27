@@ -1,7 +1,7 @@
 #preview #prev:hover,
 #preview #next:hover
 {
-    background-color: #383838;
+    background-color: #172a23;
 }
 #preview #prev,
 #preview #next
@@ -18,7 +18,7 @@
     padding: 10px 20px;
     font-size: 3rem;
     color: black;
-    background-color: #5c5c5c;
+    background-color: #30493e;
     border: none;
     border-radius: 5px;
     cursor: pointer;

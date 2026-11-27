@@ -41,13 +41,13 @@ export function showArtworkPreparation(retry: () => void): void {
     const notice = document.createElement('aside');
     notice.id = 'artwork-selection-notice';
     notice.setAttribute('role', 'status');
-    notice.style.cssText = 'position:fixed;right:20px;bottom:20px;max-width:420px;padding:20px;background:#253244;color:white;border:1px solid #80d5ff;border-radius:8px;z-index:99999;font:16px Arial;box-shadow:0 8px 30px #0008';
+    notice.style.cssText = 'position:fixed;right:20px;bottom:20px;max-width:420px;padding:20px;background:#172a23;color:white;border:1px solid #a5e5c6;border-radius:8px;z-index:99999;font:16px Arial;box-shadow:0 8px 30px #0008';
     const message = document.createElement('p');
     message.textContent = '선택한 카드의 이미지를 준비 중입니다. 선택은 유지됩니다. 준비 완료 후 다시 시도하세요.';
     notice.appendChild(message);
     const link = document.createElement('a');
     link.href = '/artwork'; link.target = '_blank'; link.rel = 'noopener';
-    link.textContent = '이미지 준비 상태'; link.style.color = '#80d5ff';
+    link.textContent = '이미지 준비 상태'; link.style.color = '#a5e5c6';
     notice.appendChild(link);
     for (const [label, action] of [
         ['선택 다시 시도', () => { notice.remove(); retry(); }],

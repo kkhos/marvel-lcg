@@ -111,7 +111,7 @@ function doReplay(file_name) {
 }
     </script>
 
-<dialog id="saved-games" style="background:#192542;color:white;border:1px solid #7285c3;border-radius:12px;width:min(80vw,650px);max-height:85dvh;overflow:auto">
+<dialog id="saved-games" style="background:#172a23;color:white;border:1px solid #759b85;border-radius:12px;width:min(80vw,650px);max-height:85dvh;overflow:auto">
 <h2 style="margin:0 0 8px">저장 게임</h2><div id="save-list"></div>
 <section id="save-delete-confirm" hidden style="padding:12px;border:1px solid #c07782;border-radius:8px;background:#382333">
  <p id="save-delete-message"></p><p>삭제한 저장 게임은 복구할 수 없습니다.</p>
@@ -140,7 +140,7 @@ async function showSaves(){
   const res=await fetch('/mobile_save_slots',{cache:'no-store'});if(!res.ok)throw Error();
   const slots=await res.json();status.textContent='';
   for(const s of slots){
-   const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid #526080';
+   const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:10px;padding:8px;border-bottom:1px solid #527b63';
    const label=document.createElement('div');label.style.flex='1';label.textContent=(s.slot===0?'빠른 저장':'저장 '+s.slot)+(s.exists?' · '+new Date(s.modified*1000).toLocaleString():' · 비어 있음');row.append(label);
    for(const [name,action] of [['이어하기','resume'],['삭제','delete']]){
     const b=document.createElement('button');b.textContent=name;b.disabled=!s.exists;b.style.cssText='min-height:40px;padding:6px 12px';b.onclick=async()=>{

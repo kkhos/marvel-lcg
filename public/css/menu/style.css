@@ -400,3 +400,8 @@ button:hover{
     cursor: pointer;
 }
 
+
+/* Green chrome only; card/aspect/status colors remain unchanged. */
+body { background-color: #0b1612; color: #e8f1eb; }
+fieldset { border-color: #527b63; }
+button:not(:has(img)), input[type=button], select { accent-color: #2e6b57; }

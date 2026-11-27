@@ -23,7 +23,7 @@ export class TouchControls {
         const style = document.createElement('style');
         style.textContent = `
             #scene .card { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
-            #touch-preview { background: #18222c; color: white; border: 1px solid #a0b4c8; border-radius: 12px;
+            #touch-preview { background: #172a23; color: white; border: 1px solid #83b79a; border-radius: 12px;
                 max-width: 90vw; max-height: 90vh; padding: 10px; overflow: auto; }
             #touch-preview::backdrop { background: #000b; }
             #touch-preview img { display: block; height: min(74vh, 600px); max-width: 78vw; object-fit: contain; margin: auto; }
@@ -31,14 +31,14 @@ export class TouchControls {
             #touch-preview .touch-card-body img { max-width:42vw; height:min(65dvh,500px); flex:0 0 auto; }
             #touch-preview .touch-card-text { width:min(42vw,450px); min-width:0; max-height:65dvh; overflow:auto; font:15px/1.5 system-ui,sans-serif; white-space:pre-wrap; overflow-wrap:anywhere; }
             #touch-preview .touch-card-title { display:block; font-size:19px; margin-bottom:8px; }
-            #touch-preview .touch-card-source { display:block; color:#b9c9dd; font-size:11px; margin-top:10px; }
+            #touch-preview .touch-card-source { display:block; color:#b9d4c3; font-size:11px; margin-top:10px; }
             #touch-preview .touch-buttons { display: flex; gap: 8px; justify-content: center; margin-top: 6px; }
             #touch-preview button { min-height: 44px; padding: 5px 16px; font-size: 16px; }
             #touch-drag-ghost { position: fixed; pointer-events: none; z-index: 2147483646; width: 86px; height: 120px;
-                background: #24384c center / contain no-repeat; border: 2px solid #9cd8ff; border-radius: 6px; opacity: .86;
+                background: #263e33 center / contain no-repeat; border: 2px solid #a5e5c6; border-radius: 6px; opacity: .86;
                 transform: translate(-50%, -70%); }
             #touch-drop-zone { position: fixed; z-index: 2147483645; top: 8px; left: 50%; transform: translateX(-50%);
-                background: #24384c; border: 2px dashed #9cd8ff; border-radius: 10px; color: white;
+                background: #263e33; border: 2px dashed #a5e5c6; border-radius: 10px; color: white;
                 padding: 14px 24px; font: bold 16px Arial; }
         `;
         document.head.append(style);
@@ -103,7 +103,7 @@ export class TouchControls {
 
         const pile = document.createElement('dialog');
         pile.id = 'touch-pile';
-        pile.style.cssText = 'background:#18222c;color:white;border:1px solid #a0b4c8;border-radius:12px;width:min(80vw,760px);max-height:85dvh;overflow:auto;padding:12px';
+        pile.style.cssText = 'background:#172a23;color:white;border:1px solid #83b79a;border-radius:12px;width:min(80vw,760px);max-height:85dvh;overflow:auto;padding:12px';
         const pileTitle = document.createElement('h3');
         const pileList = document.createElement('div');
         pileList.style.cssText = 'display:flex;gap:10px;overflow-x:auto;touch-action:pan-x;padding:8px';
