@@ -35,10 +35,24 @@ export class TouchControls {
             #touch-preview .touch-card-title { display:block; font-size:19px; margin-bottom:8px; }
             #touch-preview .touch-card-source { display:block; color:#b9d4c3; font-size:11px; margin-top:10px; }
             #touch-preview .touch-buttons { display: flex; gap: 8px; justify-content: center; margin-top: 6px; }
-            #touch-preview button, #touch-pile > button { min-height: 44px; padding: 5px 16px;
+            #touch-preview button, #touch-pile .touch-pile-close { min-height: 44px; padding: 5px 16px;
                 font: 700 15px/1.25 system-ui,sans-serif; color: #f1f6f3; background: #30493e;
                 border: 1px solid #83b79a; border-radius: 7px; }
             #touch-preview button[hidden] { display: none !important; }
+            #touch-pile { position:fixed; inset:0; margin:auto; box-sizing:border-box; width:min(80vw,760px);
+                height:fit-content; max-height:85dvh; padding:10px; overflow:hidden; background:#172a23;
+                color:#f1f6f3; border:1px solid #83b79a; border-radius:12px; font:14px/1.3 system-ui,sans-serif; }
+            #touch-pile[open] { display:flex; flex-direction:column; gap:6px; }
+            #touch-pile::backdrop { background:#0008; }
+            #touch-pile .touch-pile-header { display:flex; flex:0 0 auto; align-items:center; justify-content:space-between;
+                gap:8px; padding:0 2px 6px; border-bottom:1px solid #527b63; }
+            #touch-pile .touch-pile-title { margin:0; padding:0; color:inherit; font:750 18px/1.3 system-ui,sans-serif; }
+            #touch-pile .touch-pile-close { flex:none; min-height:36px; padding:4px 10px; font-size:13px; }
+            #touch-pile .touch-pile-list { display:flex; gap:10px; min-height:0; overflow-x:auto; overflow-y:hidden;
+                touch-action:pan-x; padding:6px 2px; }
+            #touch-pile .touch-pile-list > button { flex:0 0 auto; background:transparent; border:0; padding:2px;
+                cursor:pointer; touch-action:pan-x; }
+            #touch-pile .touch-pile-list img { height:min(48dvh,230px); width:auto; display:block; }
             #touch-drag-ghost { position: fixed; pointer-events: none; z-index: 2147483646; width: 86px; height: 120px;
                 background: #263e33 center / contain no-repeat; border: 2px solid #a5e5c6; border-radius: 6px; opacity: .86;
                 transform: translate(-50%, -70%); }
@@ -111,14 +125,21 @@ export class TouchControls {
 
         const pile = document.createElement('dialog');
         pile.id = 'touch-pile';
-        pile.style.cssText = 'position:fixed;inset:0;margin:auto;box-sizing:border-box;height:fit-content;background:#172a23;color:white;border:1px solid #83b79a;border-radius:12px;width:min(80vw,760px);max-height:85dvh;overflow:auto;padding:12px';
+        const pileHeader = document.createElement('header');
+        pileHeader.className = 'touch-pile-header';
         const pileTitle = document.createElement('h3');
+        pileTitle.id = 'touch-pile-title';
+        pileTitle.className = 'touch-pile-title';
+        pile.setAttribute('aria-labelledby', pileTitle.id);
         const pileList = document.createElement('div');
-        pileList.style.cssText = 'display:flex;gap:10px;overflow-x:auto;touch-action:pan-x;padding:8px';
+        pileList.className = 'touch-pile-list';
         const pileClose = document.createElement('button');
-        pileClose.textContent = '닫기';
+        pileClose.type = 'button';
+        pileClose.className = 'touch-pile-close';
+        pileClose.textContent = '닫기 ×';
         pileClose.onclick = () => pile.close();
-        pile.append(pileTitle, pileList, pileClose);
+        pileHeader.append(pileTitle, pileClose);
+        pile.append(pileHeader, pileList);
         document.body.append(pile);
         pile.addEventListener('close', () => {
             pileList.querySelectorAll('img').forEach(image => CardImages.setImage(image, ''));
@@ -140,10 +161,10 @@ export class TouchControls {
             for (const card of visible) {
                 const data = Cards.getCard(Number(card.dataset.id))!;
                 const button = document.createElement('button');
-                button.style.cssText = 'flex:0 0 auto;background:transparent;border:0;padding:2px';
+                button.type = 'button';
                 const image = document.createElement('img');
                 image.alt = koCard(data.card_id)?.name ?? data.name;
-                image.style.cssText = 'height:min(48dvh,230px);width:auto;display:block';
+
                 button.append(image);
                 CardImages.setImage(image, data.pic_id);
                 button.onclick = () => preview(card);

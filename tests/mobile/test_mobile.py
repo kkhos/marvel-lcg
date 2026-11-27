@@ -641,6 +641,20 @@ class MobileRegression(unittest.TestCase):
             }
         }""")
         self.screenshot("top-piles")
+        # Pile dialogs use compact viewport typography rather than scene-scaled headings.
+        for pool, title in [('nemesis-pool','숙적 카드'),('area-advanced','예비 카드')]:
+            self.page.locator('#'+pool).evaluate("(el) => el.click()")
+            pile = self.page.locator('#touch-pile')
+            expect(pile).to_be_visible()
+            heading = pile.get_by_role('heading', name=title)
+            expect(heading).to_be_visible()
+            self.assertEqual(heading.evaluate("(el) => getComputedStyle(el).fontSize"), '18px')
+            close = pile.get_by_role('button', name='닫기 ×')
+            self.bounds(close)
+            self.assertGreater(pile.locator('.touch-pile-list img').count(),0)
+            self.screenshot(pool)
+            close.tap()
+            expect(pile).to_be_hidden()
         self.page.locator("#right-side-bar-handle").tap()
         dialog = self.page.locator("#mobile-settings-dialog")
         expect(dialog).to_be_visible()
