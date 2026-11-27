@@ -209,3 +209,7 @@
     background-color: #e0e0e0;
 }
 
+
+#game-over-buttons button.main-menu { background-color:#2e6b57; }
+#game-over-buttons button.retry-game { background-color:#30493e; }
+#game-over-buttons button[hidden] { display:none!important; }

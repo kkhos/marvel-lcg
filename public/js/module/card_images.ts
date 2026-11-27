@@ -19,6 +19,16 @@ export class CardImages {
     private static entries = new Map<string, ImageEntry>();
     private static bindings = new WeakMap<HTMLElement, Map<string, ImageBinding>>();
 
+    static releaseAll(): void {
+        for (const entry of this.entries.values()) {
+            if (entry.timer !== undefined) window.clearTimeout(entry.timer);
+            entry.bindings.clear();
+            if (entry.imageUrl) URL.revokeObjectURL(entry.imageUrl);
+        }
+        this.entries.clear();
+        this.bindings = new WeakMap();
+    }
+
     static setImage(image: HTMLImageElement, source: string): void {
         this.bind(image, 'src', source, url => image.src = url);
     }
@@ -122,3 +132,6 @@ export class CardImages {
         }, delay * 1000 + 100);
     }
 }
+
+// Keep bfcache documents intact; unload releases all object URLs and retry timers.
+window.addEventListener('pagehide', event => { if (!event.persisted) CardImages.releaseAll(); });

@@ -486,3 +486,10 @@ body.mobile-layout #scene #encounter-deck-2,
 body.mobile-layout #scene #encounter-discard-pile-2 { --x: 350; }
 body.mobile-layout #scene #encounter-deck-3,
 body.mobile-layout #scene #encounter-discard-pile-3 { --x: 515; }
+
+/* Result navigation stays in the fixed footer on compact landscape screens. */
+body.mobile-layout #game-over-buttons button.main-menu { background:#2e6b57; border-color:#a5e5c6; }
+body.mobile-layout #game-over-buttons button.retry-game { background:#273e34; }
+body.mobile-layout #game-over-buttons button { min-width:100px; }
+body.mobile-layout #game-over-buttons button:disabled { opacity:.55; pointer-events:none; }
+body.mobile-layout #game-over-buttons button[hidden] { display:none!important; }

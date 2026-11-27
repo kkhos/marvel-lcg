@@ -32,6 +32,27 @@ class GameServerNewGame(GameServerBase):
         self.game.NewGame(new_game)
         return web.json_response({'result': "New game created"})
 
+    async def retry_finished_game(self, request: web.Request) -> web.Response:
+        # Reuse the existing restart flow, but only for the result being shown.
+        try:
+            data = await request.json()
+            game_id = data.get('game_id')
+        except Exception:
+            return web.json_response({'error': 'Invalid game ID'}, status=400)
+        game = self.game
+        if type(game_id) is not int or game_id != game.session.game_id:
+            return web.json_response({'error': '게임이 이미 변경되었습니다.'}, status=409)
+        if (not game.world or not game.world.is_game_over
+                or game.world.game_over.is_game_exit_or_undo
+                or game.state.IsRunningNewGame()
+                or self.controller_manager.replay.is_replay):
+            return web.json_response({'error': '종료된 일반 게임에서만 다시 도전할 수 있습니다.'}, status=409)
+        blocked = self.ArtworkSelectionResponse('scene', game.scene)
+        if blocked is not None:
+            return blocked
+        game.Restart(-1)
+        return web.json_response({'result': 'New game created', 'game_id': game.session.game_id})
+
     async def save_campaign_settings(self, request: web.Request) -> web.Response:
         try:
             data = await request.json()
@@ -298,6 +319,7 @@ class GameServerNewGame(GameServerBase):
         self.AddPostSecurity('/save_campaign_settings', self.save_campaign_settings)
         self.AddPostSecurity('/clear_campaign_settings', self.clear_campaign_settings)
         self.AddAwaitGetSecurity('/new_debug', self.new_debug)
+        self.AddPostSecurity('/retry_finished_game', self.retry_finished_game)
         self.AddAwaitGetSecurity('/load_replay', self.load_replay)
         self.AddAwaitGetSecurity('/resume_replay', self.resume_replay)
         self.AddPostSecurity('/continue_replay', self.continue_replay)

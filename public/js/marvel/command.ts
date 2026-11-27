@@ -24,6 +24,8 @@ export class Command {
         }
     }
 
+    static get isSavingReplay() { return Command.savingReplay; }
+
     static async saveLocal() {
         if( Command.savingReplay ) return
         Command.savingReplay = true

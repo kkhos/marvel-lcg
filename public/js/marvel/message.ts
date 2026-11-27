@@ -2,6 +2,9 @@ import { koText, koHtml, koLabel, koGameOverReason } from "./ko-game.js";
 import { Command } from "./command.js";
 import { Game } from "./game.js";
 import { Replay } from "./replay.js";
+import { Client } from "./client.js";
+import { UI } from "./ui.js";
+import { Setting } from "./settings.js";
 
 export class Message {
 
@@ -11,6 +14,9 @@ export class Message {
     private static game_over_div: HTMLElement
     private static end_messageElement: HTMLElement
     private static end_messageElementText: HTMLElement
+
+    private static retryButton: HTMLButtonElement;
+    private static leaving = false;
 
     static init() {
         Message.overlay = document.getElementById('message-overlay')!;
@@ -39,6 +45,54 @@ export class Message {
 
         game_over_buttons.appendChild(buttonShare);
         game_over_buttons.appendChild(buttonSave);
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'retry-game';
+        retry.innerHTML = '<i class="fa fa-refresh" aria-hidden="true"></i> 다시 도전';
+        retry.onclick = () => { void Message.leaveResult(true); };
+        Message.retryButton = retry;
+        const home = document.createElement('button');
+        home.type = 'button';
+        home.className = 'main-menu';
+        home.innerHTML = '<i class="fa fa-home" aria-hidden="true"></i> 메인 메뉴';
+        home.onclick = () => { void Message.leaveResult(false); };
+        game_over_buttons.append(retry,home);
+    }
+
+    private static async leaveResult(retry: boolean) {
+        if (Message.leaving) return;
+        if (Command.isSavingReplay) {
+            window.alert('리플레이 저장이 끝난 후 다시 선택해 주세요.');
+            return;
+        }
+        Message.leaving = true;
+        const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('#game-over-buttons button'));
+        buttons.forEach(b => b.disabled = true);
+        try {
+            if (retry) {
+                const response = await fetch('/retry_finished_game', {
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({game_id:UI.last_game_id})
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || '다시 도전할 수 없습니다.');
+            }
+            // A full navigation gives each attempt an independent document and
+            // cancels outstanding UI tasks. Keep the local Python server alive.
+            const target = retry ? new URL(window.location.href) : new URL('/main', window.location.origin);
+            if (retry) target.searchParams.delete('replay');
+            else {
+                const version = new URLSearchParams(window.location.search).get('v');
+                if (version) target.searchParams.set('v',version);
+            }
+            Client.disconnect();
+            window.location.replace(target.toString());
+        } catch (error) {
+            Message.leaving = false;
+            buttons.forEach(b => b.disabled = false);
+            window.alert(error instanceof Error ? error.message : '이동하지 못했습니다.');
+        }
     }
 
     static cleanGameOverMessage() {
@@ -46,6 +100,7 @@ export class Message {
     }
 
     static showGameOverMessage(text: string) {
+        Message.retryButton.hidden = Replay.is_watching || Setting.is_watch;
         Message.game_over_div.classList.add('active');
         Message.overlay.classList.remove('active');
         if( Game.players_won ) {

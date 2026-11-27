@@ -32,6 +32,7 @@ export class Client {
     private static last_turn_id    = -2
     private static last_notify_id = 0
     private static first_start_ui  = true
+    private static disconnected = false
 
     static ws = class WebSocketHandler {
         static ws: WebSocket | null = null;
@@ -39,6 +40,7 @@ export class Client {
         static isProcessing: boolean = false;
 
         static init(): void {
+            if (Client.disconnected) return;
             function getUrlParameters(url: string): string {
                 const params = url.split('?')[1];
                 return params ? params : '';
@@ -73,10 +75,10 @@ export class Client {
         }
     
         static async processQueue(): Promise<void> {
-            if (WebSocketHandler.isProcessing) return;
+            if (Client.disconnected || WebSocketHandler.isProcessing) return;
             WebSocketHandler.isProcessing = true;
     
-            while (WebSocketHandler.messageQueue.length > 0) {
+            while (!Client.disconnected && WebSocketHandler.messageQueue.length > 0) {
                 // const message = WebSocketHandler.messageQueue.shift();
                 const message = WebSocketHandler.messageQueue.pop()
                 WebSocketHandler.messageQueue.length = 0
@@ -104,11 +106,27 @@ export class Client {
         }
     }
 
+    static disconnect() {
+        Client.disconnected = true;
+        Client.ws.messageQueue.length = 0;
+        const socket = Client.ws.ws;
+        Client.ws.ws = null;
+        if (socket) {
+            socket.onopen = socket.onmessage = socket.onerror = socket.onclose = null;
+            if (socket.readyState < WebSocket.CLOSING) socket.close(1000, 'Leaving game');
+        }
+        Game.is_pause = true;
+        UI.hideAllTimerBar();
+        Music.pauseBgm();
+    }
+
     static doSyncGame() {
+        if (Client.disconnected) return;
         Client.ws.doSyncGame()
     }
 
     static doConnect() {
+        Client.disconnected = false;
         UI.last_game_id = -1
         // Game.setGameOver(false)
         if( Setting.is_hot_seat ) {

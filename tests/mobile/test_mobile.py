@@ -578,7 +578,8 @@ class MobileRegression(unittest.TestCase):
         for width, height in [(915,412), (740,360)]:
             self.page.set_viewport_size({"width":width,"height":height})
             for selector in ["#game-over-box","#game-over-text-2","#session-statistics-container",
-                             "#game-over-close","#game-over-buttons .save-replay","#game-over-buttons .share-replay"]:
+                             "#game-over-close","#game-over-buttons .save-replay","#game-over-buttons .share-replay",
+                             "#game-over-buttons .retry-game","#game-over-buttons .main-menu"]:
                 self.bounds(self.page.locator(selector))
             expect(self.page.locator("#right-side-bar-handle")).to_be_hidden()
             stats = self.page.locator("#session-statistics-container")
@@ -590,6 +591,17 @@ class MobileRegression(unittest.TestCase):
         expect(self.page.locator("#right-side-bar-handle")).to_be_visible()
         self.page.locator("#game-over-close").tap()
         expect(self.page.locator("#game-over-message")).to_be_visible()
+        # The result is synthetic: the backend must refuse restart of a live game.
+        response = self.page.evaluate("""async () => {
+            const url = performance.getEntriesByType('resource').find(e => new URL(e.name).pathname === '/public/js/marvel/ui.js').name;
+            const {UI}=await import(url);
+            const response=await fetch('/retry_finished_game',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({game_id:UI.last_game_id})});
+            return response.status;
+        }""")
+        self.assertEqual(response,409)
+        self.page.locator("#game-over-buttons .main-menu").tap()
+        expect(self.page.get_by_role("button",name="새 게임",exact=True)).to_be_visible()
+        self.assertTrue(self.page.url.split('?')[0].endswith('/main'))
         self.assertEqual(self.errors, [])
 
     def test_gameplay_settings_and_mulligan(self):
