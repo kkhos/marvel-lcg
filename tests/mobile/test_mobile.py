@@ -407,6 +407,44 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["titles"], ["천둥강타","강화하다!","길을 비켜라"])
         self.assertEqual(result["names"], ["Wrecker","Thunderball","Piledriver","Bulldozer"])
 
+    def test_deck_editor_no_null_growth(self):
+        self.goto("/deck")
+        self.page.wait_for_function("window.cardStatistics && window.cardPreview", timeout=90000)
+        self.page.evaluate("""async () => {
+            hero_data=await getHeroJson('captain_america');
+            hero_data.player_deck.push(null,'null','undefined');
+            showDeckCards();
+        }""")
+        main=self.page.locator('#player_deck_images > .image-div')
+        side=self.page.locator('#side_deck_images > .image-div')
+        expect(main).to_have_count(25)
+        for _ in range(3):
+            self.page.evaluate("""() => {
+                const main=document.getElementById('player_deck_images');
+                const side=document.getElementById('side_deck_images');
+                side.append(main.firstElementChild);updatePeekedCardsString();
+                main.prepend(side.firstElementChild);updatePeekedCardsString();
+            }""")
+        expect(main).to_have_count(25)
+        expect(side).to_have_count(0)
+        main.first.get_by_role('button',name='메인/사이드 덱 이동').tap()
+        expect(main).to_have_count(24)
+        expect(side).to_have_count(1)
+        side.first.get_by_role('button',name='메인/사이드 덱 이동').tap()
+        expect(main).to_have_count(25)
+        main.first.get_by_role('button',name='카드 1장 추가').tap()
+        expect(main).to_have_count(26)
+        main.first.get_by_role('button',name='카드 1장 제거').tap()
+        expect(main).to_have_count(25)
+        state=self.page.evaluate("""() => ({ids:hero_data.player_deck,side:hero_data.side_deck,
+            fixed:hero_data.hero_deck.length,slots:document.getElementById('slots').value})""")
+        self.assertEqual(len(state['ids']),25)
+        self.assertEqual(state['side'],[])
+        self.assertEqual(state['fixed'],15)
+        self.assertNotIn('null',state['slots'])
+        self.assertTrue(all(re.fullmatch(r'\d{5}[a-z]?',id) for id in state['ids']))
+        self.assertEqual(self.errors,[])
+
     def test_save_slot_delete_confirmation(self):
         # Only the isolated CI checkout gets a synthetic save file.
         fixture = Path(__file__).resolve().parents[2] / "save_3.json"

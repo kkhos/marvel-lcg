@@ -57,8 +57,9 @@
 <link rel="stylesheet" href="/public/css/menu/touch-deck.css">
 <script src="/public/js/menu/touch-deck.js"></script>
 </head>
-<body>
-
+<body class="deck-editor-page">
+<header id="deck-toolbar" class="deck-mobile-only"><div class="deck-toolbar-title"><strong id="deck-title">덱 편집기</strong><span id="deck-total">메인 0장 · 사이드 0장</span></div><nav aria-label="덱 편집 메뉴"><button type="button" onclick="document.getElementById('deck-picker').open=true;document.getElementById('deck-picker').scrollIntoView()">히어로</button><button type="button" onclick="document.getElementById('main-deck-section').scrollIntoView()">메인</button><button type="button" onclick="document.getElementById('side-deck-section').scrollIntoView()">사이드</button><button type="button" onclick="document.getElementById('deck-library').open=true;document.getElementById('deck-library').scrollIntoView()">카드 추가</button><button type="button" onclick="saveDeck()">저장</button><button type="button" class="deck-primary" onclick="play()">플레이</button></nav><span id="deck-cleanup-status" role="status"></span></header>
+<details id="deck-picker" class="deck-collapse" open><summary>히어로 및 세트 선택</summary>
 <fieldset style="flex-direction: column;">
     <legend>세트</legend>
     
@@ -66,6 +67,7 @@
     
     <div id="set-content"></div>
 </fieldset>
+</details>
 
 <script type="module">
 import { CardStatistics } from './module/card_statistics.js';
@@ -74,6 +76,8 @@ import { SetInfo } from './module/set_info.js';
 // window.cardStatistics = cardStatistics;
 import { CardPreview } from './module/card_preview.js';
 import { CardImages } from './module/card_images.js';
+import { koCard } from './marvel/ko-cards.js';
+window.deckKoName = id => koCard(id)?.name;
 window.cardImages = CardImages;
 // const cardPreview = new CardPreview(window.cardStatistics.const_card_dict);
 // window.cardPreview = cardPreview
@@ -228,6 +232,7 @@ var cardPreview
                     const response_hero = await fetch(`get_hero_json?${e.value}`);
                     hero_data = await response_hero.json()
                     showDeckCards()
+                    if (window.MarvelDeckTouch) document.getElementById('deck-picker').open=false;
                     document.getElementById('deck_editor').scrollIntoView({ behavior: 'smooth' });
                     e.classList.add('click')
                 }
@@ -268,17 +273,20 @@ var cardPreview
 
 </script>
 
+<details class="deck-collapse" id="deck-import"><summary>덱 불러오기</summary>
 <fieldset style="flex-direction: column;">
     <legend>불러오기</legend>
     <div>MarvelCDB에서 불러오기: <input id="deck_id" name="deck_id" value="" placeholder="2345" required> <input type="button" onclick="getDeck(false)" value="덱 가져오기"> <input type="button" onclick="getDeck(true)" value="비공개 덱 가져오기"></div>
     <div>파일에서 불러오기: <input type="file" onchange="loadDeck(this)" accept=".json"> </div>
     <div>클립보드에서 불러오기: <input type="button" onclick="importDeck()" value="가져오기"> </div>
 </fieldset>
+</details>
 
 <input id="hero" name="hero" value="" placeholder="" style="display: none;" readonly required>
 
 <fieldset style="display: flex; flex-direction: column; overflow: auto; width: 100%;" id="deck_editor">
     <legend>덱 구성</legend>
+    <details id="deck-fixed-cards" class="deck-collapse" open><summary>히어로 전용 카드 · 의무 · 숙적</summary>
     <div id="hero_images"></div>
 
     <div id="hero_obligation"></div>
@@ -292,21 +300,24 @@ var cardPreview
 
     <div id="hero_deck_images"></div>
     <textarea style="display: none;" id="hero_deck" readonly></textarea>
+    </details>
+    <p class="deck-touch-help deck-edit-tip">카드 터치: 확대 · −/+ 수량 조정 · 이동 버튼 또는 ≡ 핸들로 메인/사이드 이동</p>
+    <details id="deck-library" class="deck-collapse"><summary>카드 검색 및 추가</summary><div class="deck-library-input"><input id="deck-search" type="search" placeholder="카드 이름 또는 ID" aria-label="카드 검색"><select id="deck-class" aria-label="성향 필터"><option value="">모든 성향</option><option value="Aggression">용맹</option><option value="Justice">정의</option><option value="Leadership">통솔</option><option value="Protection">수호</option><option value="Basic">기본</option></select><select id="deck-add-target" aria-label="추가 위치"><option value="player_deck_images">메인 덱</option><option value="side_deck_images">사이드 덱</option></select></div><p id="deck-search-status" role="status">검색어를 입력하거나 성향을 선택하세요.</p><div id="deck-search-results"></div></details>
 
-    <fieldset style="padding: 2px;">
+    <fieldset id="main-deck-section" style="padding: 2px;">
         <legend id="player_deck_images_size">메인</legend>
         <div id="player_deck_images" class="drop-zone"></div>
-        <textarea onchange="updatePlayerDeck()" id="slots" placeholder="플레이어 덱" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
+        <details class="deck-raw"><summary>카드 ID 직접 편집</summary><textarea onchange="updatePlayerDeck()" id="slots" placeholder="플레이어 덱" rows="3"></textarea></details>
     </fieldset>
     
-    <fieldset style="padding: 2px;">
+    <fieldset id="side-deck-section" style="padding: 2px;">
         <legend id="side_deck_images_size">사이드</legend>
         <div id="side_deck_images" class="drop-zone"></div>
-        <textarea onchange="updatePlayerDeck()" id="side_deck" placeholder="사이드 덱" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'></textarea>
+        <details class="deck-raw"><summary>카드 ID 직접 편집</summary><textarea onchange="updatePlayerDeck()" id="side_deck" placeholder="사이드 덱" rows="3"></textarea></details>
     </fieldset>
 
     <ul>
-        <li class="deck-mouse-help">좌클릭: 미리보기 · 우클릭: 제거 · 가운데 클릭: 복제</li><li class="deck-touch-help">카드 터치: 확대 · − 버튼: 사이드 덱 이동/제거 · + 버튼: 복제</li>
+        <li class="deck-mouse-help">좌클릭: 미리보기 · 우클릭: 제거 · 가운데 클릭: 복제</li><li class="deck-touch-help">메인/사이드 이동은 이동 버튼 또는 ≡ 핸들을 사용하세요.</li>
         <!-- <li>"Deadpool" and other heroes who use `set_aside` may also need to edit Extra deck.</li> -->
         <li>Put your decks in the folder "./deck" to display them in `My Deck`</li>
         <li>We recommend you use <a href="https://marvelcdb.com/deck/new">marvelcdb.com</a> to build your deck.</li>
@@ -324,10 +335,9 @@ var cardPreview
             }
         </script>
     </ul>
-    </div>
 </fieldset>
 
-<fieldset style="flex-direction: column;">
+<fieldset id="deck-footer" style="flex-direction: column;">
     <input type="button" onclick="exportDeck()" value="내보내기">
     <input type="button" onclick="play()" value="플레이">
     <input type="button" onclick="saveDeck()" style="background-color: skyblue;" value="저장">
@@ -438,6 +448,12 @@ function getDeck(is_private) {
 }
 
 /** @param {string} card_id */
+function validDeckCardId(id) {
+    return typeof id === 'string' && id.trim() === id && (/^\d{5}[a-z]?$/i.test(id) || (window.cardStatistics && Object.prototype.hasOwnProperty.call(window.cardStatistics.const_card_dict,id)));
+}
+function cleanDeckList(list, grouped=false) {
+    return (Array.isArray(list) ? list : []).filter(id => typeof id === 'string' && (grouped ? id.split(',').every(validDeckCardId) : validDeckCardId(id)));
+}
 function create_card(card_id, from_peek) {
     let img = document.createElement('img')
     let new_card_id = card_id
@@ -446,6 +462,12 @@ function create_card(card_id, from_peek) {
     div.classList.add('image-div')
     div.appendChild(img)
     div.setAttribute('data-card-id', card_id)
+    const name = window.deckKoName?.(card_id) || window.cardStatistics?.const_card_dict[card_id]?.name || card_id;
+    div.title = name;
+    img.alt = name;
+    if (window.MarvelDeckTouch) {
+        const caption=document.createElement('span');caption.className='deck-card-name';caption.textContent=name;div.append(caption);
+    }
 
     const openPreview = () => cardPreview?.previewCard(div, {});
     div.onclick = (event) => {
@@ -473,7 +495,14 @@ function create_card(card_id, from_peek) {
             }
         }
     }
-    if (from_peek && window.MarvelDeckTouch) MarvelDeckTouch.attach(div, [["−", "사이드 덱으로 이동 또는 제거", () => div.oncontextmenu(new Event("contextmenu"))], ["+", "복제", () => {if(div.parentNode){div.parentNode.appendChild(create_card(card_id,true));updatePeekedCardsString();}}]]);
+    if (from_peek && window.MarvelDeckTouch) {
+        MarvelDeckTouch.attach(div, [
+            ["−", "카드 1장 제거", () => {if(div.parentNode){div.remove();updatePeekedCardsString();}}],
+            ["+", "카드 1장 추가", () => {if(div.parentNode){div.after(create_card(card_id,true));updatePeekedCardsString();}}],
+            ["↔", "메인/사이드 덱 이동", () => {if(div.parentNode){const target=div.parentNode.id==='side_deck_images'?'player_deck_images':'side_deck_images';document.getElementById(target).append(div);updatePeekedCardsString();}}]
+        ]);
+        const handle=document.createElement('span');handle.className='deck-drag-handle';handle.textContent='≡';handle.title='길게 눌러 이동';handle.setAttribute('aria-hidden','true');div.append(handle);
+    }
     return div
 }
 
@@ -484,9 +513,15 @@ function add_card(e, card_id, allow_update=false) {
 }
 
 function showDeckCards() {
-    // Starter decks and imported decks may omit these optional card lists.
-    hero_data['set_aside'] ??= []
-    hero_data['side_deck'] ??= []
+    // Repair bogus null entries from older editors while keeping duplicate real cards.
+    let removed=0;
+    for (const key of ['hero','obligations','nemesis_set','set_aside','hero_deck','player_deck','side_deck']) {
+        const old=Array.isArray(hero_data[key])?hero_data[key]:[];
+        hero_data[key]=cleanDeckList(old,['hero','obligations','nemesis_set','set_aside'].includes(key));
+        removed+=old.length-hero_data[key].length;
+    }
+    if (removed) document.getElementById('deck-cleanup-status').textContent='잘못된 카드 항목 '+removed+'개를 제외했습니다.';
+    if(window.MarvelDeckTouch && hero_data.hero.length) document.getElementById('deck-fixed-cards').open=false;
     if( !('aspect' in hero_data) ) {
         hero_data['aspect'] = ""
     }
@@ -515,7 +550,7 @@ function showDeckCards() {
     the_list.push(...hero_data['set_aside'])
     for( let card of the_list ) {
         for( let card_id of card.split(",") ) {
-            add_card(e, card_id, true)
+            add_card(e, card_id)
         }
     }
 
@@ -553,8 +588,7 @@ function showDeckCards() {
         add_card(e, card_id, true)
     }
     e.setAttribute('data-size', hero_data['player_deck'].length.toString())
-    document.querySelector('#player_deck_images_size').innerHTML = `size: ${hero_data['player_deck'].length.toString()}`
-    document.querySelector('#side_deck_images_size').innerHTML = `size: ${hero_data['side_deck'].length.toString()}`
+    refreshDeckSummary();
 }
 
 async function set_hero(hero_name, hero_code = "") {
@@ -567,27 +601,42 @@ function isEmptyString(str) {
   return /^\s*$/.test(str);
 }
 
-function updatePlayerDeck() {
-    let e;
-    e = document.querySelector('#slots')
-    hero_data['player_deck'] = []
-    for( let card_id of e.value.split(';') ) {
-        if( !isEmptyString(card_id) ) {
-            hero_data['player_deck'].push(card_id.trim())
-        }
-    }
-
-    e = document.querySelector('#side_deck')
-    hero_data['side_deck'] = []
-    for( let card_id of e.value.split(';') ) {
-        if( !isEmptyString(card_id) ) {
-            hero_data['side_deck'].push(card_id.trim())
-        }
-    }
-
-    showDeckCards()
+function refreshDeckSummary() {
+    const main=hero_data.player_deck.length, side=hero_data.side_deck.length, fixed=hero_data.hero_deck.length;
+    document.getElementById('player_deck_images_size').textContent='메인 덱 · '+main+'장';
+    document.getElementById('side_deck_images_size').textContent='사이드 덱 · '+side+'장';
+    document.getElementById('deck-title').textContent=hero_data.name || '덱 편집기';
+    document.getElementById('deck-total').textContent='총 '+(fixed+main)+'장 · 전용 '+fixed+' / 메인 '+main+' / 사이드 '+side;
+    document.getElementById('player_deck_images').dataset.size=String(main);
+    document.getElementById('side_deck_images').dataset.size=String(side);
 }
-
+function updatePlayerDeck() {
+    for (const [key,id] of [['player_deck','slots'],['side_deck','side_deck'],['set_aside','set_aside']]) {
+        hero_data[key]=document.getElementById(id).value.split(';').map(id=>id.trim()).filter(Boolean);
+    }
+    showDeckCards();
+}
+function searchDeckCards() {
+    const query=document.getElementById('deck-search').value.trim().toLowerCase();
+    const aspect=document.getElementById('deck-class').value;
+    const results=document.getElementById('deck-search-results');
+    const status=document.getElementById('deck-search-status');
+    results.replaceChildren();
+    if (!window.cardStatistics || (!query && !aspect)) {status.textContent='검색어를 입력하거나 성향을 선택하세요.';return;}
+    const cards=Object.values(window.cardStatistics.const_card_dict).filter(card=>{
+        if(!['Ally','Event','Upgrade','Support','Resource','PlayerSideScheme'].includes(card.type)||card.class==='Hero')return false;
+        if(aspect && card.class.toLowerCase()!==aspect.toLowerCase())return false;
+        const name=window.deckKoName?.(card.card_id)||card.name;
+        return [card.card_id,card.name,name].some(x=>String(x).toLowerCase().includes(query));
+    });
+    status.textContent=cards.length+'개 검색 결과'+(cards.length>60?' · 처음 60개 표시':'');
+    for(const card of cards.slice(0,60)){
+        const tile=create_card(card.card_id,false);
+        const button=document.createElement('button');button.type='button';button.className='deck-library-add';button.textContent='＋ 추가';
+        button.addEventListener('click',event=>{event.stopPropagation();if(!hero_data.hero.length){status.textContent='먼저 히어로를 선택하세요.';return;}document.getElementById(document.getElementById('deck-add-target').value).append(create_card(card.card_id,true));updatePeekedCardsString();});
+        tile.append(button);results.append(tile);
+    }
+}
 async function sortDeck() {
     let e;
     e = document.querySelector('#slots')
@@ -602,8 +651,7 @@ async function sortDeck() {
 
 async function loadDeck(e) {
     const file = e.files[0]
-    if( file == undefined ) {
-    }
+    if( file == undefined ) return;
     const text = await file.text();
     // console.log(text)
     hero_data = JSON.parse(text)
@@ -664,46 +712,32 @@ async function importDeck() {
 
 <script>
     function updatePeekedCardsString() {
-        function process(name1, name2) {
-            let text = ""
-            let count = 0
-            let e = document.querySelector(name1)
-            e.querySelectorAll('div').forEach(
-                e => {
-                    text += e.getAttribute('data-card-id') + "; "
-                    count += 1
-                }
-            )
-            document.querySelector(name2).value = text
-            e.setAttribute('data-size', count.toString())
-            document.querySelector('#player_deck_images_size').innerHTML = `size: ${hero_data['player_deck'].length.toString()}`
-            document.querySelector('#side_deck_images_size').innerHTML = `size: ${hero_data['side_deck'].length.toString()}`
+        for (const [key,container,field] of [['player_deck','player_deck_images','slots'],['side_deck','side_deck_images','side_deck']]) {
+            const zone=document.getElementById(container);
+            // Only direct card nodes count. Nested controls and drag ghosts never do.
+            hero_data[key]=Array.from(zone.children).filter(el=>el.matches('.image-div[data-card-id]')).map(el=>el.dataset.cardId).filter(validDeckCardId);
+            document.getElementById(field).value=hero_data[key].join('; ');
         }
-        process("#player_deck_images", "#slots")
-        process("#hero_set_aside", "#set_aside")
-        process("#side_deck_images", "#side_deck")
-        updatePlayerDeck()
+        refreshDeckSummary();
     }
     document.addEventListener('DOMContentLoaded', function () {
-        config =  {
-            group: {
-                name: 'shared',
-            },
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            onAdd: function(evt) {
-                let card_id = evt.item.getAttribute('data-card-id');
-                let newCard = create_card(card_id, true);
-                evt.item.parentNode.replaceChild(newCard, evt.item);
-                updatePeekedCardsString();
-            },
-            onEnd: function (evt) {
-                updatePeekedCardsString();
-            }
-        }
-        // var sortable3 = Sortable.create(document.getElementById('hero_set_aside'), config);
-        var sortable1 = Sortable.create(document.getElementById('player_deck_images'), config);
-        var sortable4 = Sortable.create(document.getElementById('side_deck_images'), config);
+        const mobile=!!window.MarvelDeckTouch;
+        const config = {
+            group: {name:'shared'},
+            animation:150,
+            draggable:'.image-div[data-card-id]',
+            ghostClass:'sortable-ghost',
+            filter:'button',
+            preventOnFilter:false,
+            ...(mobile ? {handle:'.deck-drag-handle',delay:100,delayOnTouchOnly:true,touchStartThreshold:4} : {}),
+            // Sortable fires onAdd and onEnd for a cross-zone move. Commit once,
+            // after the original node has moved, without rebuilding the DOM.
+            onEnd:function(){updatePeekedCardsString();}
+        };
+        Sortable.create(document.getElementById('player_deck_images'),config);
+        Sortable.create(document.getElementById('side_deck_images'),config);
+        document.getElementById('deck-search').addEventListener('input',searchDeckCards);
+        document.getElementById('deck-class').addEventListener('change',searchDeckCards);
     });
 </script>
 

@@ -6,7 +6,7 @@ window.MarvelDeckTouch={
   bindPreview(card,open){
     let start=null, lastTouch=0;
     card.addEventListener('pointerdown',e=>{
-      if(e.pointerType!=='touch'||!e.isPrimary||e.target.closest('button'))return;
+      if(e.pointerType!=='touch'||!e.isPrimary||e.target.closest('button,.deck-drag-handle'))return;
       start={id:e.pointerId,x:e.clientX,y:e.clientY,time:performance.now()};
     });
     card.addEventListener('pointermove',e=>{
@@ -15,11 +15,11 @@ window.MarvelDeckTouch={
     card.addEventListener('pointercancel',()=>{start=null;});
     card.addEventListener('pointerup',e=>{
       const p=start;start=null;
-      if(!p||p.id!==e.pointerId||e.target.closest('button')||performance.now()-p.time>650||Math.hypot(e.clientX-p.x,e.clientY-p.y)>12)return;
+      if(!p||p.id!==e.pointerId||e.target.closest('button,.deck-drag-handle')||performance.now()-p.time>650||Math.hypot(e.clientX-p.x,e.clientY-p.y)>12)return;
       lastTouch=performance.now();e.preventDefault();e.stopPropagation();open();
     });
     card.addEventListener('click',e=>{
-      if(!e.target.closest('button')&&lastTouch&&performance.now()-lastTouch<650){e.preventDefault();e.stopImmediatePropagation();}
+      if(!e.target.closest('button,.deck-drag-handle')&&lastTouch&&performance.now()-lastTouch<650){e.preventDefault();e.stopImmediatePropagation();}
     },true);
     card.addEventListener('contextmenu',e=>{if(e.pointerType==='touch'||(e.sourceCapabilities&&e.sourceCapabilities.firesTouchEvents)){e.preventDefault();e.stopImmediatePropagation();}},true);
   },

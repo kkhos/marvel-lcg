@@ -11,3 +11,45 @@
 .deck-touch .image-div[data-card-id]{touch-action:pan-y;cursor:pointer;-webkit-touch-callout:none}
 .deck-touch .image-div[data-card-id] img{pointer-events:none}
 @media(orientation:portrait){.deck-touch #preview{padding:40px 5px 12px;gap:4px}.deck-touch #preview-content{flex-direction:column}.deck-touch #preview-img{height:auto;width:min(72vw,calc((100dvh - 110px)*.714));max-width:72vw;max-height:75dvh}.deck-touch #preview-card-id{width:90%;max-height:16dvh}.deck-touch #preview-img.rotate{height:min(68vw,60dvh);width:auto}.deck-touch #preview #prev,.deck-touch #preview #next{flex-basis:30px;width:30px}}
+
+/* The deck editor is touch-first, without changing the card browser. */
+.deck-mobile-only{display:none}
+.deck-touch .deck-editor-page{padding:0 12px 12px;scroll-padding-top:90px}
+.deck-touch .deck-editor-page #deck-toolbar{display:flex;position:sticky;top:0;z-index:20;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;padding:8px 4px;background:#12251d;border-bottom:1px solid #527b63}
+.deck-toolbar-title{display:flex;flex-direction:column;gap:2px;min-width:120px}
+.deck-toolbar-title strong{font-size:17px}
+#deck-total,#deck-cleanup-status{font:12px system-ui;color:#b9d9c8}
+#deck-cleanup-status:empty{display:none}
+#deck-toolbar nav{display:flex;flex-wrap:wrap;gap:5px}
+.deck-touch .deck-editor-page button,.deck-touch .deck-editor-page input[type=button],.deck-touch .deck-editor-page select{background:#30493e;color:#f3f7f4;border:1px solid #759b85;padding:5px 9px;font:600 13px system-ui}
+.deck-touch .deck-editor-page .deck-primary{background:#2e6b57;border-color:#a5e5c6}
+.deck-collapse{margin:8px 0;border:1px solid #527b63;border-radius:8px;padding:6px}
+.deck-collapse>summary,.deck-raw>summary{padding:6px;cursor:pointer;color:#c9e7d5;font-weight:600}
+.deck-touch .deck-editor-page fieldset{margin:4px 0 10px}
+.deck-touch .deck-editor-page #deck_editor{overflow:visible!important}
+.deck-touch .deck-editor-page #set-images{flex-wrap:nowrap;overflow:auto;padding:5px}
+.deck-touch .deck-editor-page #set-images>.set{flex:0 0 82px;height:82px}
+.deck-touch .deck-editor-page #set-images>.set>img{height:76px;width:auto}
+.deck-touch .deck-editor-page #set-content .details{gap:5px}
+.deck-touch .deck-editor-page #deck_editor .image-div{width:86px;height:120px;margin:0 0 32px;border-radius:7px}
+.deck-touch .deck-editor-page #deck_editor .image-div:has(.deck-card-controls){margin-bottom:68px}
+.deck-touch .deck-editor-page #deck_editor .image-div img{width:100%;height:100%;object-fit:contain;border-radius:7px}
+.deck-touch .deck-editor-page #deck_editor .image-div::after{display:none}
+.deck-card-name{display:block;position:absolute;top:100%;left:0;right:0;min-height:29px;text-align:center;font:600 11px/1.2 system-ui;color:#e5f0ea;overflow:hidden;overflow-wrap:anywhere}
+.deck-touch .deck-editor-page .deck-card-controls{top:calc(100% + 29px);gap:2px}
+.deck-touch .deck-editor-page .deck-card-controls button{padding:0;min-width:0;min-height:34px;font-size:18px}
+.deck-drag-handle{position:absolute;top:2px;right:2px;background:#14251de8;color:white;border-radius:5px;padding:3px 9px;font:bold 18px system-ui;touch-action:none;cursor:grab;z-index:3}
+.deck-touch .deck-editor-page .drop-zone{gap:8px;min-height:78px}
+.deck-touch .deck-editor-page .drop-zone::before{pointer-events:none;content:'여기에 카드를 놓으세요'}
+.deck-touch .deck-editor-page .deck-edit-tip{font-size:12px;color:#b5d2c2;margin:5px 0}
+.deck-touch .deck-editor-page .deck-raw{margin:6px 0;font-size:12px}
+.deck-touch .deck-editor-page .deck-raw textarea{width:100%;background:#12251d;color:white;border:1px solid #527b63}
+.deck-library-input{display:flex;flex-wrap:wrap;gap:6px;padding:4px}
+#deck-search{flex:1;min-width:140px;min-height:36px;background:#102219;color:#f4f8f5;border:1px solid #759b85;border-radius:6px;padding:6px 8px}
+#deck-search-status{font:12px system-ui;color:#b9d9c8;padding:4px}
+#deck-search-results{display:flex;flex-wrap:wrap;gap:8px}
+.deck-touch .deck-editor-page #deck-search-results .image-div{margin-bottom:68px}
+.deck-library-add{position:absolute;top:calc(100% + 29px);width:100%;left:0}
+.deck-touch .deck-editor-page #deck-footer{flex-direction:row!important;gap:6px}
+.deck-touch .deck-editor-page #deck-footer input{min-width:72px}
+@media(orientation:landscape){.deck-touch .deck-editor-page #deck_editor .image-div{width:94px;height:132px}}
