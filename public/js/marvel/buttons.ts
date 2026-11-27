@@ -760,7 +760,10 @@ export class Button{
             id: 'all-hand-cards',
             property: 'show_all_hand_cards',
             onClick: (e) => {
-                Cards.render.printCards()
+                // Solo hand visibility is unchanged. Do not replay a game render.
+                if (mobile && Game.total_players === 1) return;
+                if (!Game.world_descriptor) return;
+                Cards.render.printCards(!mobile)
                 Effect.updateHighLight()
             }
         })
@@ -771,7 +774,9 @@ export class Button{
             property: 'hide_no_action_cards',
             onClick: (e) => {
                 console.log('hide_no_action_cards:', ButtonSetting.hide_no_action_cards)
-                Cards.render.printCards()
+                if (mobile && Game.total_players === 1) return;
+                if (!Game.world_descriptor) return;
+                Cards.render.printCards(!mobile)
                 Effect.updateHighLight()
             }
         })
@@ -792,8 +797,10 @@ export class Button{
                 ClientPreferences.setShowDeckDuringFullSearch(playerId, enabled)
                 Button.updateFullSearchButton()
                 FullSearchPresentation.onPreferenceChanged(playerId, enabled)
-                Cards.render.printCards()
-                Effect.updateHighLight()
+                if (Game.world_descriptor && (!mobile || Game.full_search_presentation_players.includes(playerId) || Effect.select_effect_obj.is_search)) {
+                    Cards.render.printCards(!mobile)
+                    Effect.updateHighLight()
+                }
                 Client.syncFullSearchPreference(playerId, enabled)
             },
         })

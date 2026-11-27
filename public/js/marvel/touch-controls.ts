@@ -3,6 +3,7 @@ import { ClassName } from './class_name.js';
 import { Effect } from './effect.js';
 import { SelectStep } from './select.js';
 import { CardImages } from '../module/card_images.js';
+import { HoverCard } from './hover.js';
 
 type Gesture = {
     id: number; card: HTMLElement; x: number; y: number;
@@ -199,6 +200,8 @@ export class TouchControls {
             const openSettings = () => {
                 if (dialog.open || settings.open) return;
                 if (gesture) { suppress(gesture.card); stop(); }
+                // Clear only desktop hover state, not the game selection.
+                HoverCard.set(null);
                 settings.showModal();
                 sidebarHandle.setAttribute('aria-expanded', 'true');
             };
@@ -225,6 +228,7 @@ export class TouchControls {
             });
             settings.addEventListener('close', () => {
                 sidebarHandle.setAttribute('aria-expanded', 'false');
+                sidebarHandle.focus({ preventScroll: true });
             });
             // History is a separate existing game overlay; reveal it after the
             // user explicitly opens it, rather than leaving it behind settings.

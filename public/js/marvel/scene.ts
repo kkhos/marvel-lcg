@@ -8,17 +8,20 @@ export class Scene {
     static init() {
         const mobile = /Android|iPhone|iPad/i.test(navigator.userAgent) || matchMedia('(pointer: coarse)').matches;
         document.body.classList.toggle('mobile-layout', mobile);
-        if (mobile) window.visualViewport?.addEventListener('resize', adjustSceneScale);
-        // Adjust scale on DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', () => {
-            adjustSceneScale()
-        });
-
-        // Adjust scale on resize
+        // Layout viewport is stable when transient Android bars or dialogs
+        // change only visualViewport. Coalesce genuine resizes to one frame.
+        let resizeFrame = 0;
+        const scheduleResize = () => {
+            if (resizeFrame) return;
+            resizeFrame = requestAnimationFrame(() => {
+                resizeFrame = 0;
+                adjustSceneScale();
+            });
+        };
+        document.addEventListener('DOMContentLoaded', scheduleResize);
         adjustSceneScale();
-        window.onresize = () => {
-            adjustSceneScale();
-        }
+        window.addEventListener('resize', mobile ? scheduleResize : adjustSceneScale);
+        if (mobile) window.addEventListener('pageshow', scheduleResize);
 
         // import { HoverCard } from "./hover.js";
         if( Setting.scene_3d ) {
@@ -69,15 +72,21 @@ export function adjustSceneScale() {
     const sceneHeight = parseFloat(rootStyles.getPropertyValue('--scene-height'));
 
     const mobile = document.body.classList.contains('mobile-layout');
-    const viewportWidth = mobile ? Math.min(window.innerWidth, document.documentElement.clientWidth || window.innerWidth, window.visualViewport?.width || window.innerWidth) : window.innerWidth;
-    const viewportHeight = mobile ? Math.min(window.innerHeight, document.documentElement.clientHeight || window.innerHeight, window.visualViewport?.height || window.innerHeight) : window.innerHeight;
+    const viewportWidth = mobile ? (document.documentElement.clientWidth || window.innerWidth) : window.innerWidth;
+    const viewportHeight = mobile ? (document.documentElement.clientHeight || window.innerHeight) : window.innerHeight;
+    if (![viewportWidth, viewportHeight, sceneWidth, sceneHeight].every(n => Number.isFinite(n) && n > 0)) return;
 
     // Calculate scale factors
     const scaleX = viewportWidth / sceneWidth;
     const scaleY = viewportHeight / sceneHeight;
-    Scene.scale = Math.min(scaleX, scaleY); // Use the smaller scale to fit within the viewport
+    const nextScale = Math.min(scaleX, scaleY);
+    const left = `${(viewportWidth - sceneWidth * nextScale) / 2}px`;
+    const top = `${(viewportHeight - sceneHeight * nextScale) / 2}px`;
+    if (mobile && Scene.scale === nextScale && camera.style.left === left &&
+        camera.style.top === top && camera.style.display === "unset") return;
+    Scene.scale = nextScale;
 
-    // Apply the scale transformation
+    // Apply the scale transformation only for a genuine layout change.
     camera.style.transform = `scale(${Scene.scale})`;
     if( Setting.scene_3d ) {
         document.getElementById('scene')!.style.transform = `scale(1) rotateX(20deg)`;
@@ -85,8 +94,8 @@ export function adjustSceneScale() {
     camera.style.display = "unset";
 
     // Center the scene in the viewport
-    camera.style.left = `${(viewportWidth - (sceneWidth * Scene.scale)) / 2}px`;
-    camera.style.top = `${(viewportHeight - (sceneHeight * Scene.scale)) / 2}px`;
+    camera.style.left = left;
+    camera.style.top = top;
 
     // Set the new value for the CSS variable
     // Must use `parseInt`

@@ -198,6 +198,33 @@ class MobileRegression(unittest.TestCase):
         expect(dialog.locator("#undo-btn")).to_be_visible()
         expect(self.page.locator("#players-pin")).to_be_hidden()
         self.screenshot("settings")
+        # Settings must not replay the game or drop hand objects on Back.
+        board_state = """() => ({
+            step: window.Game.current_step_id,
+            render: window.Game.world_descriptor.render_id,
+            camera: document.getElementById('camera').style.transform,
+            cards: [...document.querySelectorAll('#player-all-hand-cards .card:not(.hide),#player-all-area-hero .card:not(.hide),#area-villain .card:not(.hide)')].map(c => ({
+                id: c.dataset.id,
+                selected: c.classList.contains('selected'),
+                x: c.style.getPropertyValue('--x'),
+                y: c.style.getPropertyValue('--y')
+            }))
+        })"""
+        original = self.page.evaluate(board_state)
+        for index in range(3):
+            if index > 0:
+                self.page.locator("#right-side-bar-handle").tap()
+                expect(dialog).to_be_visible()
+            dialog.locator("#hide-no-action-cards").tap()
+            dialog.locator("#all-hand-cards").tap()
+            speed.fill("1.25" if index % 2 == 0 else "1")
+            self.assertTrue(self.page.evaluate("window.MarvelTouch.back()"))
+            expect(dialog).to_be_hidden()
+            self.wait_hand_images()
+            self.assertEqual(original, self.page.evaluate(board_state))
+        self.screenshot("settings-back-stable")
+        self.page.locator("#right-side-bar-handle").tap()
+        expect(dialog).to_be_visible()
         # A tap outside the dialog must close it, not select the hand card
         # underneath or advance the server's game step.
         card = hand.first

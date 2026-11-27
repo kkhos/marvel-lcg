@@ -100,3 +100,10 @@ body.mobile-layout #left-side-bar { left: 0; transition: none; }
 body.mobile-layout #left-side-bar:not(:has(> .button:not(.hide):not(#players-pin))) {
     display: none;
 }
+
+/* Avoid permanently promoting every card face to a separate compositing layer
+   on Android WebView. Actual card transitions remain enabled. */
+body.mobile-layout #scene .card .face,
+body.mobile-layout #scene .card .face .image {
+    will-change: auto;
+}

@@ -1231,12 +1231,14 @@ class CardRender {
         return card_div
     }
 
-    static printCards() {
+    static printCards(playEventAnimation = true) {
         CardRender.updateCardsData()
 
-        UI.anime_move_cards_count = 0
-        UI.anime_shuffle_cards_count = 0
-        CardAnimation.setAnimeTimeInit()
+        if (playEventAnimation) {
+            UI.anime_move_cards_count = 0
+            UI.anime_shuffle_cards_count = 0
+            CardAnimation.setAnimeTimeInit()
+        }
 
         for( const area_name of CardRender.area_names )
         {
@@ -1260,7 +1262,7 @@ class CardRender {
             HoverCard.updateHoverEffects(Number(HoverCard.hover_card.dataset.id!), true)
         }
 
-        CardAnimation.showEvent()
+        if (playEventAnimation) CardAnimation.showEvent()
 
         console.log("do_render:", Game.world_descriptor.render_id, CardRender.stat_do_render, "/", CardRender.stat_skip_render)
         // if( CardRender.stat_do_render < 5 && CardRender.stat_do_render > 0 ) {
@@ -1270,7 +1272,7 @@ class CardRender {
         CardRender.stat_do_render = []
         // CardRender.stat_do_render2 = []
 
-        CardAnimation.setAnimeTimeEnd()
+        if (playEventAnimation) CardAnimation.setAnimeTimeEnd()
 
         return
     }
