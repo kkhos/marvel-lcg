@@ -355,6 +355,44 @@ class MobileRegression(unittest.TestCase):
         expect(popup).to_be_hidden()
         self.assertEqual(self.errors, [])
 
+    def test_mobile_status_card_aspect_ratio(self):
+        self.start_game()
+        result = self.page.evaluate("""() => {
+            const parent=document.getElementById('area-villain');
+            const card=document.createElement('div');
+            card.className='card type-status-card gain-status';
+            card.innerHTML='<div class="face"><div class="image"></div></div>';
+            parent.append(card);
+            try {
+                const face=card.querySelector('.face');
+                const art=getComputedStyle(face.querySelector('.image'),'::before');
+                const root=getComputedStyle(document.documentElement);
+                return {w:card.offsetWidth,h:card.offsetHeight,
+                    fw:face.offsetWidth,fh:face.offsetHeight,
+                    iw:parseFloat(art.width),ih:parseFloat(art.height),
+                    width:parseFloat(root.getPropertyValue('--card-width')),
+                    height:parseFloat(root.getPropertyValue('--card-height')),
+                    animation:getComputedStyle(face).animationName};
+            } finally {card.remove();}
+        }""")
+        self.assertAlmostEqual(result["w"], result["width"] * .5, delta=1)
+        self.assertAlmostEqual(result["h"], result["height"] * .5, delta=1)
+        self.assertAlmostEqual(result["fw"], result["w"], delta=1)
+        self.assertAlmostEqual(result["fh"], result["h"], delta=1)
+        self.assertAlmostEqual(result["iw"], result["w"], delta=1)
+        self.assertAlmostEqual(result["ih"], result["h"], delta=1)
+        self.assertEqual(result["animation"], "none")
+
+    def test_ko_obligation_form_choice(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koHtml}=await import('/public/js/marvel/ko-game.js');
+            return ['Flip to alter-ego form','Flip to hero form',
+                '<span data-id="1">Flip to alter-ego form</span>'].map(koHtml);
+        }""")
+        self.assertEqual(result, ["일상 형태로 변신", "히어로 형태로 변신",
+            '<span data-id="1">일상 형태로 변신</span>'])
+
     def test_ko_status_and_statistics(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

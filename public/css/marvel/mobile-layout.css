@@ -801,3 +801,26 @@ body.mobile-layout #scene .card .info > div:has(>span:is(
     .quickstrike,.patrol,.villainous,.stalwart,.steady,.toughness,.restricted,
     .permanent,.temporary,.teamwork,.peril,.surge,.incite,.assault,.vulnerable
 ):not(.counter):not(.token)) { display: none !important; }
+
+/* Status cards occupy a half-card slot in MoveCard.computeCardX.
+   Scale both axes equally on mobile instead of squeezing a full-height image.
+   Touch previews provide the full-size reading surface, so sticky hover must
+   not resize these thumbnails or run the desktop width-only gain animation. */
+body.mobile-layout #scene .area .card.type-status-card:not(.moving) {
+    width: calc(var(--card-width) * .5);
+    min-width: calc(var(--card-width) * .5);
+    max-width: calc(var(--card-width) * .5);
+    height: calc(var(--card-height) * .5);
+    min-height: calc(var(--card-height) * .5);
+    max-height: calc(var(--card-height) * .5);
+}
+body.mobile-layout #scene .area .card.type-status-card:not(.moving) .face {
+    width: 100%; min-width: 100%; max-width: 100%;
+    height: 100%; min-height: 100%; max-height: 100%;
+    animation: none;
+}
+body.mobile-layout #scene .area .card.type-status-card:not(.moving) .face .image::before {
+    width: 100%; height: 100%;
+    background-size: contain, 100% 100%;
+    background-position: center;
+}

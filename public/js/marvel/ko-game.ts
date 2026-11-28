@@ -73,6 +73,8 @@ const labels: Record<string, string> = {
   "Defense": "방어",
   "Recover": "회복",
   "Change Form": "변신",
+  "Flip to alter-ego form": "일상 형태로 변신",
+  "Flip to hero form": "히어로 형태로 변신",
   "Action": "행동",
   "Action 1": "행동 1",
   "Hero Action": "히어로 행동",
@@ -325,6 +327,8 @@ export function koText(value: string): string {
             .replace(/\bselected\b/g, '선택:')
             .replace(/\benters game area\b/g, '플레이 영역에 들어옴')
             .replace(/\bwill take (\d+) damage from\b/g, "피해 $1점 입을 예정 · 원인:")
+            .replace(/\bFlip to alter-ego form\b/gi, '일상 형태로 변신')
+            .replace(/\bFlip to hero form\b/gi, '히어로 형태로 변신')
             .replace(/\bTake (\d+) damage\b/gi, '피해 $1점 입기')
             .replace(/\bPlace (\d+) threat on the main scheme\b/gi, '주요 음모에 위협 $1 놓기')
             .replace(/\bRemove (\d+) threat from (?:a|the) scheme\b/gi, '음모에서 위협 $1 제거하기')
