@@ -28,6 +28,7 @@ const labels: Record<string, string> = {
   "All": "모두",
   "Spider-Sense": "스파이더센스",
   "Scientist": "과학자",
+  "Spell Mastery": "주문 숙달",
   "Main scheme phase start": "주요 음모 단계 시작",
   "Main scheme phase end": "주요 음모 단계 종료",
   "Exhaust Peter Parker → remove Eviction Notice from the game": "Peter Parker 소진 → 퇴거 통지를 게임에서 제거",

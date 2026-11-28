@@ -150,6 +150,7 @@ class MobileRegression(unittest.TestCase):
             return {cards:['Tough','Stunned','Confused'].map(n=>koStatusCard('StatusCard',n)),
                 other:koStatusCard('Event','Tough') === undefined,
                 title:koLabel('STATISTIC'),
+                spell:koLabel('Spell Mastery'),
                 events:['Resolve','Resolved','Enters Play','Resource','Defeated'].map(koStatistic),
                 html:koHtml('<span data-id="Resolved">Resolved x2</span>')};
         }""")
@@ -157,6 +158,7 @@ class MobileRegression(unittest.TestCase):
         self.assertTrue(all("버립니다" in c["text"] for c in result["cards"]))
         self.assertTrue(result["other"])
         self.assertEqual(result["title"], "통계")
+        self.assertEqual(result["spell"], "주문 숙달")
         self.assertEqual(result["events"], ["효과 처리", "효과 처리 완료", "플레이 영역에 들어옴", "자원으로 사용", "격파"])
         self.assertEqual(result["html"], '<span data-id="Resolved">효과 처리 완료 2회</span>')
 
@@ -830,6 +832,13 @@ class MobileRegression(unittest.TestCase):
         expect(self.page.locator("#mobile-forecast-detail")).to_contain_text("조우 카드 기본")
         self.page.locator("#mobile-forecast-dialog").get_by_role("button",name="닫기").tap()
         self.assertGreaterEqual(self.page.locator("#scene .mobile-unit-stats").count(),1)
+        # Native desktop hover details must not obscure mobile identity artwork.
+        identity = self.page.locator("#scene .card.type-hero.has-mobile-hud, #scene .card.type-alter-ego.has-mobile-hud").first
+        expect(identity.locator(":scope > .mobile-board-hud")).to_be_visible()
+        self.assertTrue(identity.evaluate("""el => {
+            const details=[...el.querySelectorAll('.info .hover-only')];
+            return details.length > 0 && details.every(d => getComputedStyle(d).display === 'none');
+        }"""))
         villain=self.page.locator("#area-villain .card.has-mobile-hud:not(.hide)").first
         hud=villain.locator(":scope > .mobile-board-hud")
         expect(hud).to_be_visible()

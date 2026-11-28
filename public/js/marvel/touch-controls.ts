@@ -25,6 +25,9 @@ export class TouchControls {
         const style = document.createElement('style');
         style.textContent = `
             #scene .card { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+            /* Mobile identity HUD is sufficient; don't cover the card with desktop hover details. */
+            body.mobile-layout #scene .card.type-hero .info .hover-only,
+            body.mobile-layout #scene .card.type-alter-ego .info .hover-only { display: none !important; }
             #touch-preview { background: #172a23; color: white; border: 1px solid #83b79a; border-radius: 12px;
                 position: fixed; inset: 0; margin: auto; box-sizing: border-box; width: fit-content;
                 height: fit-content; max-width: 90vw; max-height: 90dvh; padding: 10px; overflow: auto; }
