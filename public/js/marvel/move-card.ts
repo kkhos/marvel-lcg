@@ -46,7 +46,7 @@ export class MoveCard {
             shown_cards_els.forEach((card, i) => {
                 const d = n > 1 ? (i - (n - 1) / 2) / ((n - 1) / 2) : 0;
                 card.style.setProperty('--x', String(Math.round((sceneWidth - MoveCard.cardWidth) / 2 + (i - (n - 1) / 2) * step)));
-                card.style.setProperty('--y', String(Math.round(889 + 4 * d * d)));
+                card.style.setProperty('--y', String(Math.round(877 + 4 * d * d)));
                 card.style.setProperty('--hand-angle', `${d * 10}deg`);
             });
             return;

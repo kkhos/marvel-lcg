@@ -549,3 +549,10 @@ body.mobile-layout #mobile-forecast {flex:0 0 clamp(130px,26vw,245px);min-width:
 #mobile-forecast-dialog h2{font-size:18px;margin:0 0 8px}
 #mobile-forecast-dialog p{margin:6px 0}
 #mobile-forecast-dialog button{background:#30493e;color:#fff;border:1px solid #83b79a;border-radius:7px;padding:8px 18px;min-height:38px;font:700 14px system-ui}
+
+/* Result controls remain reachable even when the result is minimized.
+   Restore the original centered prompt width while the forecast is absent. */
+body.mobile-layout:has(#game-over-box.active) #mobile-forecast {display:none!important}
+body.mobile-layout:has(#game-over-box.active) #mobile-progress-bar #prompt-box-container {
+    max-width:min(80%,820px);
+}
