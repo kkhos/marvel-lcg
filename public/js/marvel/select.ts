@@ -16,6 +16,7 @@ export class SelectStep {
     }
     static restoreStep(step: SelectStepValue): void {
         SelectStep.step = step
+        document.body.dataset.selectionStep = step
     }
     static isCost() {
         return SelectStep.step == 'cost'
@@ -30,26 +31,26 @@ export class SelectStep {
         return SelectStep.step == 'card'
     }
     static reset() {
-        SelectStep.step = 'card'
+        SelectStep.restoreStep('card')
     }
 
     ////////////////////////////////////////////////////////////////////////////////
     //
     static setCard() {
-        SelectStep.step = 'card'
+        SelectStep.restoreStep('card')
         BtnOk.setDisable(false)
         BtnOk.setCancel('End')
         // console.log('current_select_step:', SelectStep.current_select_step)
     }
     static setEffect() {
         UI.prompt.resetPromptText()
-        SelectStep.step = 'effect'
+        SelectStep.restoreStep('effect')
         BtnOk.setDisable(false)
         BtnOk.setCancel('Cancel')
         // console.log('current_select_step:', SelectStep.current_select_step)
     }
     static setTargets(need_target = true) {
-        SelectStep.step = 'target'
+        SelectStep.restoreStep('target')
         BtnOk.setDisable(false)
         BtnOk.setCancel('Cancel')
         if( Effect.isMandatoryHandSizeDiscard() ) {
@@ -86,7 +87,7 @@ export class SelectStep {
     static setCost(need_cost = true) {
         let ok = false
         let over_pay = false
-        SelectStep.step = 'cost'
+        SelectStep.restoreStep('cost')
         if( !need_cost || Effect.select_effect_obj.getCost() == "" || Effect.select_effect_obj.isCostRuleUpTo() ) {
             // UI.resetPromptText()
             // UI.setBtnCancelText('Cancel', false)
@@ -229,7 +230,7 @@ export class SelectStep {
         // console.log('current_select_step:', SelectStep.current_select_step)
     }
     static cancel() {
-        SelectStep.step = 'cost'
+        SelectStep.restoreStep('cost')
     }
     static setBegin() {
         if( Effect.response_json_ask.options.length > 0) {

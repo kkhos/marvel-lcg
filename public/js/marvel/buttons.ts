@@ -97,7 +97,7 @@ export class Button{
             }
             Button.doPost(false)
         } else if( SelectStep.isEffect() || SelectStep.isTargets() || SelectStep.isCost() ) {
-            Effect.onCancel()
+            Effect.onCancel(true)
         }
     }
 

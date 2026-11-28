@@ -212,7 +212,7 @@ export class Effect {
         }
     }
 
-    static onCancel() {
+    static onCancel(restoreMobileOptions = false) {
         if( Effect.isExEffect() ) {
             if( SelectStep.isTargets() || SelectStep.isCost() ) {
                 Effect.select_effect_obj.selected_targets = []
@@ -221,18 +221,29 @@ export class Effect {
                 Music.playClickCardSound()
             }
         } else {
+            const returnToOptions = restoreMobileOptions &&
+                document.body.classList.contains('mobile-layout') &&
+                Effect.is_in_event === 'in_turn' &&
+                (SelectStep.isTargets() || SelectStep.isCost()) &&
+                !!Effect.clicked_card_div?.isConnected &&
+                !!Effect.options_button_div.querySelector('button.clicked')
             UI.prompt.resetPromptText()
-            Effect.options_button_div.replaceChildren()
+            if (returnToOptions) {
+                for (const button of Effect.options_button_div.querySelectorAll('button.clicked')) {
+                    button.classList.remove('clicked')
+                }
+            } else Effect.options_button_div.replaceChildren()
 
             for(const card_div of document.querySelectorAll<HTMLElement>('.card')) {
                 card_div.dataset.pay_effect_id = ''
             }
 
-            Effect.clicked_card_div = undefined
+            if (!returnToOptions) Effect.clicked_card_div = undefined
             Effect.select_effect_obj.clear()
             UI.selectCountClear()
 
-            SelectStep.setBegin()
+            if (returnToOptions) SelectStep.setEffect()
+            else SelectStep.setBegin()
             Effect.updateHighLight()
             Music.playClickCardSound()
             console.log('Cancel')

@@ -191,6 +191,10 @@ body.mobile-layout #mobile-action-rail #option-buttons {
     touch-action: pan-y; overscroll-behavior: contain; pointer-events: auto;
 }
 body.mobile-layout #mobile-action-rail #option-buttons:empty { display: none; }
+/* Once an action is selected, only show confirmation/cancellation controls.
+   Keep the ability DOM intact so returning to choice restores its buttons. */
+body.mobile-layout[data-selection-step="target"] #mobile-action-rail #option-buttons,
+body.mobile-layout[data-selection-step="cost"] #mobile-action-rail #option-buttons { display: none; }
 body.mobile-layout #mobile-action-rail #option-buttons > .button {
     flex: 0 0 auto; width: 100%; height: auto; min-height: 36px;
     margin: 0; padding: 6px 4px; box-sizing: border-box;

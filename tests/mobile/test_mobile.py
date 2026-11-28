@@ -988,7 +988,9 @@ class MobileRegression(unittest.TestCase):
         """), 1920)
         # Exercise the actual production layout with synthetic long prompt and
         # option content (no game action is submitted). Keep real card DOM.
-        self.page.evaluate("""() => {
+        self.page.evaluate("""async () => {
+            const {SelectStep} = await import('/public/js/marvel/select.js');
+            SelectStep.restoreStep('effect');
             const p = document.getElementById('prompt-box-container');
             p.classList.remove('hide','display-none','prompt-anime');
             document.getElementById('prompt-text').textContent =
@@ -1002,6 +1004,14 @@ class MobileRegression(unittest.TestCase):
             }
             opts.children[1].classList.add('clicked');
             document.getElementById('btn-ok').disabled = false;
+            for (const step of ['target', 'cost', 'effect', 'card']) {
+                SelectStep.restoreStep(step);
+                const hidden=getComputedStyle(opts).display==='none';
+                if(hidden !== ['target','cost'].includes(step) || opts.children.length!==4 ||
+                    getComputedStyle(document.getElementById('btn-ok')).display==='none')
+                    throw new Error('Mobile action visibility mismatch: '+step);
+            }
+            SelectStep.restoreStep('effect');
         }""")
         for width, height in [(915, 412), (740, 360)]:
             self.page.set_viewport_size({"width": width, "height": height})
