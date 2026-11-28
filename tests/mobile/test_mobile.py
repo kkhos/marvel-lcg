@@ -750,6 +750,19 @@ class MobileRegression(unittest.TestCase):
         self.start_game()
         self.wait_hand_images()
         hand = self.page.locator("#player-all-hand-cards .card:not(.hide)")
+        # Compare the actual preview footer controls with the board settings control.
+        self.page.evaluate("""() => {
+            const d=document.getElementById('touch-preview');
+            const setting=document.getElementById('right-side-bar-handle').getBoundingClientRect();
+            d.showModal();
+            try {
+                for(const b of d.querySelectorAll('.touch-buttons > button:not([hidden])')) {
+                    const r=b.getBoundingClientRect();
+                    if(Math.abs(r.width-setting.width)>1 || Math.abs(r.height-setting.height)>1)
+                        throw new Error('Preview footer and settings button dimensions differ');
+                }
+            } finally {d.close();}
+        }""")
         for card in hand.all():
             self.bounds(card)
         self.assertTrue(self.page.evaluate("""() => [...document.querySelectorAll('#player-all-hand-cards .card:not(.hide)')].every(c => c.style.getPropertyValue('--hand-angle') !== '')"""))
