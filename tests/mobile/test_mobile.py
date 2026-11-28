@@ -475,7 +475,7 @@ class MobileRegression(unittest.TestCase):
     def test_bundled_combat_sounds(self):
         self.goto("/main")
         for name in ["hit_heavy","shield_block","threat_up","threat_down","status_on","status_off","villain_phase","villain_advance","victory","defeat","ready_card","exhaust_card"]:
-            response = self.page.request.get(f"/{name}.wav")
+            response = self.context.request.get(BASE + f"/{name}.wav")
             self.assertTrue(response.ok, name)
             data = response.body()
             self.assertEqual(data[:4], b"RIFF", name)
