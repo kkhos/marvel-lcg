@@ -212,7 +212,7 @@ export class SelectStep {
 
             let cost_text = cost_options.map(cost => cover_res(cost.split(''))).join(" or ")
             let paid_text = cover_res(paid_list_copy)
-            UI.prompt.setTempPromptText(`<span class='cost-text'>Cost</span> [${Cards.getSpanText(object_id)}]<br/>(${paid_text}) / (${cost_text})`,true,paymentSummary(Effect.select_effect_obj,has_cost.length,cost_options,ok,over_pay))
+            UI.prompt.setTempPromptText(`<span class='cost-text'>Cost</span> [${Cards.getSpanText(object_id)}]<br/>(${paid_text}) / (${cost_text})`,true,paymentSummary(Effect.select_effect_obj,has_cost.length,cost_options,ok,over_pay,paid_list.join('')))
             // console.log(text)
         }
         if( ok ) {

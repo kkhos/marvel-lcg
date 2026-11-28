@@ -1,7 +1,7 @@
 import { koHtml, koLabel } from './ko-game.js';
 import type { AskOptionPayload, EffectDescriptor } from './data.js';
 
-export type PromptSummary = { action: string; count?: string; context?: string };
+export type PromptSummary = { action: string; count?: string; context?: string; payment?: {paid:string;required:string[]} };
 
 const phases: Record<string,[string,string]> = {
     'Initialize':['준비','게임 준비 중'], 'Scenario Setup':['준비','시나리오 준비 중'],
@@ -80,10 +80,10 @@ export function targetSummary(effect:EffectDescriptor):PromptSummary {
     const label=known[name]?undefined:plainPrompt(koHtml(name))||undefined;
     return {action,count:min===max?n+'/'+max:n+'장 · '+min+'~'+max+' 선택',context:label};
 }
-export function paymentSummary(effect:EffectDescriptor,paid:number,costOptions:string[],ok:boolean,overpay:boolean):PromptSummary {
+export function paymentSummary(effect:EffectDescriptor,paid:number,costOptions:string[],ok:boolean,overpay:boolean,paidSymbols=''):PromptSummary {
     const generic=costOptions.length===1&&/^\d+$/.test(costOptions[0])&&!effect.isCostRuleSameType()&&!effect.isCostRuleDifferentType()&&!effect.isCostRuleUpTo();
     const rules=[effect.isCostRuleSameType()?'같은 유형':'',effect.isCostRuleDifferentType()?'서로 다른 유형':'',effect.isCostRuleUpTo()?'최대 비용':''].filter(Boolean);
-    return {action:overpay?'초과 지불 확인':ok?'자원 지불 완료':'자원 지불',count:generic?paid+'/'+Number(costOptions[0]):undefined,context:rules.join(' · ')||undefined};
+    return {action:overpay?'초과 지불 확인':ok?'자원 지불 완료':'자원 지불',count:generic?paid+'/'+Number(costOptions[0]):undefined,context:rules.join(' · ')||undefined,payment:generic?undefined:{paid:paidSymbols,required:costOptions}};
 }
 export class MobilePrompt {
     static render(container:HTMLElement, output:HTMLElement, raw:string, summary:PromptSummary|undefined, phase:string, round:number) {
@@ -111,6 +111,20 @@ export class MobilePrompt {
         if(badge){const stage=document.createElement('span');stage.className='mp-phase';stage.textContent=badge;row.append(stage);}
         const action=document.createElement('span');action.className='mp-action';action.textContent=summary.action;row.append(action);
         if(summary.context){const context=document.createElement('span');context.className='mp-context';context.textContent=summary.context;row.append(context);}
+        if(summary.payment){
+            const payment=document.createElement('span');payment.className='mp-payment';
+            const symbols:Record<string,string>={R:'physical',B:'mental',Y:'energy',G:'wild'};
+            const append=(value:string)=>{
+                for(const char of value){
+                    if(symbols[char]){
+                        const icon=document.createElement('span');icon.className='icon-'+symbols[char];payment.append(icon);
+                    }else payment.append(document.createTextNode(char));
+                }
+            };
+            append(summary.payment.paid||'0');payment.append(document.createTextNode(' / '));
+            summary.payment.required.forEach((value,i)=>{if(i)payment.append(document.createTextNode(' 또는 '));append(value);});
+            row.append(payment);
+        }
         if(summary.count){const count=document.createElement('span');count.className='mp-count';count.textContent=summary.count;row.append(count);}
         output.replaceChildren(row);output.scrollTop=0;
     }

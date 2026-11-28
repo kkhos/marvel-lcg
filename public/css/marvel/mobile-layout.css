@@ -612,3 +612,6 @@ body.mobile-layout .mp-count {color:#f5d681;font-weight:800;flex:none;margin-lef
 #mobile-prompt-original {overflow-wrap:anywhere;white-space:normal}
 #mobile-prompt-original img {max-width:100px;max-height:100px}
 body.mobile-layout:has(#game-over-box.active) #mobile-prompt-more {display:none}
+
+body.mobile-layout .mp-payment{display:flex;align-items:center;gap:2px;flex:none;color:#f5d681;font-size:11px;white-space:nowrap;max-width:50%;overflow:hidden}
+body.mobile-layout .mp-payment [class^=icon-]{display:inline-block;width:14px;height:14px;flex:none;background-size:contain}

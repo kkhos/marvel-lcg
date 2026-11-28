@@ -170,7 +170,7 @@ class MobileRegression(unittest.TestCase):
             const custom=new EffectDescriptor({name:'Choose a card with a printed energy resource',target_num_range:[1,1]});
             const cost=new EffectDescriptor({name:'Play',target_num_range:[0,0]});
             return {phase:phaseLabel('Player 1 Turn',2),target:targetSummary(e),custom:targetSummary(custom),
-                cost:paymentSummary(cost,2,['3'],false,false),
+                cost:paymentSummary(cost,2,['3'],false,false),typedCost:paymentSummary(cost,1,['RY'],false,false,'R'),
                 unknown:progressSummary('Enemy Activation','Custom scenario: do not discard this card')===undefined,
                 customAsk:askSummary({event_name:'WhenPlayerChooseAbility',ability_type:'Normal',show_cancel:false,options:[custom]},'Player 1 Turn','Choose a card with a printed energy resource')===undefined};
         }""")
@@ -178,6 +178,7 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["target"]["action"],"교체할 카드 선택")
         self.assertIn("0~6",result["target"]["count"])
         self.assertEqual(result["cost"]["count"],"2/3")
+        self.assertEqual(result["typedCost"]["payment"],{"paid":"R","required":["RY"]})
         self.assertEqual(result["custom"]["context"],"Choose a card with a printed energy resource")
         self.assertTrue(result["unknown"])
         self.assertTrue(result["customAsk"])
