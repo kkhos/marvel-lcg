@@ -705,6 +705,14 @@ class MobileRegression(unittest.TestCase):
         expect(self.page.locator("#mobile-forecast-detail")).to_contain_text("조우 카드 기본")
         self.page.locator("#mobile-forecast-dialog").get_by_role("button",name="닫기").tap()
         self.assertGreaterEqual(self.page.locator("#scene .mobile-unit-stats").count(),1)
+        villain=self.page.locator("#area-villain .card.has-mobile-hud:not(.hide)").first
+        hud=villain.locator(":scope > .mobile-board-hud")
+        expect(hud).to_be_visible()
+        self.assertGreaterEqual(hud.bounding_box()["x"],villain.bounding_box()["x"]+villain.bounding_box()["width"]-1)
+        scheme=self.page.locator("#area-schemes-main .card.has-mobile-threat:not(.hide)").first
+        expect(scheme.locator(":scope > .mobile-threat-hud")).to_be_visible()
+        expect(scheme.locator(".mobile-threat-track")).to_be_visible()
+        self.assertTrue(scheme.evaluate("(el) => el.querySelector('.mobile-threat-hud').getBoundingClientRect().top >= el.querySelector('.face').getBoundingClientRect().bottom-1"))
         self.assertTrue(hand.first.evaluate("(el) => {const m=new DOMMatrix(getComputedStyle(el).transform);return Math.hypot(m.a,m.b)>1.2;}"))
         self.screenshot("hand")
         # The desktop top piles deliberately use negative board coordinates.

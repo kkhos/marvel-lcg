@@ -761,6 +761,8 @@ class CardRender {
         card_div.style.setProperty('--bg-image', url_text)
 
         let card_div_info = card_div.querySelector('.info') as HTMLElement
+        card_div.querySelector(':scope > .mobile-board-hud')?.remove();
+        card_div.classList.remove('has-mobile-hud','has-mobile-threat');
         // Update cost
         if( is_hand_card ) {
             card_div_info.innerHTML = ""
@@ -1112,7 +1114,29 @@ class CardRender {
                         const status=document.createElement('span');status.className='ms-status';status.textContent=label+(info[key]>1?' '+info[key]:'');compact.append(status);
                     }
                 }
-                if(compact.childElementCount)card_div_info.append(compact);
+                if(compact.childElementCount) {
+                    if (['Hero','AlterEgo','EncounterVillain'].includes(card.card_type)) {
+                        compact.classList.add('mobile-board-hud');
+                        card_div.classList.add('has-mobile-hud');
+                        card_div.append(compact);
+                    } else card_div_info.append(compact);
+                }
+            }
+            if(document.body.classList.contains('mobile-layout') && card.is_face_up && card.is_in_play && card.card_type_base==='Scheme') {
+                const value=card.info.threat ?? card.info.k_threat;
+                const target=card.info.target_threat;
+                if(Number.isFinite(value)) {
+                    const hud=document.createElement('div');hud.className='mobile-board-hud mobile-threat-hud';
+                    const limited=card.card_type==='MainScheme' && Number.isFinite(target) && target>0;
+                    hud.textContent='위협 '+value+(limited?' / '+target:'');
+                    if(limited){
+                        const progress=document.createElement('div');progress.className='mobile-threat-track';
+                        const fill=document.createElement('span');fill.style.width=Math.max(0,Math.min(100,value/target*100))+'%';
+                        progress.append(fill);hud.append(progress);
+                        hud.dataset.danger=value>=target?'high':value/target>=.7?'near':'normal';
+                    }
+                    card_div.classList.add('has-mobile-threat');card_div.append(hud);
+                }
             }
         } else {
             card_div_info.innerHTML = ""

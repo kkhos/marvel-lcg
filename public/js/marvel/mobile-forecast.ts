@@ -22,9 +22,9 @@ export function forecastText(world: WorldDescriptor) {
         const detail=villains.map((v,j)=>v.name+' '+(values[j]??'?')).join(' / ');
         return {label, kind, detail, minions:minions.length, base:values.length===1?values[0]:undefined};
     });
-    const threatLabel=threat===undefined?'위협 확인':'위협 기본 +'+threat;
-    const attack=lines.length===1 && lines[0].base!==undefined ? lines[0].kind+' '+lines[0].base+'+강화' : '활성화 확인';
-    return {summary: threatLabel+' · '+attack+' · 조우 기본 '+players.length,
+    const threatLabel=threat===undefined?'위협 ?':'위협 +'+threat;
+    const attack=lines.length===1 && lines[0].base!==undefined ? lines[0].kind+' '+lines[0].base+'+★' : '활성화 확인';
+    return {summary: threatLabel+' · '+attack+' · 조우 '+players.length,
         details: [
             '주요 음모의 기본 위협 증가: '+(threat===undefined?'확인 필요': '+'+threat),
             '공개된 가속 아이콘 '+icons+' · 가속 토큰 '+tokens+' (기본값에 별도 반영되는지는 시나리오 규칙에 따름)',
@@ -51,7 +51,8 @@ export class MobileForecast {
         const detail=document.getElementById('mobile-forecast-detail');
         if(!button||!detail)return;
         const result=forecastText(world);
-        button.hidden=false;button.textContent='다음 · '+result.summary;
+        button.hidden=false;button.textContent=result.summary+' ▾';
+        button.title='빌런 단계 기본 예상 · 자세히 보기';
         detail.replaceChildren(...result.details.map(line=>{const p=document.createElement('p');p.textContent=line;return p;}));
     }
 }

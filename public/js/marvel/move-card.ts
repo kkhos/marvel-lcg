@@ -88,6 +88,18 @@ export class MoveCard {
 
         // Set final x/y positions on each card element
         MoveCard.setCardStyles(shown_cards_els, cards_els, list_x2, parent, card_area, offsets.normal_y, offsets.scheme_upgrade_y);
+        if(document.body.classList.contains('mobile-layout')) {
+            const ordered=shown_cards_els.slice().sort((a,b)=>Number(a.style.getPropertyValue('--x'))-Number(b.style.getPropertyValue('--x')));
+            ordered.forEach((el,i)=>{
+                const c=Cards.getCard(Number(el.dataset.id));
+                if(!c || !['Hero','AlterEgo','EncounterVillain'].includes(c.card_type))return;
+                const x=Number(el.style.getPropertyValue('--x'));
+                const next=ordered[i+1];
+                const right=next?Number(next.style.getPropertyValue('--x')):sceneWidth;
+                const w=c.name==='Archangel'?MoveCard.cardWidth*2:'t_GIANT' in c.traits?MoveCard.cardHeight:MoveCard.cardWidth;
+                el.classList.toggle('mobile-hud-crowded',right-x<w+115);
+            });
+        }
     }
 
     private static getPadding(parent: HTMLElement) {
@@ -140,6 +152,8 @@ export class MoveCard {
             const object_id = Number(cards_els[i].dataset.id!);
             const card = Cards.getCard(object_id)!;
             let x = MoveCard.computeCardX(card, list_x);
+            if(document.body.classList.contains('mobile-layout') && card.is_face_up && card.is_in_play &&
+                ['Hero','AlterEgo','EncounterVillain'].includes(card.card_type)) x += 120;
 
             // Insert padding for grouped/bound cards
             if (!rendered_ids.includes(card.bind_object_id) && i !== cards_els.length - 1 && !card.is_dealt_card) {

@@ -556,3 +556,41 @@ body.mobile-layout:has(#game-over-box.active) #mobile-forecast {display:none!imp
 body.mobile-layout:has(#game-over-box.active) #mobile-progress-bar #prompt-box-container {
     max-width:min(80%,820px);
 }
+
+/* Separate live information from rotating card faces. */
+body.mobile-layout #scene .card.has-mobile-hud .face .info>div:has(>span:is(.attack,.scheme,.thwart,.defense,.recover,.stunned,.confused,.tough,.trait)),
+body.mobile-layout #scene .card.has-mobile-hud .face .info>:is(.health,.infinite_health) {display:none!important}
+body.mobile-layout #scene .card.has-mobile-threat .face .info::after {content:none!important;display:none!important}
+body.mobile-layout #scene .card>.mobile-board-hud {
+    position:absolute;left:calc(var(--card-width) + 8px);right:auto;top:4px;bottom:auto;
+    width:104px;box-sizing:border-box;padding:5px 4px;display:flex;flex-direction:column;align-items:center;gap:5px;
+    background:#10251ef0;border:1px solid #628b73;border-radius:8px;
+    font:750 21px/1.2 'Roboto Condensed',system-ui,sans-serif;white-space:nowrap;
+    color:#dbeee3;text-shadow:none;pointer-events:none;z-index:2;
+}
+body.mobile-layout #scene .card.has-mobile-hud:has(.info .t_giant)>.mobile-board-hud {left:calc((var(--card-width) + var(--card-height)) / 2 + 8px)}
+body.mobile-layout #scene .card.has-mobile-hud:has(.info .archangel)>.mobile-board-hud {left:calc(var(--card-width) * 1.5 + 8px)}
+body.mobile-layout #scene .card.mobile-hud-crowded>.mobile-unit-stats {
+    left:auto;right:4px;top:4px;width:auto;min-width:36px;max-width:90px;padding:4px;
+}
+body.mobile-layout #scene .card.mobile-hud-crowded>.mobile-unit-stats span:not(.ms-health):not(.ms-status){display:none}
+body.mobile-layout #scene .card>.mobile-threat-hud {
+    left:calc((var(--card-width) - var(--card-height)) / 2);
+    top:calc((var(--card-width) + var(--card-height)) / 2 + 4px);
+    width:var(--card-height);padding:3px 6px;gap:3px;color:#f5d681;font-size:20px;
+}
+body.mobile-layout #scene .mobile-threat-track {height:7px;width:100%;border-radius:4px;background:#30473c;overflow:hidden}
+body.mobile-layout #scene .mobile-threat-track span {display:block;height:100%;background:#83c7a1;padding:0}
+body.mobile-layout #scene .mobile-threat-hud[data-danger=near] .mobile-threat-track span {background:#d6ad53}
+body.mobile-layout #scene .mobile-threat-hud[data-danger=high] .mobile-threat-track span {background:#db6559}
+body.mobile-layout #scene .card.facedown>.mobile-board-hud,
+body.mobile-layout #scene .card.flipping>.mobile-board-hud {display:none!important}
+body.mobile-layout #scene .card:is(.type-ally,.type-minion) .face .info>.mobile-unit-stats {
+    left:auto;right:3px;top:auto;bottom:3px;width:auto;max-width:100%;font-size:20px;padding:2px;gap:1px;
+}
+body.mobile-layout #scene .badge-new::before {content:none!important;display:none!important}
+body.mobile-layout #mobile-action-confirm #btn-end {background:#30493e;color:#f5d681;border:1px solid #83a58c;font:750 13px/1.25 system-ui}
+body.mobile-layout #mobile-action-confirm #btn-ok {background:#2e6b57;color:#e8f1eb;border:1px solid #83b79a;font:750 13px/1.25 system-ui}
+body.mobile-layout #mobile-action-confirm #btn-ok.overpay {background:#66552b;color:#f9df95;border-color:#b4a26e}
+body.mobile-layout #mobile-progress-bar #prompt-text {font-weight:600}
+body.mobile-layout #mobile-forecast {flex-basis:clamp(136px,30vw,270px);font-size:11px}
