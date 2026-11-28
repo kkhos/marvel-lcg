@@ -357,7 +357,18 @@ const msMarvelVerified: Record<string,{name:string;text:string}> = {
     "text": "십대 감성 - 행동: Ms. Marvel 카드가 버려질 때까지 당신의 덱 맨 위 카드를 버립니다. 그러고 나서 그 카드를 당신의 손에 더합니다(라운드마다 1회 제한)."
   }
 };
-const exactPhysical = {...strangeVerified, ...wreckingVerified, ...msMarvelVerified};
+// Physical Korean Klaw I and Ghost-Spider faces, 2026-11-29.
+const klawGhostVerified: Record<string,{name:string;text:string}> = {
+  "01113": {
+    "name": "Klaw",
+    "text": "★ 강제 난입: Klaw가 공격할 때, 이번 활성화에서 Klaw에게 강화 카드 1장을 추가로 줍니다."
+  },
+  "27001a": {
+    "name": "Ghost-Spider",
+    "text": "아찔한 반사신경 - 반응: 당신이 이벤트의 \"난입\" 또는 \"반응\" 능력을 해결한 후, Ghost-Spider를 준비합니다. (페이즈마다 1회 제한.)"
+  }
+};
+const exactPhysical = {...strangeVerified, ...wreckingVerified, ...msMarvelVerified, ...klawGhostVerified};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...wreckingCrewDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.

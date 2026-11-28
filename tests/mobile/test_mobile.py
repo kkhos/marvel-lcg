@@ -800,17 +800,39 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["cards"], [["Ms. Marvel","신체 변형 - 반응: 당신이 공격이나 저지, 방어 이벤트를 플레이한 후, Ms. Marvel을 소진 → 그 이벤트를 당신의 손으로 되돌림.","verified"],["Kamala Khan","십대 감성 - 행동: Ms. Marvel 카드가 버려질 때까지 당신의 덱 맨 위 카드를 버립니다. 그러고 나서 그 카드를 당신의 손에 더합니다(라운드마다 1회 제한).","verified"]])
         self.assertEqual(result["labels"], ["신체 변형","십대 감성"])
 
+    def test_ko_klaw_ghost_spider_physical_faces(self):
+        self.goto("/main")
+        result=self.page.evaluate("""async () => {
+            const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
+            const {KO_IMPORTED_KEY}=await import('/public/js/marvel/ko-local.js');
+            const {koLabel}=await import('/public/js/marvel/ko-game.js');
+            const ids=['01113','27001a'];
+            const saved=localStorage.getItem(KO_IMPORTED_KEY);
+            try {
+                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify(Object.fromEntries(ids.map(id=>[id,{name:'오류',text:'잘못된 효과'}]))));
+                refreshKoCards();
+                return {cards:ids.map(id=>[koCard(id).name,koCard(id).text,koCardSource(id)]),
+                    label:koLabel('Dizzying Reflexes')};
+            } finally {
+                if(saved===null)localStorage.removeItem(KO_IMPORTED_KEY);
+                else localStorage.setItem(KO_IMPORTED_KEY,saved);
+                refreshKoCards();
+            }
+        }""")
+        self.assertEqual(result["cards"], [["Klaw","★ 강제 난입: Klaw가 공격할 때, 이번 활성화에서 Klaw에게 강화 카드 1장을 추가로 줍니다.","verified"],["Ghost-Spider","아찔한 반사신경 - 반응: 당신이 이벤트의 \"난입\" 또는 \"반응\" 능력을 해결한 후, Ghost-Spider를 준비합니다. (페이즈마다 1회 제한.)","verified"]])
+        self.assertEqual(result["label"], "아찔한 반사신경")
+
     def test_ko_verified_trait_labels(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
             const {koTraitLabel,verifiedKoTraits}=await import('/public/js/marvel/ko-traits.js');
             return {count:Object.keys(verifiedKoTraits).length,
-                verified:['t_aerial','t_tech','t_skill','t_avenger','t_defender','t_s.h.i.e.l.d','S.H.I.E.L.D.','t_hero_for_hire','t_genius','t_mystic','t_spell','t_thwart','t_artifact','t_champion','t_inhuman','t_defense'].map(koTraitLabel),
-                pending:['t_x-men','t_guardian','t_mutant','t_web-warrior','t_future_trait','constructor'].map(koTraitLabel)};
+                verified:['t_aerial','t_tech','t_skill','t_avenger','t_defender','t_s.h.i.e.l.d','S.H.I.E.L.D.','t_hero_for_hire','t_genius','t_mystic','t_spell','t_thwart','t_artifact','t_champion','t_inhuman','t_defense','t_masters_of_evil','t_web-warrior'].map(koTraitLabel),
+                pending:['t_x-men','t_guardian','t_mutant','t_future_trait','constructor'].map(koTraitLabel)};
         }""")
-        self.assertEqual(result["count"], 26)
-        self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재","신비술사","주문","저지","유물","CHAMPION","INHUMAN","방어"])
-        self.assertEqual(result["pending"], ["X-MEN","GUARDIAN","MUTANT","WEB-WARRIOR","FUTURE TRAIT","CONSTRUCTOR"])
+        self.assertEqual(result["count"], 28)
+        self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재","신비술사","주문","저지","유물","CHAMPION","INHUMAN","방어","MASTERS OF EVIL","WEB-WARRIOR"])
+        self.assertEqual(result["pending"], ["X-MEN","GUARDIAN","MUTANT","FUTURE TRAIT","CONSTRUCTOR"])
 
     def test_ko_bundled_module(self):
         self.goto("/main")

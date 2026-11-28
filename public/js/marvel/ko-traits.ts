@@ -29,7 +29,10 @@ export const verifiedKoTraits: Readonly<Record<string,string>> = Object.freeze({
     // Ms. Marvel physical identity faces; DEFENSE is printed in bold in her ability.
     "CHAMPION": "CHAMPION",
     "INHUMAN": "INHUMAN",
-    "DEFENSE": "방어"
+    "DEFENSE": "방어",
+    // Physical Klaw I and Ghost-Spider faces.
+    "MASTERS OF EVIL": "MASTERS OF EVIL",
+    "WEB-WARRIOR": "WEB-WARRIOR"
 });
 
 export function koTraitLabel(value: string): string {
