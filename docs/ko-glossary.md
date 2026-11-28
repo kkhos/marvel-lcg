@@ -343,3 +343,34 @@ MarvelCDB 고정 리비전의 twc_encounter.json 카드 면 60개를 비교했�
 | 팀워크 (특성) | 팀워크(특성) |
 
 추가 한글팩 표시 효과에만 적용한다. 이미 맞는 키워드와 강인/강인함의 구분, 수치, 연결어, 비용 및 격발 조건을 그대로 유지한다. 실물 검증 번역, 카드명, 이미지, 원본 ZIP, 게임 엔진은 변경하지 않는다. 정발 효과 검수 완료로 승격하지 않는다.
+
+
+### 4-2차 특성 전수 조사 및 표시 용어집
+
+비공식 원본 추출 JSON 4,524개 카드 항목 중 특성 보유 2,828개, 고유 영문 특성 232종을 추출했다. 영문/한글 특성 배열의 길이는 모든 항목에서 일치했다. 설치팩 및 엔진 매칭 수량과는 다를 수 있다. 정발 확인 19종, 영문 유지 후보 63종, 한글 번역 후보 113종, 별도 검수 37종으로 분류했다. 후보 분류는 공식 표기 확정이 아니다.
+
+규칙서 11~12쪽의 거미줄 날아차기, 스파이더 추적기, Black Cat, Captain Marvel 등 카드 예시와 갑옷/과학/상태 카드 예시, 참조 안내서 44~46쪽의 Daredevil, 격투 훈련, Spider-Man, Peter Parker, 트리스켈리온, 와칸다 포에버!, Rhino 등 표기를 대조했다. 특히 TECH=과학과 SKILL=기술을 분리한다. AVENGER, DEFENDER, S.H.I.E.L.D. 및 BLACK PANTHER는 정발 예시의 영문 표기를 유지한다.
+
+| 특성 | 확인 표기 |
+|---|---|
+| AVENGER | AVENGER |
+| DEFENDER | DEFENDER |
+| S.H.I.E.L.D | S.H.I.E.L.D. |
+| BLACK PANTHER | BLACK PANTHER |
+| GENIUS | 천재 |
+| SKILL | 기술 |
+| LOCATION | 장소 |
+| TACTIC | 전술 |
+| BRUTE | 야만 |
+| CRIMINAL | 범죄자 |
+| SOLDIER | 군인 |
+| ARMOR | 갑옷 |
+| TECH | 과학 |
+| CONDITION | 상태 |
+| HERO FOR HIRE | 용병 히어로 |
+| AERIAL | 공중 |
+| ATTACK | 공격 |
+| SUPERPOWER | 슈퍼파워 |
+| ITEM | 도구 |
+
+모바일 카드 미리보기의 실시간 특성 표시만 정규화한다. 미확인 X-MEN, GUARDIAN, WEB-WARRIOR, MUTANT, MYSTIC 등은 영문으로 유지한다. 카드 효과에 포함된 특성 문구는 기존 번역을 유지하고 5차 효과 대조 시 개별 검수한다. 게임 엔진의 식별자, 조건, 카드명, 이미지, 원본 ZIP은 변경하지 않는다.

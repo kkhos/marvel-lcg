@@ -534,6 +534,18 @@ class MobileRegression(unittest.TestCase):
         self.assertTrue(result["idempotent"])
         self.assertEqual(result["unchanged"], "임시 카드가 있습니다. 강인. 강인함 상태 카드. 영속. 반격 2. 교란 X. 진척 3. 승점 0. 그러고 나서, 그리고, 대신. 물리력물리력 자원. 버린 조우 더미.")
 
+    def test_ko_verified_trait_labels(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koTraitLabel,verifiedKoTraits}=await import('/public/js/marvel/ko-traits.js');
+            return {count:Object.keys(verifiedKoTraits).length,
+                verified:['t_aerial','t_tech','t_skill','t_avenger','t_defender','t_s.h.i.e.l.d','S.H.I.E.L.D.','t_hero_for_hire','t_genius'].map(koTraitLabel),
+                pending:['t_x-men','t_guardian','t_mutant','t_mystic','t_web-warrior','t_future_trait','constructor'].map(koTraitLabel)};
+        }""")
+        self.assertEqual(result["count"], 19)
+        self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재"])
+        self.assertEqual(result["pending"], ["X-MEN","GUARDIAN","MUTANT","MYSTIC","WEB-WARRIOR","FUTURE TRAIT","CONSTRUCTOR"])
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

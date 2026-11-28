@@ -1,5 +1,6 @@
 import { koCard, koCardSource } from './ko-cards.js';
 import { koStatusCard } from './ko-status.js';
+import { koTraitLabel } from './ko-traits.js';
 import { Cards } from './cards.js';
 import { ClassName } from './class_name.js';
 import { Effect } from './effect.js';
@@ -146,7 +147,7 @@ export class TouchControls {
             if (!data || !data.isVisible() || !data.pic_id) return;
             const labels:Record<string,string>={health:'체력',k_health:'체력',attack:'공격',scheme:'음모',thwart:'저지',defense:'방어',recover:'회복',hand_size:'손 크기',stunned:'기절',confused:'혼란',tough:'강인함',retaliate:'반격'};
             liveDescription=data.is_in_play?Object.entries(data.info).filter(([k,v])=>labels[k]&&Number.isFinite(v)&&(!['stunned','confused','tough','retaliate'].includes(k)||v>0)).map(([k,v])=>labels[k]+' '+v).join(' · '):'';
-            if(data.is_in_play){const traits=Object.keys(data.traits).map(k=>k.replace(/^t_/,'')).join(' · ');if(traits)liveDescription+='\n특성: '+traits;}
+            if(data.is_in_play){const traits=Object.keys(data.traits).map(koTraitLabel).join(' · ');if(traits)liveDescription+='\n특성: '+traits;}
             previewInfo=data.is_in_play?data.info:{};
             previewId = data.card_id;
             previewName = data.name;
