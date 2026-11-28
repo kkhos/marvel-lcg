@@ -746,3 +746,37 @@ body.mobile-layout #scene :is(#area-schemes-main,#area-schemes-side) > .card {tr
 @media(prefers-reduced-motion:reduce) {
     body.mobile-layout #scene .card {transition-duration:0s!important}
 }
+
+
+/* Native landscape artwork (e.g. the personal Korean pack) is already
+   oriented for reading. Keep the original rotation for portrait bitmaps. */
+body.mobile-layout .image-preview-div:has(> .image-preview[data-art-orientation="landscape"]) {
+    width: min(61.6dvh, 90vw);
+    height: min(44.45dvh, 64.94vw);
+}
+body.mobile-layout .image-preview[data-art-orientation="landscape"] {
+    rotate: 0deg;
+    transition: none;
+    background-size: 100% 100%;
+}
+body.mobile-layout .image-preview[data-art-orientation="landscape"] > .image-preview-text {
+    rotate: 0deg; transform: none;
+    left: 48%; right: 4%; top: 30%; bottom: 7%;
+    width: auto; height: auto; overflow: auto;
+}
+body.mobile-layout #scene .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme)
+    .face[data-art-orientation="landscape"] .image::before {
+    background-size: contain, 100% 100%; background-position: center;
+}
+body.mobile-layout #scene .area-schemes .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme)
+    .face[data-art-orientation="landscape"] .image::before {
+    left: 0; top: 0; width: 100%; height: 100%;
+    transform: none; background-size: 100% 100%;
+}
+
+/* Printed keywords need not cover the art. Preserve real counters, status
+   cards, guard icon, retaliate values and the separate compact live HUDs. */
+body.mobile-layout #scene .card .info > div:has(>span:is(
+    .quickstrike,.patrol,.villainous,.stalwart,.steady,.toughness,.restricted,
+    .permanent,.temporary,.teamwork,.peril,.surge,.incite,.assault,.vulnerable
+):not(.counter):not(.token)) { display: none !important; }

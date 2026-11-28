@@ -395,7 +395,7 @@ export class HoverCard{
             // void preview_div.offsetWidth;
             HoverCard.preview_source = bg_image
             const image_source = /url\((.*?)\)$/.exec(bg_image)![1].replace(/"/g, '')
-            CardImages.setBackground(preview_div, '--bg-image', image_source)
+            CardImages.setBackground(preview_div, '--bg-image', image_source, document.body.classList.contains('mobile-layout'))
 
             if( ButtonSetting.show_image_text ) {
                 preview_div.parentElement!.querySelector('.image-preview-name')!.innerHTML = name
@@ -424,8 +424,8 @@ export class HoverCard{
             // if( !UI.hold_ctrl ) {
             HoverCard.is_showing = false
             HoverCard.preview_source = ""
-            CardImages.setBackground(HoverCard.preview_left, '--bg-image', '')
-            CardImages.setBackground(HoverCard.preview_right, '--bg-image', '')
+            CardImages.setBackground(HoverCard.preview_left, '--bg-image', '', true)
+            CardImages.setBackground(HoverCard.preview_right, '--bg-image', '', true)
             HoverCard.preview_left.parentElement!.classList.add('hide')
             HoverCard.preview_right.parentElement!.classList.add('hide')
             // }

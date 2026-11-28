@@ -142,6 +142,62 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(self.errors, [])
         self.screenshot("home-redesign")
 
+    def test_mobile_native_landscape_art_and_keywords(self):
+        self.start_game()
+        self.page.evaluate("""async () => {
+            const {CardImages}=await import('/public/js/module/card_images.js');
+            const {HoverCard}=await import('/public/js/marvel/hover.js');
+            const {CardAnimation}=await import('/public/js/marvel/card_animation.js');
+            const make=(w,h)=>{
+                const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+                const ctx=canvas.getContext('2d');ctx.fillStyle='#c4a97e';ctx.fillRect(0,0,w,h);
+                return canvas.toDataURL('image/png');
+            };
+            const art=make(194,140), portrait=make(140,194);
+            const scheme=document.querySelector('#area-schemes-main .card:not(.hide):not(.facedown)');
+            if(!scheme)throw new Error('No main scheme');
+            const face=scheme.querySelector('.face');
+            CardImages.setBackground(face,'--bg-image-true',art,true);
+            const old=CardAnimation.animation_name;
+            CardAnimation.animation_name='center_flip';
+            HoverCard.center_preview.preview_container.classList.remove('display-none');
+            HoverCard.show('url("'+art+'")','Test Scheme','EncounterSideScheme','', '1','',false);
+            CardAnimation.animation_name=old;
+            const unit=document.querySelector('#area-villain .card:not(.hide)');
+            const info=unit.querySelector('.info');
+            const keyword=document.createElement('div');keyword.id='test-quickstrike';
+            keyword.innerHTML='<span class="quickstrike hide-value">Quickstrike</span>';
+            const counter=document.createElement('div');counter.id='test-keyword-counter';
+            counter.innerHTML='<span>2x</span><span class="quickstrike counter">test</span>';
+            info.append(keyword,counter);
+            window.orientationTest={face,scheme,portrait,showPortrait:()=>{
+                const prev=CardAnimation.animation_name;CardAnimation.animation_name='center_flip';
+                HoverCard.show('url("'+portrait+'")','Test Scheme','EncounterSideScheme','', '1','',false);
+                CardAnimation.animation_name=prev;
+            }};
+        }""")
+        preview=self.page.locator("#image-preview-div-center .image-preview")
+        expect(preview).to_have_attribute("data-art-orientation","landscape")
+        self.page.wait_for_function("""() => {
+            const {face,scheme}=window.orientationTest;
+            const p=document.querySelector('#image-preview-div-center .image-preview');
+            const art=getComputedStyle(face.querySelector('.image'),'::before');
+            return face.dataset.artOrientation==='landscape' && art.transform==='none' &&
+                p.getBoundingClientRect().width>p.getBoundingClientRect().height &&
+                getComputedStyle(p).rotate==='0deg' &&
+                getComputedStyle(document.getElementById('test-quickstrike')).display==='none' &&
+                getComputedStyle(document.getElementById('test-keyword-counter')).display!=='none';
+        }""")
+        self.bounds(preview)
+        self.screenshot("native-landscape-art")
+        self.page.evaluate("window.orientationTest.showPortrait()")
+        expect(preview).to_have_attribute("data-art-orientation","portrait")
+        self.page.wait_for_function("""() => {
+            const p=document.querySelector('#image-preview-div-center .image-preview');
+            return getComputedStyle(p).rotate==='90deg';
+        }""")
+        self.assertEqual(self.errors, [])
+
     def test_mobile_dynamic_card_focus(self):
         self.start_game()
         result=self.page.evaluate("""async () => {

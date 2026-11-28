@@ -717,7 +717,9 @@ class CardRender {
         // Hover/flip controls use the card IDs on the outer element. Override
         // only the displayed face so recovered blob URLs do not change them.
         const card_face = card_div.querySelector('.face') as HTMLElement
-        CardImages.setBackground(card_face, '--bg-image-true', pic_id)
+        const detectLandscape = document.body.classList.contains('mobile-layout') && card.card_type_base === 'Scheme';
+        if (!detectLandscape) card_face.removeAttribute('data-art-orientation');
+        CardImages.setBackground(card_face, '--bg-image-true', pic_id, detectLandscape)
         CardImages.setBackground(card_face, '--bg-image-false', card.down_card_id)
 
         let is_facedown = card_div.classList.contains(ClassName.facedown)

@@ -18,6 +18,7 @@ interface ImageBinding {
 export class CardImages {
     private static entries = new Map<string, ImageEntry>();
     private static bindings = new WeakMap<HTMLElement, Map<string, ImageBinding>>();
+    private static orientations = new Map<string, Promise<string>>();
 
     static releaseAll(): void {
         for (const entry of this.entries.values()) {
@@ -27,15 +28,40 @@ export class CardImages {
         }
         this.entries.clear();
         this.bindings = new WeakMap();
+        this.orientations.clear();
     }
 
     static setImage(image: HTMLImageElement, source: string): void {
         this.bind(image, 'src', source, url => image.src = url);
     }
 
-    static setBackground(element: HTMLElement, property: string, source: string): void {
+    static setBackground(element: HTMLElement, property: string, source: string, detectOrientation = false): void {
         this.bind(element, property, source, url => {
-            element.style.setProperty(property, url ? `url("${url}")` : 'none');
+            const value = url ? `url("${url}")` : 'none';
+            const unchanged = element.style.getPropertyValue(property) === value;
+            element.style.setProperty(property, value);
+            if (!detectOrientation) return;
+            if (unchanged && element.hasAttribute('data-art-orientation') && url) return;
+            element.removeAttribute('data-art-orientation');
+            if (!url) return;
+            element.dataset.artOrientation = 'pending';
+            // Decode the actual delivered blob, not the card type: imported
+            // packs can contain native landscape artwork while legacy art is
+            // stored in a portrait bitmap that needs the original rotation.
+            let orientation = this.orientations.get(url);
+            if (!orientation) {
+                orientation = new Promise<string>(resolve => {
+                    const image = new Image();
+                    image.onload = () => resolve(image.naturalWidth > image.naturalHeight ? 'landscape' : 'portrait');
+                    image.onerror = () => resolve('unknown');
+                    image.src = url;
+                });
+                this.orientations.set(url, orientation);
+            }
+            void orientation.then(result => {
+                if (element.style.getPropertyValue(property) === value)
+                    element.dataset.artOrientation = result;
+            });
         });
     }
 
@@ -81,7 +107,10 @@ export class CardImages {
         if (!entry.complete && entry.bindings.size === 0) {
             if (entry.timer !== undefined) window.clearTimeout(entry.timer);
             this.entries.delete(entry.source);
-            if (entry.imageUrl) URL.revokeObjectURL(entry.imageUrl);
+            if (entry.imageUrl) {
+                this.orientations.delete(entry.imageUrl);
+                URL.revokeObjectURL(entry.imageUrl);
+            }
         }
     }
 
@@ -105,7 +134,10 @@ export class CardImages {
             const oldUrl = entry.imageUrl;
             entry.imageUrl = URL.createObjectURL(blob);
             for (const binding of entry.bindings) binding.apply(entry.imageUrl);
-            if (oldUrl) URL.revokeObjectURL(oldUrl);
+            if (oldUrl) {
+                this.orientations.delete(oldUrl);
+                URL.revokeObjectURL(oldUrl);
+            }
 
             const retryHeader = response.headers.get('X-Card-Image-Retry-After');
             const state = response.headers.get('X-Card-Image-State');
