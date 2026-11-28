@@ -394,6 +394,24 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["source"], "reprint")
         self.assertTrue(result["unknown"])
 
+    def test_ko_imported_pack_priority(self):
+        self.goto("/main")
+        result=self.page.evaluate("""async () => {
+            const {KO_IMPORTED_KEY,cleanImportedCards}=await import('/public/js/marvel/ko-local.js');
+            const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
+            const clean=cleanImportedCards({'09001b':{name:'Stephen Strange',text:'타고난 재능'},'01001a':{name:'오류',text:'틀린 번역'},'07034':{name:'오류',text:'틀린 번역'},'bad':{name:'오류',text:'오류'}});
+            localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify(clean));refreshKoCards();
+            const result={ids:Object.keys(clean),doctor:koCard('09001b').text,source:koCardSource('09001b'),hero:koCard('01001a').name,wreck:koCard('07034').name};
+            localStorage.removeItem(KO_IMPORTED_KEY);refreshKoCards();return result;
+        }""")
+        self.assertEqual(result["doctor"],"타고난 재능")
+        self.assertEqual(result["source"],"imported")
+        self.assertEqual(result["hero"],"Spider-Man")
+        self.assertEqual(result["wreck"],"강화하다!")
+        self.assertNotIn("bad",result["ids"])
+        self.goto("/artwork")
+        expect(self.page.locator("#ko-pack-install")).to_be_visible()
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

@@ -71,3 +71,37 @@ export async function importKoCards(progress: (message:string)=>void) {
     if (!failures.length && Object.keys(cards).length >= 250) localStorage.setItem(KO_COMPLETE_KEY, KO_SOURCE_REV);
     return {count:Object.keys(cards).length, failures};
 }
+
+export const KO_IMPORTED_KEY = 'marvel-ko-imported-pack-v1';
+export function cleanImportedCards(rows: unknown): Record<string,KoEntry> {
+    const out: Record<string,KoEntry> = Object.create(null);
+    if (!rows || typeof rows !== 'object' || Array.isArray(rows)) return out;
+    for(const [id,value] of Object.entries(rows)) {
+        const row=value as KoEntry;
+        if (!validId.test(id) || !row || typeof row.name!=='string' || typeof row.text!=='string' || row.name.length>300 || row.text.length>15000) continue;
+        const name=safeName(row.name), text=plainKo(row.text);
+        if(name && (hangul.test(text) || !text.trim())) out[id]={name,text};
+    }
+    return out;
+}
+export function readImportedKoCache(): Record<string,KoEntry> {
+    try {return cleanImportedCards(JSON.parse(localStorage.getItem(KO_IMPORTED_KEY)||'{}'));}
+    catch {return Object.create(null);}
+}
+export function storeImportedKoPack(data: {cards:unknown;image_count:number;source_count:number;mismatches:string[]}) {
+    const entries=cleanImportedCards(data.cards);
+    localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify(entries));
+    return {count:Object.keys(entries).length,images:data.image_count,sourceCount:data.source_count,mismatches:data.mismatches||[]};
+}
+export async function syncImportedKoPack() {
+    const response=await fetch('/get_ko_pack',{cache:'no-store'});
+    if(!response.ok)throw Error('한글팩 정보를 읽지 못했습니다.');
+    return storeImportedKoPack(await response.json());
+}
+export async function installImportedKoPack(file:File) {
+    if(file.size>256*1024*1024)throw Error('한글팩이 너무 큽니다.');
+    const response=await fetch('/import_ko_pack',{method:'POST',body:file,cache:'no-store',headers:{'Content-Type':'application/zip'}});
+    const data=await response.json();
+    if(!response.ok)throw Error(data.error||'한글팩 설치 실패');
+    return storeImportedKoPack(data);
+}

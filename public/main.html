@@ -172,9 +172,12 @@ window.MarvelSetup={back:()=>{const d=document.getElementById('saved-games');if(
 </script>
 <script type="module">
     // Android personal-use cache: fetch once without blocking the game launcher.
-    import { importKoCards, KO_COMPLETE_KEY, KO_SOURCE_REV, readKoCache } from '/public/js/marvel/ko-local.js';
+    import { importKoCards, KO_COMPLETE_KEY, KO_SOURCE_REV, readKoCache, readImportedKoCache, syncImportedKoPack } from '/public/js/marvel/ko-local.js';
     import { bundledKoCount, refreshKoCards } from '/public/js/marvel/ko-cards.js';
-    if (navigator.userAgent.includes('MarvelAndroid') && !bundledKoCount) {
+    if (navigator.userAgent.includes('MarvelAndroid')) {
+        syncImportedKoPack().then(()=>refreshKoCards()).catch(()=>{});
+    }
+    if (navigator.userAgent.includes('MarvelAndroid') && !bundledKoCount && !Object.keys(readImportedKoCache()).length) {
         try {
             if (localStorage.getItem(KO_COMPLETE_KEY) !== KO_SOURCE_REV || Object.keys(readKoCache()).length < 250) {
                 const status=document.createElement('small');

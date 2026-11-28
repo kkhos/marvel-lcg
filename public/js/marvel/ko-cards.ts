@@ -1,4 +1,4 @@
-import { readKoCache } from './ko-local.js';
+import { readKoCache, readImportedKoCache } from './ko-local.js';
 import { normalizeKoCardText } from './ko-glossary.js';
 import { bundledKo } from './ko-bundled.js';
 import { goblinDraft } from './ko-goblin.js';
@@ -307,18 +307,22 @@ const physicalVerified = new Set(['07001a','07001b','07004','01005','02021','270
 const verifiedNames: Record<string,string> = {'07019':'천둥강타','07034':'강화하다!','07048':'길을 비켜라'};
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
 const draftCards = {...reviewedDrafts, ...koCards};
-const sources: Record<string,'verified'|'community'|'draft'> = Object.create(null);
+const sources: Record<string,'verified'|'imported'|'community'|'draft'> = Object.create(null);
 export function refreshKoCards() {
     const localCards = {...readKoCache(), ...bundledKo};
+    const imported = readImportedKoCache();
+    // Keep the reviewed scenario correction until the physical 07034 is checked.
+    delete imported['07034'];
     for (const id of Object.keys(normalizedCards)) delete normalizedCards[id];
     for (const id of Object.keys(sources)) delete sources[id];
-    for (const id of new Set([...Object.keys(draftCards), ...Object.keys(localCards)])) {
+    for (const id of new Set([...Object.keys(draftCards), ...Object.keys(localCards), ...Object.keys(imported)])) {
     const verified = physicalVerified.has(id);
-    const community = !verified && Object.prototype.hasOwnProperty.call(localCards,id);
-    const entry = (community ? localCards[id] : draftCards[id]) ?? localCards[id];
+    const fromPack = !verified && Object.prototype.hasOwnProperty.call(imported,id);
+    const community = !verified && !fromPack && Object.prototype.hasOwnProperty.call(localCards,id);
+    const entry = (verified ? draftCards[id] : fromPack ? imported[id] : community ? localCards[id] : draftCards[id]) ?? localCards[id];
     if (!entry) continue;
     normalizedCards[id] = {name:verifiedNames[id] ?? entry.name, text:entry.text === undefined ? undefined : (community ? entry.text : normalizeKoCardText(entry.text))};
-    sources[id] = verified ? 'verified' : community ? 'community' : 'draft';
+    sources[id] = verified ? 'verified' : fromPack ? 'imported' : community ? 'community' : 'draft';
     }
 }
 refreshKoCards();

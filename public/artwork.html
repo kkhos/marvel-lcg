@@ -61,6 +61,14 @@
         <button id="ko-import" type="button" class="primary">한국어 번역 받기 / 업데이트</button>
         <small>최초 한 번 인터넷 필요 · 이후 오프라인 사용 · 조우 카드와 시니스터 모티브 일부 미번역</small>
     </section>
+    <section class="panel" aria-labelledby="ko-pack-heading">
+        <h2 id="ko-pack-heading">한글 카드팩 설치</h2>
+        <p>받은 <code>marvel-korean-pack.zip</code> 파일을 그대로 선택하세요. 일치하는 카드의 한글 설명과 이미지가 기기에 저장됩니다. 실물 검증 번역과 영문 이미지 원본, 덱 및 세이브는 유지합니다.</p>
+        <p id="ko-pack-status" role="status">한글팩 확인 중</p>
+        <input id="ko-pack-file" type="file" accept=".zip,application/zip" hidden>
+        <button id="ko-pack-install" type="button" class="primary">한글팩 파일 선택</button>
+        <small>개인 사용 · 설치 중 앱을 닫지 마세요. 원본 카드 이미지가 준비되지 않은 경우 기존 이미지 다운로드는 계속 필요할 수 있습니다.</small>
+    </section>
     <section class="panel" aria-labelledby="maintenance">
         <h2 id="maintenance">이미지 라이브러리 관리</h2>
         <p>The first download is about 1.7 GiB, separate from the application ZIP. Keep the library in the <strong>저장 위치</strong> folder shown above: new installations reuse it automatically. Only the host needs the full library, including for LAN and Cloudflare games.</p>
@@ -84,9 +92,22 @@
 </main>
 <script type="module">
     import { startArtworkPage } from '/public/js/module/artwork.js';
-    import { importKoCards, readKoCache } from '/public/js/marvel/ko-local.js';
+    import { importKoCards, readKoCache, syncImportedKoPack, installImportedKoPack } from '/public/js/marvel/ko-local.js';
     import { bundledKoCount } from '/public/js/marvel/ko-cards.js';
     startArtworkPage();
+    const packInput=document.getElementById('ko-pack-file');
+    const packButton=document.getElementById('ko-pack-install');
+    const packStatus=document.getElementById('ko-pack-status');
+    const showPack=r=>{packStatus.textContent=r.count?'설치됨 · 번역 '+r.count+'개 / 이미지 '+r.images+'개 · ID/이름 불일치 '+r.mismatches.length+'개 제외':'설치된 한글팩 없음';};
+    syncImportedKoPack().then(showPack).catch(()=>packStatus.textContent='한글팩 확인 실패');
+    packButton.onclick=()=>packInput.click();
+    packInput.onchange=async()=>{
+        const file=packInput.files?.[0];if(!file)return;
+        packButton.disabled=true;packStatus.textContent='한글팩 검증 및 설치 중…';
+        try{showPack(await installImportedKoPack(file));packStatus.textContent+=' · 다음 화면부터 적용';}
+        catch(error){packStatus.textContent='설치 실패: '+String(error);}
+        finally{packButton.disabled=false;packInput.value='';}
+    };
     const button = document.getElementById('ko-import');
     const progress = document.getElementById('ko-progress');
     if (bundledKoCount > 0) {

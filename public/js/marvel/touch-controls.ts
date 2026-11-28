@@ -124,7 +124,7 @@ export class TouchControls {
             text.textContent = plain || (translated ? '추가 능력 설명 없음' : '표시할 설명 없음');
             renderRelatedRules(rules,showingBack?[]:relatedRules(Cards.getText(id)||'',plain,previewInfo));
             description.scrollTop=0;
-            source.textContent = status ? '부가 상태 카드 · 정발판 규칙서 대조 완료' : translated?.text !== undefined ? (koCardSource(id) === 'verified' ? '정발판 효과 대조 완료 · 자원 기호는 문자로 표시' : koCardSource(id) === 'community' ? 'MarvelCDB 한국어 데이터 · 실물 대조 권장' : koCardSource(id) === 'reprint' ? '재수록 카드 · 원본 번역 적용' : '한국어 번역 초안 · 원본 카드와 대조 권장') : '원문 / 미번역';
+            source.textContent = status ? '부가 상태 카드 · 정발판 규칙서 대조 완료' : translated?.text !== undefined ? (koCardSource(id) === 'verified' ? '정발판 효과 대조 완료 · 자원 기호는 문자로 표시' : koCardSource(id) === 'imported' ? '추가 한글팩 · 정발판 실물 대조 권장' : koCardSource(id) === 'community' ? 'MarvelCDB 한국어 데이터 · 실물 대조 권장' : koCardSource(id) === 'reprint' ? '재수록 카드 · 원본 번역 적용' : '한국어 번역 초안 · 원본 카드와 대조 권장') : '원문 / 미번역';
         }
         close.onclick = () => dialog.close();
         dialog.onclick = e => { if (e.target === dialog) dialog.close(); };

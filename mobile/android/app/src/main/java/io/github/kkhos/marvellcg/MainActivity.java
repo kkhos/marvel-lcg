@@ -2,6 +2,9 @@ package io.github.kkhos.marvellcg;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.webkit.WebChromeClient;
+import android.webkit.ValueCallback;
 import android.os.Bundle;
 import android.os.Build;
 import android.view.WindowInsets;
@@ -46,6 +49,8 @@ public class MainActivity extends Activity {
     private static volatile boolean launching = false;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private WebView web;
+    private static final int KO_PACK_PICKER = 6104;
+    private ValueCallback<Uri[]> koPackFileCallback;
     private TextView status;
     private Button start;
     private FrameLayout splash;
@@ -69,7 +74,26 @@ public class MainActivity extends Activity {
         web.getSettings().setJavaScriptEnabled(true);
         web.getSettings().setDomStorageEnabled(true);
         web.getSettings().setAllowFileAccess(false);
-        web.getSettings().setAllowContentAccess(false);
+        // The single-file chooser is restricted to the local artwork page.
+        web.getSettings().setAllowContentAccess(true);
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                Uri page = Uri.parse(view.getUrl() == null ? "" : view.getUrl());
+                if (!"http".equals(page.getScheme()) || !"127.0.0.1".equals(page.getHost()) || page.getPort() != 2345
+                        || !("/artwork".equals(page.getPath()) || "/public/artwork.html".equals(page.getPath()))) {
+                    callback.onReceiveValue(null);
+                    return true;
+                }
+                if (koPackFileCallback != null) koPackFileCallback.onReceiveValue(null);
+                koPackFileCallback = callback;
+                Intent picker = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                picker.addCategory(Intent.CATEGORY_OPENABLE);
+                picker.setType("*/*");
+                try { startActivityForResult(picker, KO_PACK_PICKER); }
+                catch (RuntimeException ex) { koPackFileCallback = null; callback.onReceiveValue(null); }
+                return true;
+            }
+        });
         web.setWebViewClient(new WebViewClient() {
             @Override public void onPageCommitVisible(WebView view, String url) {
                 super.onPageCommitVisible(view, url);
@@ -376,6 +400,16 @@ public class MainActivity extends Activity {
         return root;
     }
 
+    @Override protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == KO_PACK_PICKER && koPackFileCallback != null) {
+            ValueCallback<Uri[]> callback = koPackFileCallback;
+            koPackFileCallback = null;
+            Uri selected = resultCode == RESULT_OK && data != null ? data.getData() : null;
+            callback.onReceiveValue(selected != null && "content".equals(selected.getScheme()) ? new Uri[]{selected} : null);
+        }
+    }
+
     @Override public void onBackPressed() {
         handleBack();
     }
@@ -437,6 +471,7 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onDestroy() {
+        if (koPackFileCallback != null) { koPackFileCallback.onReceiveValue(null); koPackFileCallback = null; }
         handler.removeCallbacks(poll);
         splash.animate().cancel();
         web.stopLoading();

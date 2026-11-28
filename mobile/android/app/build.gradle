@@ -28,8 +28,8 @@ android {
         applicationId 'io.github.kkhos.marvellcg'
         minSdk 24
         targetSdk 35
-        versionCode 71
-        versionName '0.5.62-compact-preview-buttons'
+        versionCode 72
+        versionName '0.5.63-ko-pack'
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
     }
     sourceSets.main.assets.srcDir(layout.buildDirectory.dir('generated/gameAssets'))
