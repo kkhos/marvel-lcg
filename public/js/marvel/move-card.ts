@@ -139,8 +139,10 @@ export class MoveCard {
     }
 
     private static buildPlayAreaXList(cards_els: HTMLElement[], list_x: number[]) {
-        for (let i = 0; i < cards_els.length; i++) {
-            list_x.push(MoveCard.cardWidth + 10);
+        const mobile = document.body.classList.contains('mobile-layout');
+        for (const card of cards_els) {
+            const landscape = mobile && card.matches(':not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme)');
+            list_x.push((landscape ? MoveCard.cardHeight : MoveCard.cardWidth) + 10);
         }
     }
 

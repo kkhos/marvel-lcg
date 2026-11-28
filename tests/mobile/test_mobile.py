@@ -191,6 +191,55 @@ class MobileRegression(unittest.TestCase):
         }""")
         self.bounds(preview)
         self.screenshot("native-landscape-art")
+        # Verify the real board thumbnail CSS in the processing lane and pile,
+        # not just the large center preview or the final scheme area.
+        result=self.page.evaluate("""async () => {
+            const {MoveCard}=await import('/public/js/marvel/move-card.js');
+            const original=window.orientationTest.scheme;
+            const results=[];
+            for(const zone of ['area-play','encounter-discard-pile-0']){
+                const parent=document.getElementById(zone);
+                const card=original.cloneNode(true);
+                card.removeAttribute('id');card.removeAttribute('data-id');
+                card.classList.remove('hide','facedown','peeking');
+                card.classList.remove('type-main-scheme','type-player-side-scheme');
+                card.classList.add('type-encounter-side-scheme');
+                const face=card.querySelector('.face');
+                parent.append(card);
+                try {
+                    const read=()=>{
+                        const art=getComputedStyle(face.querySelector('.image'),'::before');
+                        return {w:card.offsetWidth,h:card.offsetHeight,iw:parseFloat(art.width),ih:parseFloat(art.height),transform:art.transform};
+                    };
+                    face.dataset.artOrientation='landscape';
+                    const native=read();
+                    face.dataset.artOrientation='portrait';
+                    const legacy=read();
+                    let step=null;
+                    if(zone==='area-play'){
+                        const positions=[];
+                        MoveCard.buildPlayAreaXList([card],positions);
+                        step=positions[0];
+                    }
+                    card.classList.add('facedown');
+                    const hidden=read();
+                    results.push({zone,native,legacy,hidden,step});
+                } finally {card.remove();}
+            }
+            return results;
+        }""")
+        for entry in result:
+            native,legacy,hidden=entry["native"],entry["legacy"],entry["hidden"]
+            self.assertGreater(native["w"],native["h"],entry["zone"])
+            self.assertEqual(native["transform"],"none")
+            self.assertAlmostEqual(native["iw"],native["w"],delta=2)
+            self.assertAlmostEqual(native["ih"],native["h"],delta=2)
+            self.assertNotEqual(legacy["transform"],"none")
+            self.assertAlmostEqual(legacy["iw"],legacy["h"],delta=2)
+            self.assertAlmostEqual(legacy["ih"],legacy["w"],delta=2)
+            self.assertLess(hidden["w"],hidden["h"])
+            if entry["step"] is not None:
+                self.assertGreaterEqual(entry["step"],native["w"])
         self.page.evaluate("window.orientationTest.showPortrait()")
         expect(preview).to_have_attribute("data-art-orientation","portrait")
         self.page.wait_for_function("""() => {

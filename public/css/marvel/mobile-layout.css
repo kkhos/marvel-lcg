@@ -764,14 +764,35 @@ body.mobile-layout .image-preview[data-art-orientation="landscape"] > .image-pre
     left: 48%; right: 4%; top: 30%; bottom: 7%;
     width: auto; height: auto; overflow: auto;
 }
+/* The reveal/processing lane also renders actual board cards, not the
+   center image preview. Give face-up schemes a landscape outer box there.
+   Piles keep their original column width to avoid overlapping adjacent decks. */
+body.mobile-layout #scene #area-play > .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme) {
+    width: var(--card-height); min-width: var(--card-height); height: var(--card-width);
+}
+body.mobile-layout #scene .deck > .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme) {
+    width: var(--card-width); min-width: var(--card-width);
+    height: calc(var(--card-width) * 127 / 176);
+}
+/* Legacy art is a portrait bitmap, rotated inside a landscape box. For
+   compact pile cards use the swapped compact dimensions as well. */
+body.mobile-layout #scene #area-play > .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme) .face .image::before,
+body.mobile-layout #scene .deck > .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme) .face .image::before {
+    left: 50%; top: 50%; width: var(--card-width); height: var(--card-height);
+    transform-origin: center; transform: translate(-50%, -50%) rotate(90deg);
+}
+body.mobile-layout #scene .deck > .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme) .face .image::before {
+    width: calc(var(--card-width) * 127 / 176); height: var(--card-width);
+}
+/* Native landscape art must fill the landscape frame without rotation. */
 body.mobile-layout #scene .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme)
     .face[data-art-orientation="landscape"] .image::before {
     background-size: contain, 100% 100%; background-position: center;
 }
-body.mobile-layout #scene .area-schemes .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme)
+body.mobile-layout #scene :is(.area-schemes,#area-play,.deck) > .card:not(.facedown):is(.type-main-scheme,.type-player-side-scheme,.type-encounter-side-scheme)
     .face[data-art-orientation="landscape"] .image::before {
     left: 0; top: 0; width: 100%; height: 100%;
-    transform: none; background-size: 100% 100%;
+    transform: none; background-size: 100% 100%; background-position: center;
 }
 
 /* Printed keywords need not cover the art. Preserve real counters, status
