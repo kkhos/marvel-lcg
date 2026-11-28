@@ -48,6 +48,7 @@ export function progressSummary(phase:string, raw:string):PromptSummary|undefine
         [/ were discarded$/,()=> '카드 버림'],
         [/ was shuffled(?: with |$)/,()=> '덱 섞기'],
         [/ has run out$/,()=> '덱 소진'],
+        [/ would surge against /i,()=> '쇄도 · 추가 조우 카드 공개'],
         [/ activation ends$/,()=> '적 활성화 종료']
     ];
     for(const [re,format] of patterns){const match=text.match(re);if(match)return {action:format(match)};}

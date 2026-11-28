@@ -7,6 +7,7 @@ import { SelectStep } from './select.js';
 import { CardImages } from '../module/card_images.js';
 import { HoverCard } from './hover.js';
 import { HistoryLog } from './history.js';
+import { relatedRules, renderRelatedRules, createRuleDictionary } from './ko-rule-help.js';
 
 type Gesture = {
     id: number; card: HTMLElement; x: number; y: number;
@@ -39,6 +40,23 @@ export class TouchControls {
                 font: 700 15px/1.25 system-ui,sans-serif; color: #f1f6f3; background: #30493e;
                 border: 1px solid #83b79a; border-radius: 7px; }
             #touch-preview button[hidden] { display: none !important; }
+            #touch-preview .rule-help {white-space:normal;margin-top:12px;padding-top:8px;border-top:1px solid #527b63;font:13px/1.4 system-ui}
+            #touch-preview .rule-help-chips {display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+            #touch-preview .rule-help-chips button {min-height:32px;font-size:12px;padding:4px 8px}
+            #touch-preview .rule-help-chips button[aria-expanded=true] {background:#426c50;border-color:#a5e5c6}
+            #touch-preview .rule-help-detail {margin-top:6px;padding:8px;background:#243e31;border-radius:6px}
+            #mobile-rule-dictionary {position:fixed;inset:0;margin:auto;box-sizing:border-box;width:min(620px,90vw);max-height:85dvh;padding:12px;background:#172a23;color:#e8f1eb;border:1px solid #83b79a;border-radius:12px;font:14px/1.4 system-ui;overflow:hidden}
+            #mobile-rule-dictionary[open] {display:flex;flex-direction:column;gap:8px}
+            #mobile-rule-dictionary::backdrop {background:#0009}
+            #mobile-rule-dictionary header {display:flex;align-items:center;justify-content:space-between;gap:10px}
+            #mobile-rule-dictionary h2 {font:750 18px system-ui;margin:0}
+            #mobile-rule-dictionary button,#mobile-settings-rule-help {min-height:36px;padding:5px 10px;background:#30493e;color:#e8f1eb;border:1px solid #83b79a;border-radius:6px;font:700 13px system-ui}
+            #mobile-rule-dictionary input {width:100%;box-sizing:border-box;background:#10251e;color:white;border:1px solid #83b79a;border-radius:6px;padding:8px;font:16px system-ui}
+            #mobile-rule-dictionary .rule-dictionary-list {overflow:auto;min-height:0}
+            #mobile-rule-dictionary details {border-bottom:1px solid #527b63;padding:8px 4px}
+            #mobile-rule-dictionary summary {cursor:pointer;font-weight:700}
+            #mobile-rule-dictionary p {margin:7px 0 3px;color:#d3e8da}
+
             #touch-pile { position:fixed; inset:0; margin:auto; box-sizing:border-box; width:min(80vw,760px);
                 height:fit-content; max-height:85dvh; padding:10px; overflow:hidden; background:#172a23;
                 color:#f1f6f3; border:1px solid #83b79a; border-radius:12px; font:14px/1.3 system-ui,sans-serif; }
@@ -84,13 +102,16 @@ export class TouchControls {
         source.className = 'touch-card-source';
         const live = document.createElement('div');live.className='touch-live-info';
         live.style.cssText='white-space:pre-wrap;color:#b7dfc7;margin:8px 0;font-size:13px';
-        description.append(name,live,text,source);
+        const rules=document.createElement('section');rules.className='rule-help';rules.hidden=true;
+        const dictionary=createRuleDictionary();
+        description.append(name,live,text,rules,source);
         body.append(img,description);
         dialog.append(body, controls);
         document.body.append(dialog);
         let previewFront = '', previewBack = '', showingBack = false;
         let previewId = '', previewName = '', previewType = '';
         let liveDescription = '';
+        let previewInfo:Record<string,number>={};
         function updateDescription() {
             const id = showingBack ? previewBack : previewId;
             live.textContent=showingBack?'':liveDescription;
@@ -101,6 +122,8 @@ export class TouchControls {
             const raw = translated?.text ?? (showingBack ? '' : Cards.getText(id));
             const plain = raw.replace(/<hr\s*\/?\s*>/gi,'\n────\n').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'');
             text.textContent = plain || (translated ? '추가 능력 설명 없음' : '표시할 설명 없음');
+            renderRelatedRules(rules,showingBack?[]:relatedRules(Cards.getText(id)||'',plain,previewInfo));
+            description.scrollTop=0;
             source.textContent = status ? '부가 상태 카드 · 정발판 규칙서 대조 완료' : translated?.text !== undefined ? (koCardSource(id) === 'verified' ? '정발판 효과 대조 완료 · 자원 기호는 문자로 표시' : koCardSource(id) === 'community' ? 'MarvelCDB 한국어 데이터 · 실물 대조 권장' : koCardSource(id) === 'reprint' ? '재수록 카드 · 원본 번역 적용' : '한국어 번역 초안 · 원본 카드와 대조 권장') : '원문 / 미번역';
         }
         close.onclick = () => dialog.close();
@@ -117,6 +140,7 @@ export class TouchControls {
             const labels:Record<string,string>={health:'체력',k_health:'체력',attack:'공격',scheme:'음모',thwart:'저지',defense:'방어',recover:'회복',hand_size:'손 크기',stunned:'기절',confused:'혼란',tough:'강인함',retaliate:'반격'};
             liveDescription=data.is_in_play?Object.entries(data.info).filter(([k,v])=>labels[k]&&Number.isFinite(v)&&(!['stunned','confused','tough','retaliate'].includes(k)||v>0)).map(([k,v])=>labels[k]+' '+v).join(' · '):'';
             if(data.is_in_play){const traits=Object.keys(data.traits).map(k=>k.replace(/^t_/,'')).join(' · ');if(traits)liveDescription+='\n특성: '+traits;}
+            previewInfo=data.is_in_play?data.info:{};
             previewId = data.card_id;
             previewName = data.name;
             previewType = data.card_type;
@@ -300,7 +324,8 @@ export class TouchControls {
             const closeSettings = document.createElement('button');
             closeSettings.type = 'button';
             closeSettings.textContent = '닫기 ×';
-            header.append(title, closeSettings);
+            const ruleButton=document.createElement('button');ruleButton.id='mobile-settings-rule-help';ruleButton.type='button';ruleButton.textContent='규칙 사전';ruleButton.onclick=dictionary.open;
+            header.append(title, ruleButton, closeSettings);
             sidebar.classList.remove('clicked', 'side-bar');
             sidebar.classList.add('mobile-settings-controls');
             document.body.append(sidebarHandle, settings);
@@ -352,6 +377,7 @@ export class TouchControls {
         window.addEventListener('blur', () => { if (gesture) { suppress(gesture.card); stop(); } });
         (window as unknown as { MarvelTouch: { back: () => boolean } }).MarvelTouch = {
             back: () => {
+                if(dictionary.dialog.open){dictionary.dialog.close();return true;}
                 if (HistoryLog.isOpen()) { HistoryLog.close(); return true; }
                 if (settings.open) { settings.close(); return true; }
                 if (dialog.open) { dialog.close(); return true; }

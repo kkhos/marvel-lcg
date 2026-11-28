@@ -160,6 +160,41 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["events"], ["효과 처리", "효과 처리 완료", "플레이 영역에 들어옴", "자원으로 사용", "격파"])
         self.assertEqual(result["html"], '<span data-id="Resolved">효과 처리 완료 2회</span>')
 
+    def test_rule_dictionary(self):
+        self.start_game()
+        self.page.locator("#right-side-bar-handle").tap()
+        self.page.locator("#mobile-settings-rule-help").tap()
+        dictionary=self.page.locator("#mobile-rule-dictionary")
+        expect(dictionary).to_be_visible()
+        search=dictionary.get_by_role("searchbox")
+        search.fill("Surge")
+        expect(dictionary.locator("summary")).to_have_text("쇄도 (Surge)")
+        dictionary.locator("summary").tap()
+        expect(dictionary.locator("details p")).to_contain_text("추가 조우 카드 1장")
+        search.fill("수렁")
+        expect(dictionary.locator("summary")).to_have_text("수렁 (Hazard)")
+        dictionary.get_by_role("button",name="닫기 ×").tap()
+        expect(dictionary).to_be_hidden()
+        expect(self.page.locator("#mobile-settings-dialog")).to_be_visible()
+        self.page.locator("#mobile-settings-dialog").get_by_role("button",name="닫기 ×").tap()
+        result=self.page.evaluate("""async () => {
+            const {ruleHelp,relatedRules,renderRelatedRules}=await import('/public/js/marvel/ko-rule-help.js');
+            const {progressSummary}=await import('/public/js/marvel/mobile-prompt.js');
+            const el=document.createElement('div');
+            renderRelatedRules(el,relatedRules('Surge.','쇄도.'));
+            el.querySelector('button').click();
+            return {count:ruleHelp.filter(r=>r.category==='키워드').length,description:el.querySelector('.rule-help-detail').textContent,
+                noToughness:!relatedRules('Tough','강인함').some(x=>x.id==='Toughness'),
+                hazard:relatedRules('','',{hazard:1}).some(x=>x.id==='Hazard'),
+                surge:progressSummary('Reveal Encounter Cards','Card would surge against Peter Parker').action};
+        }""")
+        self.assertEqual(result["count"],26)
+        self.assertIn("추가 조우 카드 1장",result["description"])
+        self.assertTrue(result["noToughness"])
+        self.assertTrue(result["hazard"])
+        self.assertEqual(result["surge"],"쇄도 · 추가 조우 카드 공개")
+        self.assertEqual(self.errors,[])
+
     def test_mobile_prompt_summary(self):
         self.goto("/main")
         result=self.page.evaluate("""async () => {
