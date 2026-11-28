@@ -409,6 +409,7 @@ class MobileRegression(unittest.TestCase):
 
     def test_deck_editor_no_null_growth(self):
         self.goto("/deck")
+        self.assertEqual(self.page.evaluate("document.characterSet"), "UTF-8")
         self.page.wait_for_function("window.cardStatistics && window.cardPreview", timeout=90000)
         self.page.evaluate("""async () => {
             hero_data=await getHeroJson('captain_america');
@@ -418,6 +419,10 @@ class MobileRegression(unittest.TestCase):
         main=self.page.locator('#player_deck_images > .image-div')
         side=self.page.locator('#side_deck_images > .image-div')
         expect(main).to_have_count(25)
+        expect(main.first.locator('[data-deck-action]')).to_have_count(3)
+        expect(main.first.locator('[data-deck-action=move]')).to_have_attribute('aria-label','메인/사이드 덱 이동')
+        expect(main.first.locator('[data-deck-action=add]')).to_have_attribute('aria-label','카드 1장 추가')
+        expect(main.first.locator('[data-deck-action=remove]')).to_have_attribute('aria-label','카드 1장 제거')
         for _ in range(3):
             self.page.evaluate("""() => {
                 const main=document.getElementById('player_deck_images');
@@ -427,14 +432,14 @@ class MobileRegression(unittest.TestCase):
             }""")
         expect(main).to_have_count(25)
         expect(side).to_have_count(0)
-        main.first.get_by_role('button',name='메인/사이드 덱 이동').tap()
+        main.first.locator('[data-deck-action=move]').tap()
         expect(main).to_have_count(24)
         expect(side).to_have_count(1)
-        side.first.get_by_role('button',name='메인/사이드 덱 이동').tap()
+        side.first.locator('[data-deck-action=move]').tap()
         expect(main).to_have_count(25)
-        main.first.get_by_role('button',name='카드 1장 추가').tap()
+        main.first.locator('[data-deck-action=add]').tap()
         expect(main).to_have_count(26)
-        main.first.get_by_role('button',name='카드 1장 제거').tap()
+        main.first.locator('[data-deck-action=remove]').tap()
         expect(main).to_have_count(25)
         state=self.page.evaluate("""() => ({ids:hero_data.player_deck,side:hero_data.side_deck,
             fixed:hero_data.hero_deck.length,slots:document.getElementById('slots').value})""")

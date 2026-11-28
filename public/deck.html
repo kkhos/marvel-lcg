@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="ko">
 
 <head>
+    <meta charset="UTF-8">
     <title>덱 편집기</title>
     <link rel="stylesheet" href="/public/css/menu/style.css">
     <link rel="stylesheet" href="/public/css/menu/preview.css">
@@ -497,13 +498,13 @@ function create_card(card_id, from_peek) {
     }
     if (from_peek && (/Android|iPhone|iPad/i.test(navigator.userAgent) || matchMedia('(pointer:coarse)').matches)) {
         const actions = [
-            ["−", "카드 1장 제거", () => {if(div.parentNode){div.remove();updatePeekedCardsString();}}],
-            ["+", "카드 1장 추가", () => {if(div.parentNode){div.after(create_card(card_id,true));updatePeekedCardsString();}}],
-            ["↔", "메인/사이드 덱 이동", () => {if(div.parentNode){const target=div.parentNode.id==='side_deck_images'?'player_deck_images':'side_deck_images';document.getElementById(target).append(div);updatePeekedCardsString();}}]
+            ["remove", "−", "카드 1장 제거", () => {if(div.parentNode){div.remove();updatePeekedCardsString();}}],
+            ["add", "+", "카드 1장 추가", () => {if(div.parentNode){div.after(create_card(card_id,true));updatePeekedCardsString();}}],
+            ["move", "↔", "메인/사이드 덱 이동", () => {if(div.parentNode){const target=div.parentNode.id==='side_deck_images'?'player_deck_images':'side_deck_images';document.getElementById(target).append(div);updatePeekedCardsString();}}]
         ];
         const controls=document.createElement('div');controls.className='deck-card-controls';
-        for(const [symbol,label,run] of actions){
-            const b=document.createElement('button');b.type='button';b.textContent=symbol;b.title=label;b.setAttribute('aria-label',label);
+        for(const [action,symbol,label,run] of actions){
+            const b=document.createElement('button');b.type='button';b.dataset.deckAction=action;b.textContent=symbol;b.title=label;b.setAttribute('aria-label',label);
             b.addEventListener('click',event=>{event.stopPropagation();event.preventDefault();run();});
             b.addEventListener('pointerdown',event=>event.stopPropagation());
             controls.append(b);
