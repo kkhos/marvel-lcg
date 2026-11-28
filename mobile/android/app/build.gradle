@@ -28,8 +28,8 @@ android {
         applicationId 'io.github.kkhos.marvellcg'
         minSdk 24
         targetSdk 35
-        versionCode 85
-        versionName '0.5.76-mobile-card-focus'
+        versionCode 86
+        versionName '0.5.77-mobile-popup-back-fix'
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
     }
     sourceSets.main.assets.srcDir(layout.buildDirectory.dir('generated/gameAssets'))

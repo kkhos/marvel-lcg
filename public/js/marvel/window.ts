@@ -43,6 +43,16 @@ export class WindowLoad {
     }
 
     static onKeyDown(event: KeyboardEvent) {
+        // The top-layer ability dialog owns its keyboard input. In particular
+        // Escape must not fall through to the game cancellation shortcut.
+        const abilityDialog = document.querySelector<HTMLDialogElement>('#mobile-ability-choice-dialog[open]');
+        if (abilityDialog) {
+            if (event.key === 'Escape' && !event.defaultPrevented) {
+                event.preventDefault();
+                abilityDialog.dispatchEvent(new Event('mobile-ability-back'));
+            }
+            return;
+        }
         if (event.altKey) {
             UI.hold_alt = true
             document.body.classList.add('hold-alt')

@@ -24,6 +24,7 @@ export class MobileAbilityChoices {
         if (this.dialog) return;
         const dialog = document.createElement('dialog');
         dialog.id = 'mobile-ability-choice-dialog';
+        dialog.setAttribute('closedby', 'none');
         dialog.setAttribute('aria-labelledby', 'mobile-ability-choice-title');
         const heading = document.createElement('h2');
         heading.id = 'mobile-ability-choice-title';
@@ -43,8 +44,9 @@ export class MobileAbilityChoices {
             e.stopImmediatePropagation();
             this.requestCancel();
         });
-        // Existing global Escape shortcuts can cancel/reset the engine prompt
-        // before the native dialog cancel event. Own Escape while this modal is open.
+        // Route native back and keyboard cancellation to the actual dialog's
+        // owner, even if the caller is using another instance of this module.
+        dialog.addEventListener('mobile-ability-back', () => this.requestCancel());
         window.addEventListener('keydown', e => {
             if (!dialog.open || e.key !== 'Escape') return;
             e.preventDefault();
@@ -110,8 +112,9 @@ export class MobileAbilityChoices {
     }
 
     static handleBack(): boolean {
-        if (!this.dialog?.open) return false;
-        this.requestCancel();
+        const dialog = document.querySelector<HTMLDialogElement>('#mobile-ability-choice-dialog[open]');
+        if (!dialog) return false;
+        dialog.dispatchEvent(new Event('mobile-ability-back'));
         return true;
     }
 
@@ -142,7 +145,7 @@ export class MobileAbilityChoices {
             document.body.dataset.selectionStep !== 'effect' ||
             !buttons.some(button => this.enabled(button)) ||
             buttons.some(button => button.classList.contains('clicked')) ||
-            !this.needsPopup(source, buttons)) {
+            (!dialog.open && !this.needsPopup(source, buttons))) {
             this.close();
             return;
         }

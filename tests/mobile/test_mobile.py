@@ -207,8 +207,17 @@ class MobileRegression(unittest.TestCase):
         expect(popup.locator(".mac-option").nth(1)).to_be_disabled()
         expect(popup.locator(".mac-cancel")).to_be_hidden()
         self.page.keyboard.press("Escape")
+        expect(popup).to_have_attribute("open", "")
         expect(popup).to_be_visible()
-        self.assertTrue(self.page.evaluate("() => window.MarvelTouch.back()"))
+        result=self.page.evaluate("""() => {
+            const d=document.getElementById('mobile-ability-choice-dialog');
+            const before=d.open;
+            const handled=window.MarvelTouch.back();
+            return {before,handled,after:d.open,step:document.body.dataset.selectionStep,
+                count:document.querySelectorAll('#option-buttons > button').length,
+                clicks:window.choiceTest.clicks};
+        }""")
+        self.assertEqual(result, {"before":True,"handled":True,"after":True,"step":"effect","count":3,"clicks":0})
         expect(popup).to_be_visible()
         for width,height in [(915,412),(740,360)]:
             self.page.set_viewport_size({"width":width,"height":height})

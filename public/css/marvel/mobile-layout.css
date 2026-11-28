@@ -661,6 +661,7 @@ body.mobile-layout #option-buttons.mac-popup-active { visibility: hidden; }
     font: 13px/1.25 system-ui, sans-serif;
     -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
 }
+#mobile-ability-choice-dialog:not([open]) { display: none !important; }
 #mobile-ability-choice-dialog[open] { display: flex; flex-direction: column; gap: 8px; }
 #mobile-ability-choice-dialog::backdrop { background: #0008; }
 #mobile-ability-choice-dialog h2 { margin: 0; font: 750 17px/1.25 system-ui; text-align: center; }

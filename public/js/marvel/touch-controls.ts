@@ -1,7 +1,6 @@
 import { koCard, koCardSource } from './ko-cards.js';
 import { koStatusCard } from './ko-status.js';
 import { koTraitLabel } from './ko-traits.js';
-import { MobileAbilityChoices } from './mobile-ability-choices.js';
 import { MobileCardFocus } from './mobile-card-focus.js';
 import { Cards } from './cards.js';
 import { ClassName } from './class_name.js';
@@ -390,7 +389,12 @@ export class TouchControls {
         window.addEventListener('blur', () => { if (gesture) { suppress(gesture.card); stop(); } });
         (window as unknown as { MarvelTouch: { back: () => boolean } }).MarvelTouch = {
             back: () => {
-                if (MobileAbilityChoices.handleBack()) return true;
+                // The visible DOM dialog is the source of truth for native back.
+                const ability = document.querySelector<HTMLDialogElement>('#mobile-ability-choice-dialog[open]');
+                if (ability) {
+                    ability.dispatchEvent(new Event('mobile-ability-back'));
+                    return true;
+                }
                 if(dictionary.dialog.open){dictionary.dialog.close();return true;}
                 if (HistoryLog.isOpen()) { HistoryLog.close(); return true; }
                 if (settings.open) { settings.close(); return true; }
