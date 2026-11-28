@@ -604,6 +604,8 @@ class MobileRegression(unittest.TestCase):
         self.page.get_by_role("button", name="플레이어 1에 추가", exact=True).tap()
         self.page.locator(".ml-footer .ml-primary").tap()
         expect(self.page.locator(".ml-footer .ml-primary")).to_have_text("게임 시작")
+        expect(self.page.locator(".ml-versus .ml-vs")).to_have_text("VS")
+        expect(self.page.locator(".ml-versus-team .ml-tile")).to_have_count(2)
         # Same seed for repeatable hand and screenshots.
         self.page.locator("#seed_div").fill("42")
         self.page.locator(".ml-footer .ml-primary").tap()
@@ -695,6 +697,13 @@ class MobileRegression(unittest.TestCase):
             parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-width')),
             parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-height'))
         ]"""), [155, 214])
+        self.bounds(self.page.locator("#mobile-forecast"))
+        self.page.locator("#mobile-forecast").tap()
+        expect(self.page.locator("#mobile-forecast-dialog")).to_be_visible()
+        expect(self.page.locator("#mobile-forecast-detail")).to_contain_text("조우 카드 기본")
+        self.page.locator("#mobile-forecast-dialog").get_by_role("button",name="닫기").tap()
+        self.assertGreaterEqual(self.page.locator("#scene .mobile-unit-stats").count(),1)
+        self.assertTrue(hand.first.evaluate("(el) => {const m=new DOMMatrix(getComputedStyle(el).transform);return Math.hypot(m.a,m.b)>1.2;}"))
         self.screenshot("hand")
         # The desktop top piles deliberately use negative board coordinates.
         # Mobile must put real top cards entirely inside the camera clip.

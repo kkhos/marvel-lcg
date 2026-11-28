@@ -1086,6 +1086,34 @@ class CardRender {
             info_div += `<div class="control_player"><i class="fa fa-bookmark" aria-hidden="true"></i></div>`
 
             card_div_info.innerHTML = `<div class='name'>${card.name}</div>` + info_div
+            if (document.body.classList.contains('mobile-layout') && card.is_face_up && card.is_in_play &&
+                ['Hero','AlterEgo','EncounterVillain','Ally','Minion'].includes(card.card_type)) {
+                const compact = document.createElement('div');
+                compact.className = 'mobile-unit-stats';
+                const info = card.info;
+                const add = (label: string, key: string, cssClass: string) => {
+                    const value = info[key];
+                    if (!Number.isFinite(value)) return;
+                    const item = document.createElement('span');
+                    item.className = cssClass;item.textContent = label+' '+value;
+                    compact.append(item);
+                };
+                if(info.is_infinite_health) {
+                    const hp=document.createElement('span');hp.className='ms-health';hp.textContent='체력 ∞';compact.append(hp);
+                } else add('체력', Number.isFinite(info.health)?'health':'k_health', 'ms-health');
+                if (card.card_type==='Hero') {
+                    add('공격','attack','ms-attack');add('저지','thwart','ms-scheme');add('방어','defense','ms-defense');
+                } else if(card.card_type==='AlterEgo') add('회복','recover','ms-defense');
+                else if(card.card_type==='EncounterVillain') {
+                    add('공격','attack','ms-attack');add('음모','scheme','ms-scheme');
+                }
+                for (const [key,label] of [['stunned','기절'],['confused','혼란'],['tough','강인함']]) {
+                    if(info[key]>0) {
+                        const status=document.createElement('span');status.className='ms-status';status.textContent=label+(info[key]>1?' '+info[key]:'');compact.append(status);
+                    }
+                }
+                if(compact.childElementCount)card_div_info.append(compact);
+            }
         } else {
             card_div_info.innerHTML = ""
         }

@@ -15,6 +15,7 @@ import { Lib } from './lib.js'
 import { ErrorDialog } from './error_dialog.js'
 import { MouseSync } from './mouse.js'
 import { FullSearchPresentation } from './full_search_presentation.js'
+import { MobileForecast } from './mobile-forecast.js'
 
 function showRes() {
     let resource_div = ""
@@ -410,6 +411,7 @@ export class Client {
         const data = await response.json();
 
         Game.world_descriptor = new WorldDescriptor(data)
+        MobileForecast.update(Game.world_descriptor)
         console.log("world_state render_id:", Game.world_descriptor.render_id)
 
         if( true || Client.last_turn_id == Game.world_descriptor.render_id )

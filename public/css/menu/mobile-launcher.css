@@ -55,3 +55,8 @@ body.ml-mobile{width:100%;height:100dvh;overflow:hidden}
 .ml-preview-title{position:absolute;top:12px;left:12px;max-width:22vw;overflow-wrap:anywhere;font:700 14px system-ui;color:#dbece1}
 .ml-preview-close{position:absolute;top:8px;right:8px;padding:8px 12px;min-height:40px;color:white;background:#30493e;border:1px solid #83b79a;border-radius:8px;font:700 14px system-ui;touch-action:manipulation}
 @media(orientation:portrait){.ml-card-preview{padding:50px 8px 8px}.ml-card-preview img{width:100%;height:auto;max-width:100%;max-height:calc(100dvh - 60px)}.ml-preview-title{max-width:60vw}}
+
+.ml-versus{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:center}
+.ml-versus-team{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,82px),1fr));gap:5px;align-items:start}
+.ml-versus-team .ml-tile img{width:auto;max-width:100%;height:clamp(85px,34dvh,175px);aspect-ratio:5/7}
+.ml-vs{font:900 italic clamp(20px,5vw,34px) system-ui;color:#f4d477;text-shadow:2px 2px #0b1612;justify-self:center}

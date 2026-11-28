@@ -82,14 +82,18 @@ export class TouchControls {
         const text = document.createElement('div');
         const source = document.createElement('small');
         source.className = 'touch-card-source';
-        description.append(name,text,source);
+        const live = document.createElement('div');live.className='touch-live-info';
+        live.style.cssText='white-space:pre-wrap;color:#b7dfc7;margin:8px 0;font-size:13px';
+        description.append(name,live,text,source);
         body.append(img,description);
         dialog.append(body, controls);
         document.body.append(dialog);
         let previewFront = '', previewBack = '', showingBack = false;
         let previewId = '', previewName = '', previewType = '';
+        let liveDescription = '';
         function updateDescription() {
             const id = showingBack ? previewBack : previewId;
+            live.textContent=showingBack?'':liveDescription;
             // Never infer or reveal a hidden card's name from its object ID.
             const status = showingBack ? undefined : koStatusCard(previewType, previewName);
             const translated = status ?? koCard(id);
@@ -110,6 +114,9 @@ export class TouchControls {
         function preview(card: HTMLElement) {
             const data = Cards.getCard(Number(card.dataset.id));
             if (!data || !data.isVisible() || !data.pic_id) return;
+            const labels:Record<string,string>={health:'체력',k_health:'체력',attack:'공격',scheme:'음모',thwart:'저지',defense:'방어',recover:'회복',hand_size:'손 크기',stunned:'기절',confused:'혼란',tough:'강인함',retaliate:'반격'};
+            liveDescription=data.is_in_play?Object.entries(data.info).filter(([k,v])=>labels[k]&&Number.isFinite(v)&&(!['stunned','confused','tough','retaliate'].includes(k)||v>0)).map(([k,v])=>labels[k]+' '+v).join(' · '):'';
+            if(data.is_in_play){const traits=Object.keys(data.traits).map(k=>k.replace(/^t_/,'')).join(' · ');if(traits)liveDescription+='\n특성: '+traits;}
             previewId = data.card_id;
             previewName = data.name;
             previewType = data.card_type;
@@ -349,6 +356,8 @@ export class TouchControls {
                 if (settings.open) { settings.close(); return true; }
                 if (dialog.open) { dialog.close(); return true; }
                 if (pile.open) { pile.close(); return true; }
+                const forecast=document.getElementById('mobile-forecast-dialog') as HTMLDialogElement|null;
+                if(forecast?.open){forecast.close();return true;}
                 const result = document.querySelector('#game-over-box-container');
                 if (result?.querySelector('#game-over-box.active') && !result.classList.contains('minimize')) {
                     result.classList.add('minimize'); return true;

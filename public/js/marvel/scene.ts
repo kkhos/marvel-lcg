@@ -1,6 +1,7 @@
 import { Lib } from './lib.js'
 import { Setting } from "./settings.js";
 import { HoverCard } from './hover.js';
+import { MobileForecast } from './mobile-forecast.js';
 
 export class Scene {
     static scale: number = 0
@@ -25,6 +26,7 @@ export class Scene {
             header.id = 'mobile-progress-bar';
             header.setAttribute('aria-label', '게임 진행 상황');
             header.append(prompt);
+            MobileForecast.init(header);
             rail.setAttribute('aria-label', '능력 선택 및 확인');
             rail.append(options, controls);
             document.body.append(header, rail);

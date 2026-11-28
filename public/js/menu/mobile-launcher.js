@@ -74,7 +74,7 @@
   const starter=button('초심자용 덱',()=>{kind='starter';render();}),custom=button('내 덱',()=>{kind='custom';render();});tabs.append(starter,custom);
   hleft.append(hsearch,tabs,status,grid);hright.append(himage,hname,hinfo,add,slots,hero);panels[1].append(hleft,hright);
   const hp=hero.querySelector('p');if(hp){hp.replaceChildren(document.createTextNode('사용자 덱: '),button('JSON 붙여넣기',()=>{const t=prompt('덱 JSON을 붙여넣으세요.');if(t)try{SetHero(JSON.parse(t),slot);refresh();}catch{alert('올바른 덱 JSON을 입력하세요.');}}));}
-  const summary=el('div','ml-scroll'),finalCards=el('div','ml-grid'),finalInfo=el('p','ml-muted'),advanced=el('div','ml-scroll ml-detail');
+  const summary=el('div','ml-scroll'),finalCards=el('div','ml-versus'),finalInfo=el('p','ml-muted'),advanced=el('div','ml-scroll ml-detail');
   summary.append(el('h2','','출격 준비'),finalCards,finalInfo);advanced.append(el('h2','','세부 설정'),game);panels[2].append(summary,advanced);
   const records={starter:[],custom:[]};
   function cardTile(name,id,sub){const box=el('div','ml-tile'),img=el('img');img.alt='';image(img,id);box.append(img,el('strong','',name),el('small','ml-muted',sub));return box;}
@@ -90,8 +90,12 @@
     image(scenarioImage,s?.villain?.[0]||s?.schemes?.[0]||s?.set_aside?.[0]);
     slots.replaceChildren();for(let i=1;i<=4;i++){const row=el('div','ml-slot'),b=button('P'+i+' · '+(heroes[i]?.name||'선택 안 함'),()=>{slot=i;refresh();},slot===i?'ml-active':'');row.append(b);if(heroes[i])row.append(button('×',()=>{SetHero({},i);refresh();}));slots.append(row);}
     add.textContent='플레이어 '+slot+'에 '+(heroes[slot]?'교체':'추가');
-    finalCards.replaceChildren();if(scenario)finalCards.append(cardTile(scenario.name,scenario.villain?.[0]||scenario.schemes?.[0],scenario.expert?'전문가 모드':'일반 모드'));
-    const count=Object.values(heroes).filter(Boolean).length;Object.entries(heroes).filter(([,d])=>d).forEach(([i,d])=>finalCards.append(cardTile(d.name,d.hero?.[0],'플레이어 '+i)));
+    finalCards.replaceChildren();
+    const team=el('div','ml-versus-team'),enemy=el('div','ml-versus-team');
+    const count=Object.values(heroes).filter(Boolean).length;
+    Object.entries(heroes).filter(([,d])=>d).forEach(([i,d])=>team.append(cardTile(d.name,d.hero?.[0],'플레이어 '+i+' · '+((d.hero_deck?.length||0)+(d.player_deck?.length||0))+'장')));
+    if(scenario)enemy.append(cardTile(scenario.name,scenario.villain?.[0]||scenario.schemes?.[0],scenario.expert?'전문가 모드':'일반 모드'));
+    finalCards.append(team,el('strong','ml-vs','VS'),enemy);
     finalInfo.textContent='조우 세트 '+document.querySelectorAll('#encounter-sets button.click,#modular-sets button.click').length+'개 · 플레이어 '+count+'명';
     next.disabled=stage===0?!catalogReady||!scenario:!count||!scenario;
     msg.textContent=stage===0?(scenario?(scenario.name||active?.title||'시나리오 선택 완료')+' · '+(scenario.expert?'전문가 모드':'일반 모드'):catalogReady?'빌런과 난이도를 선택하세요.':'시나리오 불러오는 중…'):stage===1?'히어로와 덱을 선택하세요.':'선택한 구성으로 게임을 시작합니다.';
