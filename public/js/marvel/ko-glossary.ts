@@ -46,6 +46,8 @@ export const koGlossary = {
     'teen spirit': '십대 감성',
     'dizzying reflexes': '아찔한 반사신경',
     'masters of evil (trait)': 'MASTERS OF EVIL',
+    'elite (trait)': '간부',
+    'hydra (trait)': '하이드라',
     'web-warrior (trait)': 'WEB-WARRIOR',
     'champion (trait)': 'CHAMPION',
     'inhuman (trait)': 'INHUMAN',

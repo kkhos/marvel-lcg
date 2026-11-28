@@ -822,16 +822,35 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["cards"], [["Klaw","★ 강제 난입: Klaw가 공격할 때, 이번 활성화에서 Klaw에게 강화 카드 1장을 추가로 줍니다.","verified"],["Ghost-Spider","아찔한 반사신경 - 반응: 당신이 이벤트의 \"난입\" 또는 \"반응\" 능력을 해결한 후, Ghost-Spider를 준비합니다. (페이즈마다 1회 제한.)","verified"]])
         self.assertEqual(result["label"], "아찔한 반사신경")
 
+    def test_ko_hydra_physical_cards(self):
+        self.goto("/main")
+        result=self.page.evaluate("""async () => {
+            const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
+            const {KO_IMPORTED_KEY}=await import('/public/js/marvel/ko-local.js');
+            const ids=['01180','01181'];
+            const saved=localStorage.getItem(KO_IMPORTED_KEY);
+            try {
+                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify(Object.fromEntries(ids.map(id=>[id,{name:'오류',text:'잘못된 효과'}]))));
+                refreshKoCards();
+                return ids.map(id=>[koCard(id).name,koCard(id).text,koCardSource(id)]);
+            } finally {
+                if(saved===null)localStorage.removeItem(KO_IMPORTED_KEY);
+                else localStorage.setItem(KO_IMPORTED_KEY,saved);
+                refreshKoCards();
+            }
+        }""")
+        self.assertEqual(result, [["하이드라 군단","공개될 때: Madame Hydra가 플레이 영역에 없다면, 조우 덱과 버린 조우 더미에서 Madame Hydra를 찾아 당신과 교전 중인 채로 플레이 영역에 내려놓습니다. 그러고 나서 조우 덱을 섞습니다. 플레이 영역에 있는 하이드라 적마다 이 음모에 위협을 2만큼 추가로 놓습니다.","verified"],["Madame Hydra","Madame Hydra는 하이드라 군단 부가 음모가 플레이 영역에 있는 한 피해를 입을 수 없습니다.\n★ 강제 반응: Madame Hydra가 암약하거나 공격한 후, 하이드라 군단 부가 음모에 위협을 2만큼 놓습니다.","verified"]])
+
     def test_ko_verified_trait_labels(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
             const {koTraitLabel,verifiedKoTraits}=await import('/public/js/marvel/ko-traits.js');
             return {count:Object.keys(verifiedKoTraits).length,
-                verified:['t_aerial','t_tech','t_skill','t_avenger','t_defender','t_s.h.i.e.l.d','S.H.I.E.L.D.','t_hero_for_hire','t_genius','t_mystic','t_spell','t_thwart','t_artifact','t_champion','t_inhuman','t_defense','t_masters_of_evil','t_web-warrior'].map(koTraitLabel),
+                verified:['t_aerial','t_tech','t_skill','t_avenger','t_defender','t_s.h.i.e.l.d','S.H.I.E.L.D.','t_hero_for_hire','t_genius','t_mystic','t_spell','t_thwart','t_artifact','t_champion','t_inhuman','t_defense','t_masters_of_evil','t_web-warrior','t_elite','t_hydra'].map(koTraitLabel),
                 pending:['t_x-men','t_guardian','t_mutant','t_future_trait','constructor'].map(koTraitLabel)};
         }""")
-        self.assertEqual(result["count"], 28)
-        self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재","신비술사","주문","저지","유물","CHAMPION","INHUMAN","방어","MASTERS OF EVIL","WEB-WARRIOR"])
+        self.assertEqual(result["count"], 30)
+        self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재","신비술사","주문","저지","유물","CHAMPION","INHUMAN","방어","MASTERS OF EVIL","WEB-WARRIOR","간부","하이드라"])
         self.assertEqual(result["pending"], ["X-MEN","GUARDIAN","MUTANT","FUTURE TRAIT","CONSTRUCTOR"])
 
     def test_ko_bundled_module(self):

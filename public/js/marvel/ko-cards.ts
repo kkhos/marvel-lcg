@@ -368,7 +368,18 @@ const klawGhostVerified: Record<string,{name:string;text:string}> = {
     "text": "아찔한 반사신경 - 반응: 당신이 이벤트의 \"난입\" 또는 \"반응\" 능력을 해결한 후, Ghost-Spider를 준비합니다. (페이즈마다 1회 제한.)"
   }
 };
-const exactPhysical = {...strangeVerified, ...wreckingVerified, ...msMarvelVerified, ...klawGhostVerified};
+// Physical Korean Legions of Hydra cards, 2026-11-29.
+const hydraVerified: Record<string,{name:string;text:string}> = {
+  "01180": {
+    "name": "하이드라 군단",
+    "text": "공개될 때: Madame Hydra가 플레이 영역에 없다면, 조우 덱과 버린 조우 더미에서 Madame Hydra를 찾아 당신과 교전 중인 채로 플레이 영역에 내려놓습니다. 그러고 나서 조우 덱을 섞습니다. 플레이 영역에 있는 하이드라 적마다 이 음모에 위협을 2만큼 추가로 놓습니다."
+  },
+  "01181": {
+    "name": "Madame Hydra",
+    "text": "Madame Hydra는 하이드라 군단 부가 음모가 플레이 영역에 있는 한 피해를 입을 수 없습니다.\n★ 강제 반응: Madame Hydra가 암약하거나 공격한 후, 하이드라 군단 부가 음모에 위협을 2만큼 놓습니다."
+  }
+};
+const exactPhysical = {...strangeVerified, ...wreckingVerified, ...msMarvelVerified, ...klawGhostVerified, ...hydraVerified};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...wreckingCrewDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.

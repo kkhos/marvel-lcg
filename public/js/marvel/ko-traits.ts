@@ -32,7 +32,10 @@ export const verifiedKoTraits: Readonly<Record<string,string>> = Object.freeze({
     "DEFENSE": "방어",
     // Physical Klaw I and Ghost-Spider faces.
     "MASTERS OF EVIL": "MASTERS OF EVIL",
-    "WEB-WARRIOR": "WEB-WARRIOR"
+    "WEB-WARRIOR": "WEB-WARRIOR",
+    // Madame Hydra and Legions of Hydra physical cards: HYDRA is localized.
+    "ELITE": "간부",
+    "HYDRA": "하이드라"
 });
 
 export function koTraitLabel(value: string): string {
