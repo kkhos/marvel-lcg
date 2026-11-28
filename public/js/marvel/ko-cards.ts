@@ -299,14 +299,46 @@ const sinisterDraft: Record<string, {name:string; text?:string}> = {
     "text": "행동: 버린 더미에 있는 멀티버스행 티켓을 덱에 섞거나 George Stacy를 준비하는 것 중 하나를 선택합니다. (라운드마다 1회 제한.)"
   }
 };
+// Seven physical Korean card faces provided 2026-11-29. Transcribe rules text,
+// excluding flavor text and printed stat/keyword icons handled by the engine.
+const strangeVerified: Record<string,{name:string;text:string}> = {
+  "09001a": {
+    "name": "Doctor Strange",
+    "text": "주문 숙달 - 행동: Doctor Strange를 소진하고 비술 덱 맨 위 1장의 비용을 지불 → 그 카드의 \"특수\" 능력을 해결."
+  },
+  "09001b": {
+    "name": "Stephen Strange",
+    "text": "Stephen Strange는 비술 덱을 가지고 게임을 시작합니다(동봉된 규칙 참조).\n천부적 재능 - 행동: 비술 덱 맨 위에서 카드 1장을 버립니다(페이즈마다 1회 제한)."
+  },
+  "09003": {
+    "name": "영적 투영",
+    "text": "히어로 행동(저지): 음모 하나를 선택 → 그 음모에서 위협을 3만큼 제거하고 조우 덱 맨 위 1장을 살펴봄. 살펴본 카드에 있는 강화 아이콘마다 선택한 음모에서 위협을 추가로 1만큼 제거."
+  },
+  "09005": {
+    "name": "미스틱 아츠의 달인",
+    "text": "히어로 행동: 비술 덱 맨 위 1장의 인쇄된 비용을 지불 → 그 카드의 \"특수\" 능력을 해결. 그러고 나서 그 카드를 다시 비술 덱 맨 위에 앞면으로 놓음."
+  },
+  "09009": {
+    "name": "공중부양 망토",
+    "text": "당신은 공중 특성을 얻습니다.\n히어로 행동: 공중부양 망토를 소진 → Doctor Strange를 준비."
+  },
+  "09029": {
+    "name": "다크 디멘션 차원 연결",
+    "text": "공개될 때: 이 음모 아래에 비술 덱 맨 위 1장을 뒷면으로 놓습니다.\n격파될 때: 이 카드 아래에 있는 비술 카드를 비술 덱에 섞어 넣습니다."
+  },
+  "09031": {
+    "name": "최면",
+    "text": "공개될 때 (일상): 당신의 손에서 가장 비용이 높은 카드 1장을 버립니다. 그 카드에 인쇄된 비용만큼 주요 음모에 위협을 놓습니다.\n공개될 때 (히어로): 당신의 손에서 가장 비용이 높은 카드 1장을 버립니다. 당신은 그 카드에 인쇄된 비용만큼 피해를 입습니다."
+  }
+};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...wreckingCrewDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
-const physicalVerified = new Set(['07001a','07001b','07004','01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b']);
+const physicalVerified = new Set(['07001a','07001b','07004','01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b',...Object.keys(strangeVerified)]);
 // Names confirmed by the photographed setup face; effects not physically verified.
 const verifiedNames: Record<string,string> = {'07019':'천둥강타','07034':'강화하다!','07048':'길을 비켜라'};
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
-const draftCards = {...reviewedDrafts, ...koCards};
+const draftCards = {...reviewedDrafts, ...koCards, ...strangeVerified};
 const sources: Record<string,'verified'|'imported'|'community'|'draft'> = Object.create(null);
 export function refreshKoCards() {
     const localCards = {...readKoCache(), ...bundledKo};
@@ -321,7 +353,7 @@ export function refreshKoCards() {
     const community = !verified && !fromPack && Object.prototype.hasOwnProperty.call(localCards,id);
     const entry = (verified ? draftCards[id] : fromPack ? imported[id] : community ? localCards[id] : draftCards[id]) ?? localCards[id];
     if (!entry) continue;
-    normalizedCards[id] = {name:verifiedNames[id] ?? entry.name, text:entry.text === undefined ? undefined : (community ? entry.text : fromPack ? normalizeImportedKoText(entry.text) : normalizeKoCardText(entry.text))};
+    normalizedCards[id] = {name:verifiedNames[id] ?? entry.name, text:entry.text === undefined ? undefined : (community || Object.prototype.hasOwnProperty.call(strangeVerified,id) ? entry.text : fromPack ? normalizeImportedKoText(entry.text) : normalizeKoCardText(entry.text))};
     sources[id] = verified ? 'verified' : fromPack ? 'imported' : community ? 'community' : 'draft';
     }
 }

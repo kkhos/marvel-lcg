@@ -40,6 +40,14 @@ export function koKeywordLabel(value: string): string | undefined {
 }
 export const koGlossary = {
     'basic power': '기본 기능',
+    'spell mastery': '주문 숙달',
+    'natural talent': '천부적 재능',
+    'invocation deck': '비술 덱',
+    'invocation': '비술',
+    'mystic (trait)': '신비술사',
+    'spell (trait)': '주문',
+    'thwart (trait)': '저지',
+    'artifact (trait)': '유물',
     'hero action': '히어로 행동',
     'hero response': '히어로 반응',
     'forced response': '강제 반응',

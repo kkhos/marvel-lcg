@@ -621,9 +621,9 @@ class MobileRegression(unittest.TestCase):
         result=self.page.evaluate("""async () => {
             const {KO_IMPORTED_KEY,cleanImportedCards}=await import('/public/js/marvel/ko-local.js');
             const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
-            const clean=cleanImportedCards({'09001b':{name:'Stephen Strange',text:'타고난 재능'},'01001a':{name:'오류',text:'틀린 번역'},'07034':{name:'오류',text:'틀린 번역'},'bad':{name:'오류',text:'오류'}});
+            const clean=cleanImportedCards({'09002':{name:'Wong',text:'타고난 재능'},'01001a':{name:'오류',text:'틀린 번역'},'07034':{name:'오류',text:'틀린 번역'},'bad':{name:'오류',text:'오류'}});
             localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify(clean));refreshKoCards();
-            const result={ids:Object.keys(clean),doctor:koCard('09001b').text,source:koCardSource('09001b'),hero:koCard('01001a').name,wreck:koCard('07034').name};
+            const result={ids:Object.keys(clean),doctor:koCard('09002').text,source:koCardSource('09002'),hero:koCard('01001a').name,wreck:koCard('07034').name};
             localStorage.removeItem(KO_IMPORTED_KEY);refreshKoCards();return result;
         }""")
         self.assertEqual(result["doctor"],"타고난 재능")
@@ -644,10 +644,10 @@ class MobileRegression(unittest.TestCase):
             const before=koCard('01001a').text;
             const saved=localStorage.getItem(KO_IMPORTED_KEY);
             try {
-                localStorage.setItem(KO_IMPORTED_KEY, JSON.stringify({'09001b':{name:'Stephen Strange',text:sample},'01001a':{name:'오류',text:'틀린 번역'}}));
+                localStorage.setItem(KO_IMPORTED_KEY, JSON.stringify({'09002':{name:'Wong',text:sample},'01001a':{name:'오류',text:'틀린 번역'}}));
                 refreshKoCards();
                 const normalized=normalizeImportedKoText(sample);
-                return {text:koCard('09001b').text, source:koCardSource('09001b'),
+                return {text:koCard('09002').text, source:koCardSource('09002'),
                     verified:koCard('01001a').text===before && koCardSource('01001a')==='verified',
                     idempotent:normalizeImportedKoText(normalized)===normalized};
             } finally {
@@ -673,9 +673,9 @@ class MobileRegression(unittest.TestCase):
             const saved=localStorage.getItem(KO_IMPORTED_KEY);
             const before=koCard('01001a').text;
             try {
-                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify({'09001b':{name:'Stephen Strange',text:sample},'01001a':{name:'오류',text:sample}}));
+                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify({'09002':{name:'Wong',text:sample},'01001a':{name:'오류',text:sample}}));
                 refreshKoCards();
-                return {text:koCard('09001b').text, source:koCardSource('09001b'),
+                return {text:koCard('09002').text, source:koCardSource('09002'),
                     protected:koCard('01001a').text===before && koCardSource('01001a')==='verified',
                     idempotent:normalizeImportedKoText(normalized)===normalized,
                     unchanged:normalizeImportedKoText(unchanged)};
@@ -703,9 +703,9 @@ class MobileRegression(unittest.TestCase):
             const saved=localStorage.getItem(KO_IMPORTED_KEY);
             const before=koCard('07004').text;
             try {
-                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify({'09001b':{name:'Stephen Strange',text:sample},'07004':{name:'오류',text:sample}}));
+                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify({'09002':{name:'Wong',text:sample},'07004':{name:'오류',text:sample}}));
                 refreshKoCards();
-                return {text:koCard('09001b').text,source:koCardSource('09001b'),
+                return {text:koCard('09002').text,source:koCardSource('09002'),
                     protected:koCard('07004').text===before && koCardSource('07004')==='verified',
                     idempotent:normalizeImportedKoText(normalized)===normalized,
                     unchanged:normalizeImportedKoText(unchanged)};
@@ -732,11 +732,11 @@ class MobileRegression(unittest.TestCase):
             const saved=localStorage.getItem(KO_IMPORTED_KEY);
             const before=koCard('01001a').text;
             try {
-                const clean=cleanImportedCards({'09001b':{name:'Stephen Strange',text:sample},'01001a':{name:'오류',text:sample},
+                const clean=cleanImportedCards({'09002':{name:'Wong',text:sample},'01001a':{name:'오류',text:sample},
                     '45180a':{name:'임무',text:'정신 자원([mental])마다 위협을 2만큼 놓습니다. 강화 아이콘([boost])을 무시합니다.'}});
                 localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify(clean));refreshKoCards();
                 const normalized=normalizeImportedKoText(sample);
-                return {text:koCard('09001b').text,source:koCardSource('09001b'),
+                return {text:koCard('09002').text,source:koCardSource('09002'),
                     realStyle:koCard('45180a').text,
                     protected:koCard('01001a').text===before && koCardSource('01001a')==='verified',
                     unchanged:normalizeImportedKoTerms(unchanged),
@@ -756,17 +756,39 @@ class MobileRegression(unittest.TestCase):
         self.assertTrue(result["idempotent"])
         self.assertEqual(result["unchanged"], "임시 카드가 있습니다. 강인. 강인함 상태 카드. 영속. 반격 2. 교란 X. 진척 3. 승점 0. 그러고 나서, 그리고, 대신. 물리력물리력 자원. 버린 조우 더미.")
 
+    def test_ko_doctor_strange_physical_faces(self):
+        self.goto("/main")
+        result=self.page.evaluate("""async () => {
+            const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
+            const {KO_IMPORTED_KEY}=await import('/public/js/marvel/ko-local.js');
+            const {koLabel}=await import('/public/js/marvel/ko-game.js');
+            const ids=["09001a","09001b","09003","09005","09009","09029","09031"];
+            const saved=localStorage.getItem(KO_IMPORTED_KEY);
+            try {
+                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify(Object.fromEntries(ids.map(id=>[id,{name:'잘못된 이름',text:'잘못된 효과'}]))));
+                refreshKoCards();
+                return {cards:ids.map(id=>[koCard(id).name,koCard(id).text,koCardSource(id)]),
+                    labels:['Spell Mastery','Natural Talent','Invocation Deck'].map(koLabel)};
+            } finally {
+                if(saved===null)localStorage.removeItem(KO_IMPORTED_KEY);
+                else localStorage.setItem(KO_IMPORTED_KEY,saved);
+                refreshKoCards();
+            }
+        }""")
+        self.assertEqual(result["cards"], [["Doctor Strange","주문 숙달 - 행동: Doctor Strange를 소진하고 비술 덱 맨 위 1장의 비용을 지불 → 그 카드의 \"특수\" 능력을 해결.","verified"],["Stephen Strange","Stephen Strange는 비술 덱을 가지고 게임을 시작합니다(동봉된 규칙 참조).\n천부적 재능 - 행동: 비술 덱 맨 위에서 카드 1장을 버립니다(페이즈마다 1회 제한).","verified"],["영적 투영","히어로 행동(저지): 음모 하나를 선택 → 그 음모에서 위협을 3만큼 제거하고 조우 덱 맨 위 1장을 살펴봄. 살펴본 카드에 있는 강화 아이콘마다 선택한 음모에서 위협을 추가로 1만큼 제거.","verified"],["미스틱 아츠의 달인","히어로 행동: 비술 덱 맨 위 1장의 인쇄된 비용을 지불 → 그 카드의 \"특수\" 능력을 해결. 그러고 나서 그 카드를 다시 비술 덱 맨 위에 앞면으로 놓음.","verified"],["공중부양 망토","당신은 공중 특성을 얻습니다.\n히어로 행동: 공중부양 망토를 소진 → Doctor Strange를 준비.","verified"],["다크 디멘션 차원 연결","공개될 때: 이 음모 아래에 비술 덱 맨 위 1장을 뒷면으로 놓습니다.\n격파될 때: 이 카드 아래에 있는 비술 카드를 비술 덱에 섞어 넣습니다.","verified"],["최면","공개될 때 (일상): 당신의 손에서 가장 비용이 높은 카드 1장을 버립니다. 그 카드에 인쇄된 비용만큼 주요 음모에 위협을 놓습니다.\n공개될 때 (히어로): 당신의 손에서 가장 비용이 높은 카드 1장을 버립니다. 당신은 그 카드에 인쇄된 비용만큼 피해를 입습니다.","verified"]])
+        self.assertEqual(result["labels"], ["주문 숙달","천부적 재능","비술 덱"])
+
     def test_ko_verified_trait_labels(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
             const {koTraitLabel,verifiedKoTraits}=await import('/public/js/marvel/ko-traits.js');
             return {count:Object.keys(verifiedKoTraits).length,
-                verified:['t_aerial','t_tech','t_skill','t_avenger','t_defender','t_s.h.i.e.l.d','S.H.I.E.L.D.','t_hero_for_hire','t_genius'].map(koTraitLabel),
-                pending:['t_x-men','t_guardian','t_mutant','t_mystic','t_web-warrior','t_future_trait','constructor'].map(koTraitLabel)};
+                verified:['t_aerial','t_tech','t_skill','t_avenger','t_defender','t_s.h.i.e.l.d','S.H.I.E.L.D.','t_hero_for_hire','t_genius','t_mystic','t_spell','t_thwart','t_artifact'].map(koTraitLabel),
+                pending:['t_x-men','t_guardian','t_mutant','t_web-warrior','t_future_trait','constructor'].map(koTraitLabel)};
         }""")
-        self.assertEqual(result["count"], 19)
-        self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재"])
-        self.assertEqual(result["pending"], ["X-MEN","GUARDIAN","MUTANT","MYSTIC","WEB-WARRIOR","FUTURE TRAIT","CONSTRUCTOR"])
+        self.assertEqual(result["count"], 23)
+        self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재","신비술사","주문","저지","유물"])
+        self.assertEqual(result["pending"], ["X-MEN","GUARDIAN","MUTANT","WEB-WARRIOR","FUTURE TRAIT","CONSTRUCTOR"])
 
     def test_ko_bundled_module(self):
         self.goto("/main")

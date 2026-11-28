@@ -20,7 +20,12 @@ export const verifiedKoTraits: Readonly<Record<string,string>> = Object.freeze({
     "AERIAL": "공중",
     "ATTACK": "공격",
     "SUPERPOWER": "슈퍼파워",
-    "ITEM": "도구"
+    "ITEM": "도구",
+    // Doctor Strange physical Korean hero/event/upgrade faces, 2026-11-29.
+    "MYSTIC": "신비술사",
+    "SPELL": "주문",
+    "THWART": "저지",
+    "ARTIFACT": "유물"
 });
 
 export function koTraitLabel(value: string): string {
