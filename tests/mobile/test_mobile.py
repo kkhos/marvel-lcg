@@ -419,6 +419,11 @@ class MobileRegression(unittest.TestCase):
     def test_deck_editor_no_null_growth(self):
         self.goto("/deck")
         self.assertEqual(self.page.evaluate("document.characterSet"), "UTF-8")
+        for action in ("저장", "플레이"):
+            expect(self.page.get_by_role("button", name=action, exact=True)).to_have_count(1)
+            expect(self.page.locator("#deck-toolbar").get_by_role("button", name=action, exact=True)).to_be_visible()
+            expect(self.page.locator(f"#deck-footer input[value=\"{action}\"]")).to_be_hidden()
+        expect(self.page.locator("#deck-footer").get_by_role("button", name="내보내기", exact=True)).to_be_visible()
         self.page.wait_for_function("window.cardStatistics && window.cardPreview", timeout=90000)
         self.page.evaluate("""async () => {
             hero_data=await getHeroJson('captain_america');

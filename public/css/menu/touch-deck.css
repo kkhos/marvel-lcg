@@ -53,3 +53,6 @@
 .deck-touch .deck-editor-page #deck-footer{flex-direction:row!important;gap:6px}
 .deck-touch .deck-editor-page #deck-footer input{min-width:72px}
 @media(orientation:landscape){.deck-touch .deck-editor-page #deck_editor .image-div{width:94px;height:132px}}
+
+/* Mobile already provides these actions in the sticky toolbar. */
+.deck-touch .deck-editor-page #deck-footer .deck-desktop-only{display:none!important}
