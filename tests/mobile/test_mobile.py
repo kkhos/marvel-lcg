@@ -151,6 +151,11 @@ class MobileRegression(unittest.TestCase):
                 other:koStatusCard('Event','Tough') === undefined,
                 title:koLabel('STATISTIC'),
                 spell:koLabel('Spell Mastery'),
+                starting:['Add Innate Reflexes to your hand (Starting)',
+                    'Put Innate Reflexes into your hand (Starting)',
+                    'Leave Innate Reflexes in your deck'].map(koHtml),
+                startingMarkup:koHtml('<span data-id="60038">Add Innate Reflexes to your hand (Starting)</span>'),
+                untouched:koHtml('Innate Reflexes'),
                 events:['Resolve','Resolved','Enters Play','Resource','Defeated'].map(koStatistic),
                 html:koHtml('<span data-id="Resolved">Resolved x2</span>')};
         }""")
@@ -159,6 +164,9 @@ class MobileRegression(unittest.TestCase):
         self.assertTrue(result["other"])
         self.assertEqual(result["title"], "통계")
         self.assertEqual(result["spell"], "주문 숙달")
+        self.assertEqual(result["starting"], ["타고난 반사신경을 손에 더하기 (시작 시)", "타고난 반사신경을 손에 더하기 (시작 시)", "타고난 반사신경을 덱에 남기기"])
+        self.assertEqual(result["startingMarkup"], '<span data-id="60038">타고난 반사신경을 손에 더하기 (시작 시)</span>')
+        self.assertEqual(result["untouched"], "Innate Reflexes")
         self.assertEqual(result["events"], ["효과 처리", "효과 처리 완료", "플레이 영역에 들어옴", "자원으로 사용", "격파"])
         self.assertEqual(result["html"], '<span data-id="Resolved">효과 처리 완료 2회</span>')
 

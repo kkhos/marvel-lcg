@@ -29,6 +29,8 @@ const labels: Record<string, string> = {
   "Spider-Sense": "스파이더센스",
   "Scientist": "과학자",
   "Spell Mastery": "주문 숙달",
+  "Leave Innate Reflexes in your deck": "타고난 반사신경을 덱에 남기기",
+  "Starting": "시작 시",
   "Main scheme phase start": "주요 음모 단계 시작",
   "Main scheme phase end": "주요 음모 단계 종료",
   "Exhaust Peter Parker → remove Eviction Notice from the game": "Peter Parker 소진 → 퇴거 통지를 게임에서 제거",
@@ -292,6 +294,10 @@ export function koText(value: string): string {
     if (direct !== value) return direct;
     return value.replace(/[^\n]+/g, line => {
         const trimmed = line.trim();
+        // The Starting choice can contain an engine-generated action prefix.
+        if (/^(?:(?:Add|Take|Put|Move|Bring|Search for|Get) )?Innate Reflexes (?:to|into|in) your hand \(Starting\)$/i.test(trimmed)) {
+            return line.replace(trimmed, '타고난 반사신경을 손에 더하기 (시작 시)');
+        }
         const mapped = koLabel(trimmed);
         if (mapped !== trimmed) return line.replace(trimmed, mapped);
         return line
