@@ -332,6 +332,26 @@ const importedCharacterNames: ReadonlyArray<readonly [RegExp,string]> = [
     [/모도크/g, "M.O.D.O.K."]
 ];
 
+
+// Batch 4: terminology corrections observed in the extracted fan data.
+// Match explicit keyword/technical phrases, not ordinary words or card titles.
+export function normalizeImportedKoTerms(value: string): string {
+    return value
+        .replace(/(^|[.\n][ \t]*)(?:임시|일시적)(?=\.)/g, '$1순간')
+        .replace(/(?:임시|일시적) 키워드/g, '순간 키워드')
+        .replace(/조우 버린 더미/g, '버린 조우 더미')
+        .replace(/승점 구역 구역/g, '승점 구역')
+        .replace(/조종 하에/g, '조종하에')
+        .replace(/정신 자원/g, '정신력 자원')
+        .replace(/물리 자원/g, '물리력 자원')
+        .replace(/와일드 자원/g, '만능 자원')
+        // plainKo already spells out these icons. Remove only identical
+        // redundant labels; never collapse repeated resource symbols.
+        .replace(/(강화 아이콘|위기 아이콘|가속 아이콘|수렁 아이콘|증폭 아이콘)\s*\(\1\)/g, '$1')
+        .replace(/(정신력|물리력|에너지|만능) 자원\s*\(\1\)/g, '$1 자원')
+        .replace(/팀워크[ \t]+\(/g, '팀워크(');
+}
+
 export function normalizeImportedKoText(value: string): string {
-    return importedCharacterNames.reduce((text, [pattern, name]) => text.replace(pattern, () => name), normalizeKoCardText(value));
+    return importedCharacterNames.reduce((text, [pattern, name]) => text.replace(pattern, () => name), normalizeImportedKoTerms(normalizeKoCardText(value)));
 }
