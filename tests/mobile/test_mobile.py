@@ -450,6 +450,33 @@ class MobileRegression(unittest.TestCase):
         self.assertTrue(all(re.fullmatch(r'\d{5}[a-z]?',id) for id in state['ids']))
         self.assertEqual(self.errors,[])
 
+    def test_my_deck_persistence_and_invalid_slots(self):
+        self.goto("/deck")
+        self.page.wait_for_function("window.cardStatistics && window.cardPreview", timeout=90000)
+        # Mock a real MarvelCDB response, including corrupt IDs and counts.
+        self.page.route("https://marvelcdb.com/api/public/decklist/12345.json", lambda route: route.fulfill(
+            json={"name":"테스트 덱","hero_name":"Captain America","hero_code":"03001a",
+                  "slots":{"03011":2,"03012":1,"null":10,"undefined":5,"03013":-1}},
+            headers={"Access-Control-Allow-Origin":"*"}))
+        self.page.evaluate("""() => {
+            document.getElementById('deck_id').value='12345';
+            getDeck(false);
+        }""")
+        main=self.page.locator('#player_deck_images > .image-div')
+        expect(main).to_have_count(3)
+        self.page.locator('#deck-name').fill('테스트 덱')
+        self.page.evaluate("saveDeck()")
+        self.page.wait_for_function("new URLSearchParams(location.search).has('saved')")
+        key=self.page.evaluate("new URLSearchParams(location.search).get('saved')")
+        self.addCleanup(lambda: (Path(__file__).resolve().parents[2]/'deck'/(key+'.json')).unlink(missing_ok=True))
+        expect(self.page.locator('#deck-save-status')).to_have_text('My Deck 저장 완료', timeout=90000)
+        expect(main).to_have_count(3)
+        saved=self.context.request.get(BASE+'/get_hero_json?'+key).json()
+        self.assertEqual(saved['name'],'테스트 덱')
+        self.assertEqual(saved['player_deck'],['03011','03011','03012'])
+        self.assertTrue(any(key+'.json' in path for path in self.context.request.get(BASE+'/list_deck').json()))
+        self.assertEqual(self.errors,[])
+
     def test_save_slot_delete_confirmation(self):
         # Only the isolated CI checkout gets a synthetic save file.
         fixture = Path(__file__).resolve().parents[2] / "save_3.json"

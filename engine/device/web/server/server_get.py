@@ -50,7 +50,70 @@ class GameServerGet(GameServerBase):
         return self.ListFile(*ENCOUNTER_SETS_FOLDERS.value)
 
     async def list_deck(self, request: web.Request) -> web.Response:
-        return self.ListFile(*DECK_FOLDERS.value, ext=".json")
+        response = self.ListFile(*DECK_FOLDERS.value, ext=".json")
+        response.headers['Cache-Control'] = 'no-store'
+        return response
+
+    async def save_my_deck(self, request: web.Request) -> web.Response:
+        import json
+        import os
+        import re
+        import tempfile
+        import uuid
+        from pathlib import Path
+        from urllib.parse import urlsplit
+
+        origin = urlsplit(request.headers.get('Origin', ''))
+        if origin.scheme not in ('http', 'https') or origin.netloc != request.host:
+            return web.json_response({'error': 'Same-origin request required'}, status=403)
+        try:
+            data = await request.json()
+            deck = data['deck']
+            key = data.get('key')
+            if not isinstance(deck, dict) or not isinstance(deck.get('name'), str) or not deck['name'].strip():
+                raise ValueError('덱 이름을 입력하세요.')
+            if len(deck['name']) > 200:
+                raise ValueError('덱 이름이 너무 깁니다.')
+            if key is not None and (not isinstance(key, str) or not re.fullmatch(r'my_[0-9a-f]{32}', key)):
+                raise ValueError('잘못된 덱 ID')
+            removed = 0
+            for field in ('hero','hero_deck','player_deck','side_deck','obligations','nemesis_set','set_aside'):
+                values = deck.get(field, [])
+                if not isinstance(values, list) or len(values) > 20000:
+                    raise ValueError('잘못된 카드 목록')
+                grouped = field in ('hero','obligations','nemesis_set','set_aside')
+                def valid(value):
+                    return isinstance(value, str) and bool(re.fullmatch(
+                        r'[0-9]{5}[a-z]?(?:,[0-9]{5}[a-z]?)*' if grouped else r'[0-9]{5}[a-z]?',
+                        value, flags=re.IGNORECASE))
+                cleaned = [value for value in values if valid(value)]
+                removed += len(values) - len(cleaned)
+                deck[field] = cleaned
+            if not deck['hero']:
+                raise ValueError('히어로를 먼저 선택하세요.')
+        except (ValueError, TypeError, KeyError, AttributeError) as exc:
+            return web.json_response({'error': str(exc)}, status=400)
+
+        folder = Path(DECK_FOLDERS.value[0])
+        folder.mkdir(parents=True, exist_ok=True)
+        key = key or ('my_' + uuid.uuid4().hex)
+        target = folder / (key + '.json')
+        if target.is_symlink():
+            return web.json_response({'error': 'Invalid deck path'}, status=400)
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', dir=folder, suffix='.tmp', delete=False) as file:
+                temporary = file.name
+                json.dump(deck, file, ensure_ascii=False, indent=2)
+                file.flush()
+                os.fsync(file.fileno())
+            os.replace(temporary, target)
+        except OSError:
+            return web.json_response({'error': '덱을 저장하지 못했습니다.'}, status=500)
+        finally:
+            if temporary and os.path.exists(temporary):
+                os.unlink(temporary)
+        return web.json_response({'key': key, 'name': deck['name'], 'removed': removed}, headers={'Cache-Control':'no-store'})
 
     async def list_starter_deck(self, request: web.Request) -> web.Response:
         return self.ListFile(STARTER_DECK_FOLDER.value)
@@ -126,7 +189,10 @@ class GameServerGet(GameServerBase):
             file = FileManager.FindJsonPath("Hero", path, nullable=True)
         if file is None:
             return web.json_response({"error": f"Hero {path} not found"}, status=404)
-        return self.ReadJsonFile(file)
+        response = self.ReadJsonFile(file, do_cache=not path.startswith('my_'))
+        if path.startswith('my_'):
+            response.headers['Cache-Control'] = 'no-store'
+        return response
 
     async def get_sets_json(self, request: web.Request) -> web.Response:
         file = FileManager.FindJsonPath("SetInfo", "sets_info.json")
@@ -201,6 +267,7 @@ class GameServerGet(GameServerBase):
         self.AddAwaitGetSecurity('/list_scenarios', self.list_scenarios)
         self.AddAwaitGetSecurity('/list_encounter_sets', self.list_encounter_sets)
         self.AddAwaitGetSecurity('/list_deck', self.list_deck)
+        self.AddPostSecurity('/save_my_deck', self.save_my_deck)
         self.AddAwaitGetSecurity('/list_starter_deck', self.list_starter_deck)
         self.AddAwaitGetSecurity('/list_replay_files', self.list_replay_files)
         self.AddAwaitGetSecurity('/list_puzzle_files', self.list_puzzle_files)

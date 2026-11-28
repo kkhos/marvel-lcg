@@ -2627,7 +2627,8 @@ p:has(#timeout_text) {
     const search_params = new URLSearchParams(window.location.search);
     if( search_params.has('deck') ) {
         const text = search_params.get('deck')
-        const json = atob(text)
+        const binary = atob(text)
+        const json = search_params.get('encoding') === 'utf8' ? new TextDecoder().decode(Uint8Array.from(binary,c=>c.charCodeAt(0))) : binary;
         importDeck(json)
     }
 </script>

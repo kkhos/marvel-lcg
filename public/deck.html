@@ -99,7 +99,7 @@ var cardPreview
     cardPreview = new CardPreview(cardStatistics.const_card_dict);
     window.cardPreview = cardPreview
 
-    const response_deck = await fetch(`list_deck?`);
+    const response_deck = await fetch(`list_deck?`,{cache:"no-store"});
     if (!response_deck.ok) {
         throw new Error('Network response was not ok: ' + response_deck.statusText);
     }
@@ -191,7 +191,7 @@ var cardPreview
     
                         img.dataset.cardImage = image_name
                         CardImages.setImage(img, image_name)
-                        option.setAttribute('data-text', text)
+                        option.setAttribute('data-text', is_my_deck ? (data.name || text) : text)
                         option.appendChild(img)
     
                         if( !text.endsWith('_WIP') ) {
@@ -230,8 +230,10 @@ var cardPreview
                     e.parentNode.querySelectorAll("button").forEach(e2 => {
                         e2.classList.remove('click')
                     })
-                    const response_hero = await fetch(`get_hero_json?${e.value}`);
+                    const response_hero = await fetch(`get_hero_json?${encodeURIComponent(e.value)}`,{cache:"no-store"});
+                    if(!response_hero.ok) return;
                     hero_data = await response_hero.json()
+                    currentDeckKey = /^my_[0-9a-f]{32}$/.test(e.value) ? e.value : null;
                     showDeckCards()
                     if (window.MarvelDeckTouch) document.getElementById('deck-picker').open=false;
                     document.getElementById('deck_editor').scrollIntoView({ behavior: 'smooth' });
@@ -270,6 +272,14 @@ var cardPreview
             }
         }
     )
+    const saved = new URLSearchParams(location.search).get("saved");
+    if (saved && /^my_[0-9a-f]{32}$/.test(saved)) {
+        hero_data = await getHeroJson(saved);
+        currentDeckKey = saved;
+        showDeckCards();
+        document.getElementById("deck-save-status").textContent="My Deck 저장 완료";
+        if(window.MarvelDeckTouch) document.getElementById("deck-picker").open=false;
+    }
 })()
 
 </script>
@@ -277,12 +287,13 @@ var cardPreview
 <details class="deck-collapse" id="deck-import"><summary>덱 불러오기</summary>
 <fieldset style="flex-direction: column;">
     <legend>불러오기</legend>
-    <div>MarvelCDB에서 불러오기: <input id="deck_id" name="deck_id" value="" placeholder="2345" required> <input type="button" onclick="getDeck(false)" value="덱 가져오기"> <input type="button" onclick="getDeck(true)" value="비공개 덱 가져오기"></div>
+    <div>MarvelCDB에서 불러오기: <input id="deck_id" name="deck_id" value="" placeholder="덱 ID 또는 URL" required> <input type="button" onclick="getDeck(false)" value="덱 가져오기"> <input type="button" onclick="getDeck(true)" value="비공개 덱 가져오기"></div>
     <div>파일에서 불러오기: <input type="file" onchange="loadDeck(this)" accept=".json"> </div>
     <div>클립보드에서 불러오기: <input type="button" onclick="importDeck()" value="가져오기"> </div>
 </fieldset>
 </details>
 
+<div class="deck-collapse"><label for="deck-name">덱 이름</label> <input id="deck-name" maxlength="200" placeholder="내 덱 이름"><span id="deck-save-status" role="status"></span></div>
 <input id="hero" name="hero" value="" placeholder="" style="display: none;" readonly required>
 
 <fieldset style="display: flex; flex-direction: column; overflow: auto; width: 100%;" id="deck_editor">
@@ -320,7 +331,7 @@ var cardPreview
     <ul>
         <li class="deck-mouse-help">좌클릭: 미리보기 · 우클릭: 제거 · 가운데 클릭: 복제</li><li class="deck-touch-help">메인/사이드 이동은 이동 버튼 또는 ≡ 핸들을 사용하세요.</li>
         <!-- <li>"Deadpool" and other heroes who use `set_aside` may also need to edit Extra deck.</li> -->
-        <li>Put your decks in the folder "./deck" to display them in `My Deck`</li>
+        <li>저장 버튼을 누르면 앱 내부 My Deck(내 덱)에 저장됩니다.</li>
         <li>We recommend you use <a href="https://marvelcdb.com/deck/new">marvelcdb.com</a> to build your deck.</li>
         <li><button onclick="ViewCards()">카드 보기</button></li>
         <script>
@@ -366,6 +377,7 @@ async function getHeroJson(hero) {
 }
 
 
+var currentDeckKey = null;
 var hero_data = {
     "hero": [],
     "obligations": [],
@@ -393,9 +405,15 @@ function getMarvelCDBMeta(meta) {
 }
 
 function getDeck(is_private) {
-    let deck_id = document.querySelector("#deck_id").value
-    if( !deck_id ) {
-        return
+    let deck_id = document.querySelector("#deck_id").value.trim();
+    if (!deck_id) return;
+    if (!/^\d+$/.test(deck_id)) {
+        try {
+            const url=new URL(deck_id);
+            const match=url.pathname.match(/^\/(decklist|deck)\/view\/(\d+)(?:\/|$)/);
+            if(url.hostname!=='marvelcdb.com' || !match) throw Error();
+            is_private=match[1]==='deck';deck_id=match[2];
+        } catch { alert('MarvelCDB 덱 ID 또는 덱 주소를 입력하세요.');return; }
     }
     var ajax = new XMLHttpRequest();
     if( is_private ) {
@@ -410,14 +428,18 @@ function getDeck(is_private) {
                 const response = this.response
                 const json_data = JSON.parse(response)
 
-                await set_hero(json_data['hero_name'], json_data['hero_code'])
+                try { await set_hero(json_data['hero_name'], json_data['hero_code']); } catch {return;}
+                currentDeckKey=null;
+                hero_data.name=json_data.name || hero_data.name;
 
                 const marvelcdb_meta = getMarvelCDBMeta(json_data['meta'])
                 hero_data['aspect'] = marvelcdb_meta['aspect'] || ""
                 hero_data['aspect2'] = marvelcdb_meta['aspect2'] || ""
 
                 hero_data['player_deck'] = []
-                for( let card_id in json_data['slots'] ) {
+                for( let card_id in (json_data['slots'] || {}) ) {
+                    const quantity=json_data.slots[card_id];
+                    if (!validDeckCardId(card_id) || !Number.isInteger(quantity) || quantity < 1 || quantity > 100) continue;
 
                     // Hack
                     if( card_id == "26002" ) {
@@ -430,7 +452,7 @@ function getDeck(is_private) {
 
                     // Keep every non-hero card even when MarvelCDB marks the deck
                     // invalid. Campaign decks can intentionally break deckbuilding rules.
-                    for( let x=0; x<json_data['slots'][card_id]; x++ ) {
+                    for( let x=0; x<quantity; x++ ) {
                         hero_data['player_deck'].push(card_id)
                     }
                 }
@@ -450,12 +472,13 @@ function getDeck(is_private) {
 
 /** @param {string} card_id */
 function validDeckCardId(id) {
-    return typeof id === 'string' && id.trim() === id && (/^\d{5}[a-z]?$/i.test(id) || (window.cardStatistics && Object.prototype.hasOwnProperty.call(window.cardStatistics.const_card_dict,id)));
+    return typeof id === 'string' && /^\d{5}[a-z]?$/i.test(id);
 }
 function cleanDeckList(list, grouped=false) {
     return (Array.isArray(list) ? list : []).filter(id => typeof id === 'string' && (grouped ? id.split(',').every(validDeckCardId) : validDeckCardId(id)));
 }
 function create_card(card_id, from_peek) {
+    if (!validDeckCardId(card_id)) return null;
     let img = document.createElement('img')
     let new_card_id = card_id
     window.cardImages.setImage(img, new_card_id)
@@ -518,7 +541,7 @@ function create_card(card_id, from_peek) {
 /** @param {HTMLElement} e */
 function add_card(e, card_id, allow_update=false) {
     let div = create_card(card_id, allow_update)
-    e.appendChild(div)
+    if(div) e.appendChild(div)
 }
 
 function showDeckCards() {
@@ -530,6 +553,7 @@ function showDeckCards() {
         removed+=old.length-hero_data[key].length;
     }
     if (removed) document.getElementById('deck-cleanup-status').textContent='잘못된 카드 항목 '+removed+'개를 제외했습니다.';
+    document.getElementById('deck-name').value=hero_data.name || '';
     if(window.MarvelDeckTouch && hero_data.hero.length) document.getElementById('deck-fixed-cards').open=false;
     if( !('aspect' in hero_data) ) {
         hero_data['aspect'] = ""
@@ -664,15 +688,19 @@ async function loadDeck(e) {
     const text = await file.text();
     // console.log(text)
     hero_data = JSON.parse(text)
+    currentDeckKey=null;
     showDeckCards()
 }
 
 function play() {
     let play = false
     if( hero_data.hero.length != 0 ) {
+        hero_data.name=document.getElementById('deck-name').value.trim() || hero_data.name;
         const text = JSON.stringify(hero_data)
         if( text ) {
-            window.open(`scene?deck=${btoa(text)}`)
+            const bytes=new TextEncoder().encode(text);
+            const encoded=btoa(Array.from(bytes,b=>String.fromCharCode(b)).join(''));
+            window.location.href=`scene?deck=${encodeURIComponent(encoded)}&encoding=utf8`;
             play = true
         }
     }
@@ -685,6 +713,7 @@ async function importDeck() {
     const text = prompt()
     if( text ) {
         hero_data = JSON.parse(text)
+        currentDeckKey=null;
         showDeckCards()
     }
 }
@@ -705,14 +734,25 @@ async function importDeck() {
     }
     window.exportDeck = exportDeck;
 
+    let saving=false;
     async function saveDeck() {
-        if( hero_data == undefined ) {
-            alert("Error")
-        }
-        else {
-            await updatePlayerDeck()
-            saveAsFile(JSON.stringify(hero_data, null, 4), `${hero_data['name']}.json`)
-        }
+        if(saving)return;
+        const status=document.getElementById('deck-save-status');
+        if(!hero_data.hero.length){status.textContent='히어로를 먼저 선택하세요.';return;}
+        const name=document.getElementById('deck-name').value.trim();
+        if(!name){status.textContent='덱 이름을 입력하세요.';return;}
+        saving=true;
+        try {
+            updatePlayerDeck();
+            hero_data.name=name;
+            const response=await fetch('/save_my_deck',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:currentDeckKey,deck:hero_data})});
+            const result=await response.json();
+            if(!response.ok)throw Error(result.error || '저장 실패');
+            currentDeckKey=result.key;
+            const url=new URL(location.href);url.searchParams.set('saved',result.key);
+            location.replace(url.toString());
+        } catch(error){status.textContent=error.message || '저장 실패';}
+        finally{saving=false;}
     }
     window.saveDeck = saveDeck;
 </script>
