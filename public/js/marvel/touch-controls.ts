@@ -28,6 +28,7 @@ export class TouchControls {
             #touch-preview { background: #172a23; color: white; border: 1px solid #83b79a; border-radius: 12px;
                 position: fixed; inset: 0; margin: auto; box-sizing: border-box; width: fit-content;
                 height: fit-content; max-width: 90vw; max-height: 90dvh; padding: 10px; overflow: auto; }
+            #touch-preview, #touch-preview * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
             #touch-preview::backdrop { background: #000b; }
             #touch-preview img { display: block; height: min(74vh, 600px); max-width: 78vw; object-fit: contain; margin: auto; }
             #touch-preview .touch-card-body { display:flex; gap:16px; align-items:center; }
@@ -82,6 +83,9 @@ export class TouchControls {
         const dialog = document.createElement('dialog');
         dialog.id = 'touch-preview';
         dialog.setAttribute('aria-label', '카드 미리보기');
+        // A card long press can continue over the newly opened dialog in WebView.
+        dialog.addEventListener('contextmenu', e => e.preventDefault());
+        dialog.addEventListener('selectstart', e => e.preventDefault());
         const img = document.createElement('img');
         img.alt = '카드 미리보기';
         const controls = document.createElement('div');
@@ -149,6 +153,7 @@ export class TouchControls {
             showingBack = false;
             flip.hidden = previewType === 'StatusCard' || !previewBack || previewBack === previewFront;
             flip.disabled = flip.hidden;
+            window.getSelection()?.removeAllRanges();
             if (!dialog.open) dialog.showModal();
             CardImages.setImage(img, previewFront);
             updateDescription();

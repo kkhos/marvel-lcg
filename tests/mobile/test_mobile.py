@@ -774,6 +774,15 @@ class MobileRegression(unittest.TestCase):
             const setting=document.getElementById('right-side-bar-handle').getBoundingClientRect();
             d.showModal();
             try {
+                for(const el of [d, ...d.querySelectorAll('.touch-card-title,.touch-card-text,.touch-buttons button')]) {
+                    if(getComputedStyle(el).userSelect !== 'none')
+                        throw new Error('Preview permits native text selection');
+                }
+                const close=d.querySelector('.touch-buttons button:last-child');
+                for(const type of ['contextmenu','selectstart']) {
+                    if(close.dispatchEvent(new Event(type,{bubbles:true,cancelable:true})))
+                        throw new Error('Preview did not cancel '+type);
+                }
                 for(const b of d.querySelectorAll('.touch-buttons > button:not([hidden])')) {
                     const r=b.getBoundingClientRect();
                     if(Math.abs(r.width-setting.width)>1 || Math.abs(r.height-setting.height)>1)
