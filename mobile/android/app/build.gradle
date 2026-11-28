@@ -28,8 +28,8 @@ android {
         applicationId 'io.github.kkhos.marvellcg'
         minSdk 24
         targetSdk 35
-        versionCode 81
-        versionName '0.5.72-ko-traits-batch4-2'
+        versionCode 82
+        versionName '0.5.73-ko-terms-fix'
         ndk { abiFilters 'arm64-v8a', 'x86_64' }
     }
     sourceSets.main.assets.srcDir(layout.buildDirectory.dir('generated/gameAssets'))

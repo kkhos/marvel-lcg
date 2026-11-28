@@ -339,7 +339,7 @@ export function normalizeImportedKoTerms(value: string): string {
     return value
         .replace(/(^|[.\n][ \t]*)(?:임시|일시적)(?=\.)/g, '$1순간')
         .replace(/(?:임시|일시적) 키워드/g, '순간 키워드')
-        .replace(/조우 버린 더미/g, '버린 조우 더미')
+        .replace(/조우 버린 (?:카드 )?더미/g, '버린 조우 더미')
         .replace(/승점 구역 구역/g, '승점 구역')
         .replace(/조종 하에/g, '조종하에')
         .replace(/정신 자원/g, '정신력 자원')

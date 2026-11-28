@@ -520,6 +520,7 @@ class MobileRegression(unittest.TestCase):
                     realStyle:koCard('45180a').text,
                     protected:koCard('01001a').text===before && koCardSource('01001a')==='verified',
                     unchanged:normalizeImportedKoTerms(unchanged),
+                    discardPiles:['조우 버린 더미','조우 버린 카드 더미','버린 조우 더미','당신의 버린 더미','버린 카드 더미'].map(normalizeImportedKoText),
                     idempotent:normalizeImportedKoText(normalized)===normalized};
             } finally {
                 if(saved===null)localStorage.removeItem(KO_IMPORTED_KEY);
@@ -530,6 +531,7 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["text"], "순간. 순간. 순간 키워드를 잃습니다. 버린 조우 더미에서 카드 2장. 승점 구역. 조종하에. 정신력 자원, 물리력 자원, 만능 자원, 에너지 자원. 강화 아이콘, 위기 아이콘, 가속 아이콘, 수렁 아이콘, 증폭 아이콘. 팀워크(다크 라이더스).")
         self.assertEqual(result["source"], "imported")
         self.assertEqual(result["realStyle"], "정신력 자원마다 위협을 2만큼 놓습니다. 강화 아이콘을 무시합니다.")
+        self.assertEqual(result["discardPiles"], ["버린 조우 더미","버린 조우 더미","버린 조우 더미","당신의 버린 카드 더미","버린 카드 더미"])
         self.assertTrue(result["protected"])
         self.assertTrue(result["idempotent"])
         self.assertEqual(result["unchanged"], "임시 카드가 있습니다. 강인. 강인함 상태 카드. 영속. 반격 2. 교란 X. 진척 3. 승점 0. 그러고 나서, 그리고, 대신. 물리력물리력 자원. 버린 조우 더미.")
