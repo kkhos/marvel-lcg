@@ -846,6 +846,25 @@ class MobileRegression(unittest.TestCase):
         self.assertIn("피해 8", result["text"])
         self.assertTrue(result["unknown"])
 
+    def test_ko_wrecking_crew_physical_schemes(self):
+        self.goto("/main")
+        result=self.page.evaluate("""async () => {
+            const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
+            const {KO_IMPORTED_KEY}=await import('/public/js/marvel/ko-local.js');
+            const ids=["07019","07034","07048"];
+            const saved=localStorage.getItem(KO_IMPORTED_KEY);
+            try {
+                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify(Object.fromEntries(ids.map(id=>[id,{name:'오류',text:'Wrecker의 부가 음모'}]))));
+                refreshKoCards();
+                return ids.map(id=>[koCard(id).name,koCard(id).text,koCardSource(id)]);
+            } finally {
+                if(saved===null)localStorage.removeItem(KO_IMPORTED_KEY);
+                else localStorage.setItem(KO_IMPORTED_KEY,saved);
+                refreshKoCards();
+            }
+        }""")
+        self.assertEqual(result, [["천둥강타","Thunderball의 부가 음모\nThunderball이 플레이 영역에 있는 한, 이 카드는 플레이 영역을 떠날 수 없습니다.\n감마 블래스트 - 강제 반응: 이 카드에 위협을 놓은 후, 이 카드에 놓인 위협이 10 이상이라면 모든 아군 캐릭터를 기절시킵니다. 이 음모에서 위협을 3만큼만 남기고 모두 제거합니다.","verified"],["강화하다!","Piledriver의 부가 음모\nPiledriver가 플레이 영역에 있는 한, 이 카드는 플레이 영역을 떠날 수 없습니다.\n파일 드라이브 - 강제 반응: 이 카드에 위협을 놓은 후, 이 카드에 놓인 위협이 10 이상이라면 각 플레이어는 자신이 조종하는 업그레이드나 지원 중 비용이 가장 높은 카드를 버립니다. 이 음모에서 위협을 3만큼만 남기고 모두 제거합니다.","verified"],["길을 비켜라","Bulldozer의 부가 음모\nBulldozer가 플레이 영역에 있는 한, 이 카드는 플레이 영역을 떠날 수 없습니다.\n돌격! - 강제 반응: 이 카드에 위협을 놓은 후, 이 카드에 놓인 위협이 10 이상이라면 각 플레이어는 반드시 자신의 덱 맨 위 10장을 버려야 합니다. 이 음모에서 위협을 3만큼만 남기고 모두 제거합니다.","verified"]])
+
     def test_ko_wrecking_crew(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
@@ -857,7 +876,7 @@ class MobileRegression(unittest.TestCase):
                     names:['07002','07017','07032','07046'].map(id=>koCard(id).name)};
         }""")
         self.assertEqual(result["missing"], [])
-        self.assertEqual(result["verified"], ["07001a","07001b","07004"])
+        self.assertEqual(result["verified"], ["07001a","07001b","07004","07019","07034","07048"])
         self.assertEqual(result["titles"], ["천둥강타","강화하다!","길을 비켜라"])
         self.assertEqual(result["names"], ["Wrecker","Thunderball","Piledriver","Bulldozer"])
 

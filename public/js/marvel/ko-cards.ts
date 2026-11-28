@@ -331,20 +331,32 @@ const strangeVerified: Record<string,{name:string;text:string}> = {
     "text": "공개될 때 (일상): 당신의 손에서 가장 비용이 높은 카드 1장을 버립니다. 그 카드에 인쇄된 비용만큼 주요 음모에 위협을 놓습니다.\n공개될 때 (히어로): 당신의 손에서 가장 비용이 높은 카드 1장을 버립니다. 당신은 그 카드에 인쇄된 비용만큼 피해를 입습니다."
   }
 };
+// Three Wrecking Crew physical scheme cards provided 2026-11-29.
+const wreckingVerified: Record<string,{name:string;text:string}> = {
+  "07019": {
+    "name": "천둥강타",
+    "text": "Thunderball의 부가 음모\nThunderball이 플레이 영역에 있는 한, 이 카드는 플레이 영역을 떠날 수 없습니다.\n감마 블래스트 - 강제 반응: 이 카드에 위협을 놓은 후, 이 카드에 놓인 위협이 10 이상이라면 모든 아군 캐릭터를 기절시킵니다. 이 음모에서 위협을 3만큼만 남기고 모두 제거합니다."
+  },
+  "07034": {
+    "name": "강화하다!",
+    "text": "Piledriver의 부가 음모\nPiledriver가 플레이 영역에 있는 한, 이 카드는 플레이 영역을 떠날 수 없습니다.\n파일 드라이브 - 강제 반응: 이 카드에 위협을 놓은 후, 이 카드에 놓인 위협이 10 이상이라면 각 플레이어는 자신이 조종하는 업그레이드나 지원 중 비용이 가장 높은 카드를 버립니다. 이 음모에서 위협을 3만큼만 남기고 모두 제거합니다."
+  },
+  "07048": {
+    "name": "길을 비켜라",
+    "text": "Bulldozer의 부가 음모\nBulldozer가 플레이 영역에 있는 한, 이 카드는 플레이 영역을 떠날 수 없습니다.\n돌격! - 강제 반응: 이 카드에 위협을 놓은 후, 이 카드에 놓인 위협이 10 이상이라면 각 플레이어는 반드시 자신의 덱 맨 위 10장을 버려야 합니다. 이 음모에서 위협을 3만큼만 남기고 모두 제거합니다."
+  }
+};
+const exactPhysical = {...strangeVerified, ...wreckingVerified};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...wreckingCrewDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
-const physicalVerified = new Set(['07001a','07001b','07004','01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b',...Object.keys(strangeVerified)]);
-// Names confirmed by the photographed setup face; effects not physically verified.
-const verifiedNames: Record<string,string> = {'07019':'천둥강타','07034':'강화하다!','07048':'길을 비켜라'};
+const physicalVerified = new Set(['07001a','07001b','07004','01005','02021','27002','01004','01008','01009','01186','01190','01003','01001a','01060','01001b',...Object.keys(exactPhysical)]);
 const normalizedCards: Record<string, {name:string;text?:string}> = Object.create(null);
-const draftCards = {...reviewedDrafts, ...koCards, ...strangeVerified};
+const draftCards = {...reviewedDrafts, ...koCards, ...exactPhysical};
 const sources: Record<string,'verified'|'imported'|'community'|'draft'> = Object.create(null);
 export function refreshKoCards() {
     const localCards = {...readKoCache(), ...bundledKo};
     const imported = readImportedKoCache();
-    // Keep the reviewed scenario correction until the physical 07034 is checked.
-    delete imported['07034'];
     for (const id of Object.keys(normalizedCards)) delete normalizedCards[id];
     for (const id of Object.keys(sources)) delete sources[id];
     for (const id of new Set([...Object.keys(draftCards), ...Object.keys(localCards), ...Object.keys(imported)])) {
@@ -353,7 +365,7 @@ export function refreshKoCards() {
     const community = !verified && !fromPack && Object.prototype.hasOwnProperty.call(localCards,id);
     const entry = (verified ? draftCards[id] : fromPack ? imported[id] : community ? localCards[id] : draftCards[id]) ?? localCards[id];
     if (!entry) continue;
-    normalizedCards[id] = {name:verifiedNames[id] ?? entry.name, text:entry.text === undefined ? undefined : (community || Object.prototype.hasOwnProperty.call(strangeVerified,id) ? entry.text : fromPack ? normalizeImportedKoText(entry.text) : normalizeKoCardText(entry.text))};
+    normalizedCards[id] = {name:entry.name, text:entry.text === undefined ? undefined : (community || Object.prototype.hasOwnProperty.call(exactPhysical,id) ? entry.text : fromPack ? normalizeImportedKoText(entry.text) : normalizeKoCardText(entry.text))};
     sources[id] = verified ? 'verified' : fromPack ? 'imported' : community ? 'community' : 'draft';
     }
 }

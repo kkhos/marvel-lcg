@@ -1,5 +1,5 @@
 // Korean display drafts from pinned MarvelCDB English encounter data. Not physically verified.
-// 07034 uses Piledriver to match the scenario engine; source data says Wrecker (needs physical check).
+// 07034 Piledriver attribution was confirmed on the physical Korean card (2026-11-29).
 // Exact physical translations in ko-cards.ts take priority.
 export const wreckingCrewDraft: Record<string,{name:string;text:string}> = {
   "07002": {
