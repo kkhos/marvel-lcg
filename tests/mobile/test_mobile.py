@@ -778,16 +778,38 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["cards"], [["Doctor Strange","주문 숙달 - 행동: Doctor Strange를 소진하고 비술 덱 맨 위 1장의 비용을 지불 → 그 카드의 \"특수\" 능력을 해결.","verified"],["Stephen Strange","Stephen Strange는 비술 덱을 가지고 게임을 시작합니다(동봉된 규칙 참조).\n천부적 재능 - 행동: 비술 덱 맨 위에서 카드 1장을 버립니다(페이즈마다 1회 제한).","verified"],["영적 투영","히어로 행동(저지): 음모 하나를 선택 → 그 음모에서 위협을 3만큼 제거하고 조우 덱 맨 위 1장을 살펴봄. 살펴본 카드에 있는 강화 아이콘마다 선택한 음모에서 위협을 추가로 1만큼 제거.","verified"],["미스틱 아츠의 달인","히어로 행동: 비술 덱 맨 위 1장의 인쇄된 비용을 지불 → 그 카드의 \"특수\" 능력을 해결. 그러고 나서 그 카드를 다시 비술 덱 맨 위에 앞면으로 놓음.","verified"],["공중부양 망토","당신은 공중 특성을 얻습니다.\n히어로 행동: 공중부양 망토를 소진 → Doctor Strange를 준비.","verified"],["다크 디멘션 차원 연결","공개될 때: 이 음모 아래에 비술 덱 맨 위 1장을 뒷면으로 놓습니다.\n격파될 때: 이 카드 아래에 있는 비술 카드를 비술 덱에 섞어 넣습니다.","verified"],["최면","공개될 때 (일상): 당신의 손에서 가장 비용이 높은 카드 1장을 버립니다. 그 카드에 인쇄된 비용만큼 주요 음모에 위협을 놓습니다.\n공개될 때 (히어로): 당신의 손에서 가장 비용이 높은 카드 1장을 버립니다. 당신은 그 카드에 인쇄된 비용만큼 피해를 입습니다.","verified"]])
         self.assertEqual(result["labels"], ["주문 숙달","천부적 재능","비술 덱"])
 
+    def test_ko_ms_marvel_physical_faces(self):
+        self.goto("/main")
+        result=self.page.evaluate("""async () => {
+            const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
+            const {KO_IMPORTED_KEY}=await import('/public/js/marvel/ko-local.js');
+            const {koLabel}=await import('/public/js/marvel/ko-game.js');
+            const ids=['05001a','05001b'];
+            const saved=localStorage.getItem(KO_IMPORTED_KEY);
+            try {
+                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify(Object.fromEntries(ids.map(id=>[id,{name:'오류',text:'잘못된 효과'}]))));
+                refreshKoCards();
+                return {cards:ids.map(id=>[koCard(id).name,koCard(id).text,koCardSource(id)]),
+                    labels:['Morphogenetics','Teen Spirit'].map(koLabel)};
+            } finally {
+                if(saved===null)localStorage.removeItem(KO_IMPORTED_KEY);
+                else localStorage.setItem(KO_IMPORTED_KEY,saved);
+                refreshKoCards();
+            }
+        }""")
+        self.assertEqual(result["cards"], [["Ms. Marvel","신체 변형 - 반응: 당신이 공격이나 저지, 방어 이벤트를 플레이한 후, Ms. Marvel을 소진 → 그 이벤트를 당신의 손으로 되돌림.","verified"],["Kamala Khan","십대 감성 - 행동: Ms. Marvel 카드가 버려질 때까지 당신의 덱 맨 위 카드를 버립니다. 그러고 나서 그 카드를 당신의 손에 더합니다(라운드마다 1회 제한).","verified"]])
+        self.assertEqual(result["labels"], ["신체 변형","십대 감성"])
+
     def test_ko_verified_trait_labels(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
             const {koTraitLabel,verifiedKoTraits}=await import('/public/js/marvel/ko-traits.js');
             return {count:Object.keys(verifiedKoTraits).length,
-                verified:['t_aerial','t_tech','t_skill','t_avenger','t_defender','t_s.h.i.e.l.d','S.H.I.E.L.D.','t_hero_for_hire','t_genius','t_mystic','t_spell','t_thwart','t_artifact'].map(koTraitLabel),
+                verified:['t_aerial','t_tech','t_skill','t_avenger','t_defender','t_s.h.i.e.l.d','S.H.I.E.L.D.','t_hero_for_hire','t_genius','t_mystic','t_spell','t_thwart','t_artifact','t_champion','t_inhuman','t_defense'].map(koTraitLabel),
                 pending:['t_x-men','t_guardian','t_mutant','t_web-warrior','t_future_trait','constructor'].map(koTraitLabel)};
         }""")
-        self.assertEqual(result["count"], 23)
-        self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재","신비술사","주문","저지","유물"])
+        self.assertEqual(result["count"], 26)
+        self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재","신비술사","주문","저지","유물","CHAMPION","INHUMAN","방어"])
         self.assertEqual(result["pending"], ["X-MEN","GUARDIAN","MUTANT","WEB-WARRIOR","FUTURE TRAIT","CONSTRUCTOR"])
 
     def test_ko_bundled_module(self):

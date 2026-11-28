@@ -30,6 +30,8 @@ const labels: Record<string, string> = {
   "Scientist": "과학자",
   "Spell Mastery": "주문 숙달",
   "Natural Talent": "천부적 재능",
+  "Morphogenetics": "신체 변형",
+  "Teen Spirit": "십대 감성",
   "Invocation Deck": "비술 덱",
   "Invocation deck": "비술 덱",
   "Leave Innate Reflexes in your deck": "타고난 반사신경을 덱에 남기기",

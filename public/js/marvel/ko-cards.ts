@@ -346,7 +346,18 @@ const wreckingVerified: Record<string,{name:string;text:string}> = {
     "text": "Bulldozer의 부가 음모\nBulldozer가 플레이 영역에 있는 한, 이 카드는 플레이 영역을 떠날 수 없습니다.\n돌격! - 강제 반응: 이 카드에 위협을 놓은 후, 이 카드에 놓인 위협이 10 이상이라면 각 플레이어는 반드시 자신의 덱 맨 위 10장을 버려야 합니다. 이 음모에서 위협을 3만큼만 남기고 모두 제거합니다."
   }
 };
-const exactPhysical = {...strangeVerified, ...wreckingVerified};
+// Ms. Marvel physical Korean identity faces, 2026-11-29.
+const msMarvelVerified: Record<string,{name:string;text:string}> = {
+  "05001a": {
+    "name": "Ms. Marvel",
+    "text": "신체 변형 - 반응: 당신이 공격이나 저지, 방어 이벤트를 플레이한 후, Ms. Marvel을 소진 → 그 이벤트를 당신의 손으로 되돌림."
+  },
+  "05001b": {
+    "name": "Kamala Khan",
+    "text": "십대 감성 - 행동: Ms. Marvel 카드가 버려질 때까지 당신의 덱 맨 위 카드를 버립니다. 그러고 나서 그 카드를 당신의 손에 더합니다(라운드마다 1회 제한)."
+  }
+};
+const exactPhysical = {...strangeVerified, ...wreckingVerified, ...msMarvelVerified};
 export const bundledKoCount = Object.keys(bundledKo).length;
 const reviewedDrafts = {...coreEncounterDraft, ...goblinDraft, ...wreckingCrewDraft, ...sinisterDraft};
 // Only photographed faces are marked physically verified.
