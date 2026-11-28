@@ -4,15 +4,38 @@ export class Music {
     private static sound_bgm = document.getElementById('play-bgm') as HTMLAudioElement;
     private static sound_cache: Record<string, HTMLAudioElement> = {};
 
+    private static bgmWanted = false;
+
+    static initBgm() {
+        Music.bgmWanted = Boolean(ButtonSetting.bgm_on);
+        // Android WebView requires a user gesture to begin playback.
+        document.addEventListener('click', () => {
+            if (Music.bgmWanted && Music.sound_bgm?.paused) Music.playBgm();
+        }, {capture: true});
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState !== 'visible') {
+                Music.sound_bgm?.pause();
+                for (const sound of Object.values(Music.sound_cache)) sound.pause();
+            } else if (Music.bgmWanted) Music.playBgm();
+        });
+        window.addEventListener('pagehide', () => Music.pauseBgm());
+    }
+
     static playBgm() {
-        console.log('Play BGM');
-        Music.sound_bgm.src = "./asset/marvel_s_black_widow_official_theme_epic_version.mp3";
-        Music.sound_bgm.volume = 0.05;
-        Music.sound_bgm.play();
+        if (!Music.sound_bgm || !ButtonSetting.bgm_on) return;
+        Music.bgmWanted = true;
+        if (document.visibilityState !== 'visible') return;
+        if (!Music.sound_bgm.getAttribute('src') || Music.sound_bgm.getAttribute('src') === '') {
+            Music.sound_bgm.src = '/public/audio/hero-theme.mp3';
+        }
+        Music.sound_bgm.loop = true;
+        Music.sound_bgm.volume = 0.12;
+        void Music.sound_bgm.play().catch(() => {});
     }
 
     static pauseBgm() {
-        Music.sound_bgm.pause();
+        Music.bgmWanted = false;
+        Music.sound_bgm?.pause();
     }
 
     static playClickCardSound() {

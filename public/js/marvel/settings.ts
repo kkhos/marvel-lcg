@@ -96,6 +96,7 @@ export class ButtonSetting {
     static show_image_text = 0
     static is_replay = Number(search_params.has('replay'))
     static music_on = 1
+    static bgm_on = 0
 
     static show_all_players = 1
     static show_all_hand_cards = Setting.is_hot_seat ? 1 : 0

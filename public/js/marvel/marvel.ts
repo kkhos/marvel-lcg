@@ -56,6 +56,7 @@ Setting
 
 import { UI } from './ui.js';
 import { Button } from './buttons.js';
+import { Music } from './music.js';
 import { SwipeDetector } from './window.js';
 import { TouchControls } from './touch-controls.js';
 import { Client } from './client.js';
@@ -75,6 +76,7 @@ Message.init()
 FullSearchPresentation.init()
 UI.update()
 Button.initializeButtons()
+Music.initBgm()
 Button.doShow()
 
 // Usage

@@ -541,9 +541,19 @@ export class Button{
             cookie_name: 'btn_card_tilt'
         })
         Button.createButtonBase(parent_div2, {
-            text: "Sound",
+            text: "효과음",
             property: 'music_on',
             cookie_name: 'btn_sound'
+        })
+        Button.createButtonBase(parent_div2, {
+            text: "배경음악",
+            id: "bgm-toggle",
+            property: 'bgm_on',
+            cookie_name: 'btn_bgm',
+            onClick: () => {
+                if (ButtonSetting.bgm_on) Music.playBgm();
+                else Music.pauseBgm();
+            }
         })
         Button.createButtonBase(parent_div2, {
             text: "New Badge",

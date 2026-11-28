@@ -45,6 +45,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Stage CC0 hero background music
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/audio
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 --output public/audio/hero-theme.mp3 'https://raw.githubusercontent.com/gtherond/crown-of-embers/06c4583f2ac7f36ddd5eb244e567e7caa0cfbf83/Crown%20of%20Embers%20%28Orchestral%20Version%29.mp3'
+          test "$(git hash-object public/audio/hero-theme.mp3)" = '29ccc3d211295b4475dafae5d39c04a997905ac3'
       - name: Prepare personal Korean bundle
         if: github.event.repository.private && (github.event_name != 'workflow_dispatch' || inputs.personal_ko)
         run: python mobile/android/prepare_ko.py
@@ -103,6 +110,13 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Stage CC0 hero background music
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p public/audio
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 --output public/audio/hero-theme.mp3 'https://raw.githubusercontent.com/gtherond/crown-of-embers/06c4583f2ac7f36ddd5eb244e567e7caa0cfbf83/Crown%20of%20Embers%20%28Orchestral%20Version%29.mp3'
+          test "$(git hash-object public/audio/hero-theme.mp3)" = '29ccc3d211295b4475dafae5d39c04a997905ac3'
       - name: Prepare personal Korean bundle
         if: github.event.repository.private && (github.event_name != 'workflow_dispatch' || inputs.personal_ko)
         run: python mobile/android/prepare_ko.py

@@ -29,3 +29,7 @@ Personal offline builds can run `python mobile/android/prepare_ko.py` before com
 The Korean terminology glossary distinguishes physical-card evidence from provisional translation choices. See `docs/ko-glossary.md` and `public/js/marvel/ko-glossary.ts`. Only the twelve owner-photographed card faces are marked verified; matching text on another printing remains a draft. Resource icons are expressed in words in the text preview.
 
 Core encounter drafts use English card rules and the owner-provided Korean Learn to Play rulebook, p. 17 and 23, for official names. The 80 reprint links are card identifier metadata (`duplicate_of`) from the pinned MarvelCDB English catalog. No community card-text corpus is committed. Android public builds import the Korean corpus directly into device-local storage on the first launcher visit, without blocking play; the manual import remains available for retry. Physically verified cards take precedence; imported Korean text is preserved (HTML/symbol formatting only) rather than normalized indiscriminately.
+
+## Background music
+
+Crown of Embers (Orchestral Version), by [gtherond](https://github.com/gtherond/crown-of-embers), is released under CC0 1.0. Android CI stages the original MP3 from commit `06c4583f2ac7f36ddd5eb244e567e7caa0cfbf83` and verifies Git blob `29ccc3d211295b4475dafae5d39c04a997905ac3` before packaging it as `public/audio/hero-theme.mp3`. The track is optional in the game settings and is not the official Avengers score. For a local build, place the same verified MP3 at that path before packaging.
