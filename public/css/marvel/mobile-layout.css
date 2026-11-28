@@ -649,3 +649,34 @@ body.mobile-layout #touch-preview .touch-buttons > button {
     touch-action:manipulation;
 }
 body.mobile-layout #touch-preview .touch-buttons > button[hidden] {display:none!important}
+
+
+/* Center long ability choices, keeping the original rail measurable and inert. */
+body.mobile-layout #option-buttons.mac-popup-active { visibility: hidden; }
+#mobile-ability-choice-dialog {
+    position: fixed; inset: 0; margin: auto; box-sizing: border-box;
+    width: min(68vw, 640px); min-width: min(280px, 90vw); max-width: 90vw;
+    max-height: 80dvh; padding: 12px; overflow: hidden;
+    background: #172a23; color: #eef6f1; border: 1px solid #83b79a; border-radius: 12px;
+    font: 13px/1.25 system-ui, sans-serif;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+#mobile-ability-choice-dialog[open] { display: flex; flex-direction: column; gap: 8px; }
+#mobile-ability-choice-dialog::backdrop { background: #0008; }
+#mobile-ability-choice-dialog h2 { margin: 0; font: 750 17px/1.25 system-ui; text-align: center; }
+#mobile-ability-choice-dialog .mac-hint { margin: 0; color: #f5d681; text-align: center; }
+#mobile-ability-choice-dialog .mac-list {
+    min-height: 0; overflow: auto; overscroll-behavior: contain;
+    display: flex; flex-direction: column; gap: 5px; touch-action: pan-y;
+}
+#mobile-ability-choice-dialog button {
+    flex: 0 0 auto; box-sizing: border-box; min-height: 38px;
+    width: 100%; margin: 0; padding: 7px 10px;
+    background: #30493e; color: #eef6f1; border: 1px solid #709b82; border-radius: 7px;
+    font: 750 12px/1.25 'Roboto Condensed', 'sans-serif-condensed', system-ui, sans-serif;
+    letter-spacing: .15px; white-space: normal; overflow-wrap: anywhere; touch-action: manipulation;
+}
+#mobile-ability-choice-dialog button:disabled { opacity: .55; background: #394154; }
+#mobile-ability-choice-dialog button img { max-width: 100%; max-height: 23dvh; object-fit: contain; }
+#mobile-ability-choice-dialog .mac-cancel { color: #f5d681; }
+#mobile-ability-choice-dialog button[hidden] { display: none !important; }

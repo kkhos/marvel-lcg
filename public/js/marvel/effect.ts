@@ -14,6 +14,7 @@ import { BtnOk } from './btn_ok.js'
 import { HoverCard } from './hover.js'
 import { AutoActivate } from './auto_activate.js'
 import { Command } from './command.js'
+import { MobileAbilityChoices } from './mobile-ability-choices.js'
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -912,7 +913,7 @@ export class Effect {
                     }
                 } else {
                     button.addEventListener('click', function(e){
-                        const btn = e.target as HTMLElement
+                        const btn = e.currentTarget as HTMLButtonElement
                         btn.classList.toggle('clicked')
                         if( btn.classList.contains('clicked') ) {
                             for( let child of Effect.options_button_div.childNodes ) {
@@ -934,6 +935,10 @@ export class Effect {
                 }
                 Effect.options_button_div.appendChild(button)
             }
+            if (!ButtonSetting.is_replay) MobileAbilityChoices.present(
+                Effect.options_button_div,
+                () => Effect.show_cancel && !Effect.isForcedTimingChoice() && !Effect.isMandatoryHandSizeDiscard()
+            )
         }
     }
 

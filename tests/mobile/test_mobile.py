@@ -142,6 +142,66 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(self.errors, [])
         self.screenshot("home-redesign")
 
+    def test_mobile_long_ability_choices(self):
+        self.start_game()
+        self.page.evaluate("""async () => {
+            const {MobileAbilityChoices}=await import('/public/js/marvel/mobile-ability-choices.js');
+            const {SelectStep}=await import('/public/js/marvel/select.js');
+            const source=document.getElementById('option-buttons');
+            window.choiceTest={clicks:0,cancels:0};
+            window.choiceTest.render=(labels,optional=false)=>{
+                SelectStep.restoreStep('effect');
+                source.replaceChildren();
+                for(const [i,label] of labels.entries()){
+                    const b=document.createElement('button');b.className='button';b.textContent=label;
+                    if(i===1 && label==='사용 불가') b.classList.add('disable');
+                    b.onclick=()=>{window.choiceTest.clicks++;b.classList.add('clicked');SelectStep.restoreStep('target');};
+                    source.append(b);
+                }
+                MobileAbilityChoices.present(source,()=>optional);
+            };
+            window.choiceTest.render(['공격','저지']);
+        }""")
+        popup=self.page.locator("#mobile-ability-choice-dialog")
+        expect(self.page.locator("#option-buttons")).to_be_visible()
+        expect(popup).to_be_hidden()
+        self.page.evaluate("""() => window.choiceTest.render([
+            '타고난 반사신경을 손에 더하기 '.repeat(4), '사용 불가', '덱에 남기기'])""")
+        expect(popup).to_be_visible()
+        expect(popup.locator(".mac-option")).to_have_count(3)
+        expect(popup.locator(".mac-option").nth(1)).to_be_disabled()
+        expect(popup.locator(".mac-cancel")).to_be_hidden()
+        self.page.keyboard.press("Escape")
+        expect(popup).to_be_visible()
+        self.assertTrue(self.page.evaluate("() => window.MarvelTouch.back()"))
+        expect(popup).to_be_visible()
+        for width,height in [(915,412),(740,360)]:
+            self.page.set_viewport_size({"width":width,"height":height})
+            self.bounds(popup)
+            box=popup.bounding_box()
+            self.assertLessEqual(abs(box["x"]+box["width"]/2-width/2),2)
+            self.assertLessEqual(box["height"],height*.8+2)
+        popup.locator(".mac-option").first.tap()
+        expect(popup).to_be_hidden()
+        self.assertEqual(self.page.evaluate("window.choiceTest.clicks"),1)
+        expect(self.page.locator("#option-buttons")).to_be_hidden()
+        # Canceling target selection can restore the same long option list.
+        self.page.evaluate("""async () => {
+            const {SelectStep}=await import('/public/js/marvel/select.js');
+            document.querySelector('#option-buttons .clicked').classList.remove('clicked');
+            SelectStep.restoreStep('effect');
+        }""")
+        expect(popup).to_be_visible()
+        self.page.evaluate("document.getElementById('option-buttons').replaceChildren()")
+        expect(popup).to_be_hidden()
+        # Many short choices also exceed the rail's measured capacity.
+        self.page.evaluate("() => window.choiceTest.render(Array.from({length:14},(_,i)=>'능력 '+i))")
+        expect(popup).to_be_visible()
+        self.assertTrue(popup.locator(".mac-list").evaluate("el => el.scrollHeight > el.clientHeight"))
+        self.page.evaluate("document.getElementById('option-buttons').replaceChildren()")
+        expect(popup).to_be_hidden()
+        self.assertEqual(self.errors, [])
+
     def test_ko_status_and_statistics(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
