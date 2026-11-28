@@ -226,3 +226,20 @@ export function normalizeKoCardText(value: string): string {
                 return '피해를 '+verbs[verb];
             });
 }
+
+// Imported fan translation only: conservative, explicitly reviewed spellings.
+// Do not apply to physically verified cards or translate generic traits/abilities.
+const importedCharacterNames: ReadonlyArray<readonly [RegExp,string]> = [
+    [/스파이더[- ]?맨/g, 'Spider-Man'],
+    [/피터 ?파커/g, 'Peter Parker'],
+    [/닥터 ?스트레인지/g, 'Doctor Strange'],
+    [/스티븐 ?스트레인지/g, 'Stephen Strange'],
+    [/고스트[- ]?스파이더/g, 'Ghost-Spider'],
+    [/그웬 ?스테이시/g, 'Gwen Stacy'],
+    [/블랙 ?캣/g, 'Black Cat'],
+    [/닉 ?퓨리/g, 'Nick Fury']
+];
+
+export function normalizeImportedKoText(value: string): string {
+    return importedCharacterNames.reduce((text, [pattern, name]) => text.replace(pattern, () => name), normalizeKoCardText(value));
+}

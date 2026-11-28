@@ -412,6 +412,33 @@ class MobileRegression(unittest.TestCase):
         self.goto("/artwork")
         expect(self.page.locator("#ko-pack-install")).to_be_visible()
 
+    def test_ko_imported_character_names_batch_one(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {KO_IMPORTED_KEY}=await import('/public/js/marvel/ko-local.js');
+            const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
+            const {normalizeImportedKoText}=await import('/public/js/marvel/ko-glossary.js');
+            const sample='닥터 스트레인지 카드. 스파이더맨, 피터 파커, 스티븐 스트레인지, 고스트 스파이더, 그웬 스테이시, 블랙 캣, 닉 퓨리. 버린 더미. 스파이더센스. 거미줄 날아차기.';
+            const before=koCard('01001a').text;
+            const saved=localStorage.getItem(KO_IMPORTED_KEY);
+            try {
+                localStorage.setItem(KO_IMPORTED_KEY, JSON.stringify({'09001b':{name:'Stephen Strange',text:sample},'01001a':{name:'오류',text:'틀린 번역'}}));
+                refreshKoCards();
+                const normalized=normalizeImportedKoText(sample);
+                return {text:koCard('09001b').text, source:koCardSource('09001b'),
+                    verified:koCard('01001a').text===before && koCardSource('01001a')==='verified',
+                    idempotent:normalizeImportedKoText(normalized)===normalized};
+            } finally {
+                if(saved===null)localStorage.removeItem(KO_IMPORTED_KEY);
+                else localStorage.setItem(KO_IMPORTED_KEY,saved);
+                refreshKoCards();
+            }
+        }""")
+        self.assertEqual(result["text"], "Doctor Strange 카드. Spider-Man, Peter Parker, Stephen Strange, Ghost-Spider, Gwen Stacy, Black Cat, Nick Fury. 버린 카드 더미. 스파이더센스. 거미줄 날아차기.")
+        self.assertEqual(result["source"], "imported")
+        self.assertTrue(result["verified"])
+        self.assertTrue(result["idempotent"])
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

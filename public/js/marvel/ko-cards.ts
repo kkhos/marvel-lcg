@@ -1,5 +1,5 @@
 import { readKoCache, readImportedKoCache } from './ko-local.js';
-import { normalizeKoCardText } from './ko-glossary.js';
+import { normalizeKoCardText, normalizeImportedKoText } from './ko-glossary.js';
 import { bundledKo } from './ko-bundled.js';
 import { goblinDraft } from './ko-goblin.js';
 import { coreEncounterDraft } from './ko-core-encounter.js';
@@ -321,7 +321,7 @@ export function refreshKoCards() {
     const community = !verified && !fromPack && Object.prototype.hasOwnProperty.call(localCards,id);
     const entry = (verified ? draftCards[id] : fromPack ? imported[id] : community ? localCards[id] : draftCards[id]) ?? localCards[id];
     if (!entry) continue;
-    normalizedCards[id] = {name:verifiedNames[id] ?? entry.name, text:entry.text === undefined ? undefined : (community ? entry.text : normalizeKoCardText(entry.text))};
+    normalizedCards[id] = {name:verifiedNames[id] ?? entry.name, text:entry.text === undefined ? undefined : (community ? entry.text : fromPack ? normalizeImportedKoText(entry.text) : normalizeKoCardText(entry.text))};
     sources[id] = verified ? 'verified' : fromPack ? 'imported' : community ? 'community' : 'draft';
     }
 }
