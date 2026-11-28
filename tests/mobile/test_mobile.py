@@ -1,5 +1,6 @@
 """Mobile landscape UI regression with a real local Python game server."""
 import os
+import json
 import re
 import time
 import unittest
@@ -852,6 +853,36 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["count"], 30)
         self.assertEqual(result["verified"], ["공중","과학","기술","AVENGER","DEFENDER","S.H.I.E.L.D.","S.H.I.E.L.D.","용병 히어로","천재","신비술사","주문","저지","유물","CHAMPION","INHUMAN","방어","MASTERS OF EVIL","WEB-WARRIOR","간부","하이드라"])
         self.assertEqual(result["pending"], ["X-MEN","GUARDIAN","MUTANT","FUTURE TRAIT","CONSTRUCTOR"])
+
+    def test_ko_rule_trait_inventory(self):
+        self.goto("/main")
+        data=json.loads((Path(__file__).resolve().parents[2] / "data" / "cards.json").read_text(encoding="utf-8"))
+        actual=sorted({trait for pack in data.values() if isinstance(pack,list)
+                       for card in pack if isinstance(card,dict)
+                       for trait in (card.get("traits") or [])})
+        result=self.page.evaluate("""async (actual) => {
+            const {koTraitLabel,koTraitSource,verifiedKoTraits,ruleKoTraits,pendingKoTraits} =
+                await import('/public/js/marvel/ko-traits.js');
+            const verified=Object.keys(verifiedKoTraits), rule=Object.keys(ruleKoTraits),
+                pending=Object.keys(pendingKoTraits);
+            const all=[...verified,...rule,...pending];
+            return {counts:[verified.length,rule.filter(t=>ruleKoTraits[t]===t).length,
+                rule.filter(t=>ruleKoTraits[t]!==t).length,pending.length],
+                missing:actual.filter(t=>!all.includes(t)),
+                stale:all.filter(t=>!actual.includes(t)),
+                overlap:all.length-new Set(all).size,
+                wrongVerified:verified.filter(t=>koTraitLabel(t)!==verifiedKoTraits[t]||koTraitSource(t)!=='verified'),
+                wrongRule:rule.filter(t=>koTraitLabel(t)!==ruleKoTraits[t]||koTraitSource(t)!=='rule'),
+                wrongPending:pending.filter(t=>koTraitLabel(t)!==t||koTraitSource(t)!=='pending'),
+                labels:['t_x-men','t_mutant','t_black_order','t_guardian','t_outlaw','t_weapon','t_hydra','t_invocation','t_chase','t_trap','t_psionic','constructor','future_trait'].map(koTraitLabel),
+                sources:['t_x-men','t_mutant','t_hydra','t_psionic','constructor','future_trait'].map(koTraitSource)};
+        }""", actual)
+        self.assertEqual(result["counts"], [30,55,129,23])
+        for key in ["missing","stale","wrongVerified","wrongRule","wrongPending"]:
+            self.assertEqual(result[key], [], key)
+        self.assertEqual(result["overlap"],0)
+        self.assertEqual(result["labels"], ["X-MEN","MUTANT","BLACK ORDER","GUARDIAN","무법자","무기","하이드라","비술","추격!","함정!","PSIONIC","CONSTRUCTOR","FUTURE TRAIT"])
+        self.assertEqual(result["sources"], ["rule","rule","verified","pending","unknown","unknown"])
 
     def test_ko_bundled_module(self):
         self.goto("/main")
