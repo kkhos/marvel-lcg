@@ -40,8 +40,17 @@ export class MobileAbilityChoices {
         // Never dismiss the mandatory choice by Escape or tapping the backdrop.
         dialog.addEventListener('cancel', e => {
             e.preventDefault();
+            e.stopImmediatePropagation();
             this.requestCancel();
         });
+        // Existing global Escape shortcuts can cancel/reset the engine prompt
+        // before the native dialog cancel event. Own Escape while this modal is open.
+        window.addEventListener('keydown', e => {
+            if (!dialog.open || e.key !== 'Escape') return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            this.requestCancel();
+        }, true);
         dialog.addEventListener('contextmenu', e => e.preventDefault());
         dialog.addEventListener('selectstart', e => e.preventDefault());
         dialog.addEventListener('close', () => this.schedule());

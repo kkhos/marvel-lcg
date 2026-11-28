@@ -680,3 +680,68 @@ body.mobile-layout #option-buttons.mac-popup-active { visibility: hidden; }
 #mobile-ability-choice-dialog button img { max-width: 100%; max-height: 23dvh; object-fit: contain; }
 #mobile-ability-choice-dialog .mac-cancel { color: #f5d681; }
 #mobile-ability-choice-dialog button[hidden] { display: none !important; }
+
+
+/* Mobile card focus: geometry is presentation-only, leaving engine card IDs,
+   areas, target highlights, drag handlers and desktop transforms unchanged. */
+body.mobile-layout #scene .card .info > div:has(>span.trait) { display:none!important; }
+body.mobile-layout[data-card-focus="player"] #player-all-hand-cards,
+body.mobile-layout:not([data-card-focus="off"])[data-selection-step="cost"] #player-all-hand-cards {
+    --focus-hand-scale: 1.76; --focus-hand-spread: 1;
+}
+body.mobile-layout:is([data-card-focus="player"],[data-selection-step="cost"]):not([data-card-focus="off"])
+    #player-all-hand-cards:is([data-focus-count="1"],[data-focus-count="2"],[data-focus-count="3"],[data-focus-count="4"]) {
+    --focus-hand-scale: 1.92;
+}
+body.mobile-layout:is([data-card-focus="player"],[data-selection-step="cost"]):not([data-card-focus="off"])
+    #player-all-hand-cards:has(> .card:nth-child(7 of .card:not(.hide))) {
+    --focus-hand-scale: 1.44; --focus-hand-spread: .5;
+}
+body.mobile-layout:is([data-card-focus="player"],[data-selection-step="cost"]):not([data-card-focus="off"])
+    #player-all-hand-cards:has(> .card:nth-child(10 of .card:not(.hide))) {
+    --focus-hand-scale: 1.22; --focus-hand-spread: 0;
+}
+/* If both upper player rows are occupied, reserve their vertical space. */
+body.mobile-layout[data-card-focus="player"]:has(#player-all-allies > .card:not(.hide)):has(#player-all-supports > .card:not(.hide))
+    #player-all-hand-cards { --focus-hand-scale: 1.42; }
+body.mobile-layout #player-all-hand-cards .card,
+body.mobile-layout #player-all-hand-cards:hover .card {
+    transform: translate3d(calc(var(--left) + var(--focus-hand-offset,0px) * var(--focus-hand-spread,0)),var(--top),var(--t-z))
+        rotate(calc(var(--hand-angle,0deg) * (1 - var(--focus-hand-spread,0) * .6))) scale(var(--focus-hand-scale,1.22));
+    transform-origin: center bottom;
+}
+body.mobile-layout #player-all-hand-cards .card.selected {
+    transform: translate3d(calc(var(--left) + var(--focus-hand-offset,0px) * var(--focus-hand-spread,0)),calc(var(--top) - 20px),var(--t-z))
+        rotate(0) scale(var(--focus-hand-scale,1.22));
+}
+body.mobile-layout[data-card-focus="player"] #scene :is(#player-all-area-hero,#player-all-allies,#player-all-supports) > .card:not(.hide):not(.moving) {
+    --focus-board-scale: 1.23; --focus-board-rise: -50px;
+}
+body.mobile-layout[data-card-focus="player"] #scene #player-all-area-hero > .card:not(.hide):not(.moving) {
+    --focus-board-rise: -105px;
+}
+body.mobile-layout[data-card-focus="player"]:has(#player-all-allies > .card:not(.hide)):has(#player-all-supports > .card:not(.hide))
+    #scene :is(#player-all-area-hero,#player-all-allies,#player-all-supports) > .card:not(.hide):not(.moving) {
+    --focus-board-scale: 1.08; --focus-board-rise: -25px;
+}
+body.mobile-layout[data-card-focus="player"] #scene :is(#player-all-area-hero,#player-all-allies,#player-all-supports)
+    :is(.card:nth-child(5 of .card:not(.hide)),.card:has(~ .card:nth-child(5 of .card:not(.hide)))) {
+    --focus-board-scale: 1.08;
+}
+body.mobile-layout[data-card-focus="villain"] #scene :is(#area-villain,#player-all-engaged-minions) > .card:not(.hide):not(.moving),
+body.mobile-layout:not([data-card-focus="off"])[data-selection-step="target"] #scene :is(#area-villain,#player-all-engaged-minions) > .card.highlight-targets:not(.hide):not(.moving) {
+    --focus-board-scale: 1.28;
+}
+body.mobile-layout[data-card-focus="villain"] #scene :is(#area-schemes-main,#area-schemes-side) > .card:not(.hide):not(.moving) {
+    --focus-board-scale: 1.12;
+}
+body.mobile-layout #scene :is(#player-all-area-hero,#player-all-allies,#player-all-supports,#area-villain,#player-all-engaged-minions,#area-schemes-main,#area-schemes-side)
+    > .card:not(.moving) {
+    transform: translate3d(var(--left),calc(var(--top) + var(--focus-board-rise,0px)),var(--t-z)) scale(var(--focus-board-scale,1));
+    transform-origin: center center;
+}
+body.mobile-layout #scene #area-villain > .card {transform-origin: center top}
+body.mobile-layout #scene :is(#area-schemes-main,#area-schemes-side) > .card {transform-origin: right center}
+@media(prefers-reduced-motion:reduce) {
+    body.mobile-layout #scene .card {transition-duration:0s!important}
+}

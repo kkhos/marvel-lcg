@@ -2,6 +2,7 @@ import { koCard, koCardSource } from './ko-cards.js';
 import { koStatusCard } from './ko-status.js';
 import { koTraitLabel } from './ko-traits.js';
 import { MobileAbilityChoices } from './mobile-ability-choices.js';
+import { MobileCardFocus } from './mobile-card-focus.js';
 import { Cards } from './cards.js';
 import { ClassName } from './class_name.js';
 import { Effect } from './effect.js';
@@ -24,6 +25,7 @@ export class TouchControls {
     }
 
     static init() {
+        MobileCardFocus.init();
         const style = document.createElement('style');
         style.textContent = `
             #scene .card { touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
@@ -340,6 +342,7 @@ export class TouchControls {
             sidebar.classList.add('mobile-settings-controls');
             document.body.append(sidebarHandle, settings);
             settings.append(header, sidebar);
+            sidebar.append(MobileCardFocus.toggleButton());
             sidebarHandle.setAttribute('role', 'button');
             sidebarHandle.setAttribute('tabindex', '0');
             sidebarHandle.setAttribute('aria-expanded', 'false');

@@ -42,12 +42,17 @@ export class MoveCard {
         const sceneWidth = parseFloat(MoveCard.rootStyles.getPropertyValue('--scene-width'));
         if (parent.id === 'player-all-hand-cards' && document.body.classList.contains('mobile-layout')) {
             const n = shown_cards_els.length;
+            parent.dataset.focusCount = String(n);
             const step = Math.min(192, Math.max(0, sceneWidth - 760) / Math.max(1, n - 1));
             shown_cards_els.forEach((card, i) => {
                 const d = n > 1 ? (i - (n - 1) / 2) / ((n - 1) / 2) : 0;
                 card.style.setProperty('--x', String(Math.round((sceneWidth - MoveCard.cardWidth) / 2 + (i - (n - 1) / 2) * step)));
                 card.style.setProperty('--y', String(Math.round(877 + 4 * d * d)));
                 card.style.setProperty('--hand-angle', `${d * 10}deg`);
+                // Reserve room for left decks/right controls and keep hand cards
+                // centered. Only the mobile focus transform consumes this delta.
+                const expandedStep = Math.min(282, Math.max(0, sceneWidth - 980) / Math.max(1, n - 1));
+                card.style.setProperty('--focus-hand-offset', `${Math.round((i - (n - 1) / 2) * Math.max(0, expandedStep - step))}px`);
             });
             return;
         }

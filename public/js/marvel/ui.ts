@@ -1,5 +1,6 @@
 import { koText, koHtml, koLabel } from "./ko-game.js";
 import { MobilePrompt, progressSummary, type PromptSummary } from "./mobile-prompt.js";
+import { MobileCardFocus } from "./mobile-card-focus.js";
 import { ButtonSetting, Setting } from './settings.js'
 import { Game } from './game.js'
 import { Effect } from './effect.js'
@@ -543,6 +544,7 @@ export class UI {
             phase_text = Game.world_descriptor.phase
         }
 
+        MobileCardFocus.setPhase(phase_text)
         let waiting = false
 
         if( !UI.please_wait && UI.last_phase_text == phase_text) {

@@ -142,6 +142,41 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(self.errors, [])
         self.screenshot("home-redesign")
 
+    def test_mobile_dynamic_card_focus(self):
+        self.start_game()
+        result=self.page.evaluate("""async () => {
+            const {MobileCardFocus}=await import('/public/js/marvel/mobile-card-focus.js');
+            const {SelectStep}=await import('/public/js/marvel/select.js');
+            const hand=document.getElementById('player-all-hand-cards');
+            const card=hand.querySelector('.card:not(.hide)');
+            if(!card) throw new Error('No visible hand card');
+            const original=card.dataset.id;
+            const step=SelectStep.getStep();
+            const count=hand.dataset.focusCount;
+            const button=document.getElementById('mobile-dynamic-card-focus');
+            const scale=()=>Number(getComputedStyle(hand).getPropertyValue('--focus-hand-scale'))||1.22;
+            SelectStep.restoreStep('card');
+            MobileCardFocus.setPhase('Player 1 Turn');
+            const player=scale(), phase=document.body.dataset.cardFocus;
+            MobileCardFocus.setPhase('Enemy Activation');
+            const villain=scale();
+            SelectStep.restoreStep('cost');
+            const cost=scale();
+            button.click();
+            const off=scale(), offPhase=document.body.dataset.cardFocus;
+            button.click();
+            MobileCardFocus.setPhase('Resolve Mulligans');
+            SelectStep.restoreStep(step);
+            return {player,phase,villain,cost,off,offPhase,original,after:card.dataset.id,count};
+        }""")
+        self.assertEqual(result["phase"], "player")
+        self.assertGreater(result["player"], result["villain"])
+        self.assertGreater(result["cost"], result["villain"])
+        self.assertEqual(result["offPhase"], "off")
+        self.assertEqual(result["off"], 1.22)
+        self.assertEqual(result["original"], result["after"])
+        self.assertEqual(self.errors, [])
+
     def test_mobile_long_ability_choices(self):
         self.start_game()
         self.page.evaluate("""async () => {
