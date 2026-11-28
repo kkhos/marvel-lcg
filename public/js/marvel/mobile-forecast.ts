@@ -12,6 +12,7 @@ export function forecastText(world: WorldDescriptor) {
     const icons = schemes.reduce((n,c)=>n+(stat(c,'acceleration_icon')??0),0);
     const tokens = schemes.reduce((n,c)=>n+(stat(c,'k_acceleration_token')??0),0);
     const hazards = schemes.reduce((n,c)=>n+(stat(c,'hazard')??0),0);
+    const encounterCount = players.length + hazards;
     const lines = players.map((p,i)=>{
         const hero=p.area_hero.find(c=> (c.card_type==='Hero'||c.card_type==='AlterEgo') && unit(c));
         const key=hero?.card_type==='AlterEgo'?'scheme':'attack';
@@ -24,12 +25,12 @@ export function forecastText(world: WorldDescriptor) {
     });
     const threatLabel=threat===undefined?'위협 ?':'위협 +'+threat;
     const attack=lines.length===1 && lines[0].base!==undefined ? lines[0].kind+' '+lines[0].base+'+★' : '활성화 확인';
-    return {summary: threatLabel+' · '+attack+' · 조우 '+players.length,
+    return {summary: threatLabel+' · '+attack+' · 조우 '+encounterCount,
         details: [
             '주요 음모의 기본 위협 증가: '+(threat===undefined?'확인 필요': '+'+threat),
             '공개된 가속 아이콘 '+icons+' · 가속 토큰 '+tokens+' (기본값에 별도 반영되는지는 시나리오 규칙에 따름)',
             ...lines.map(l=>l.label+' · '+l.kind+' '+(l.detail||'확인 필요')+' · 교전 하수인 '+l.minions+'명'),
-            '조우 카드 기본 '+players.length+'장 · 공개된 위험 아이콘 '+hazards+'개',
+            '조우 카드 기본 '+players.length+'장 · 공개된 위험 아이콘 '+hazards+'개 · 총 '+encounterCount+'장',
             '기본 규칙과 현재 공개 정보 기준. 강화 카드, 상태 카드, 추가 활성화 및 시나리오 특수 효과는 결과를 바꿀 수 있습니다.'
         ]};
 }
