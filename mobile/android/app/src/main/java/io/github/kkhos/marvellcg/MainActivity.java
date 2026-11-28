@@ -54,7 +54,8 @@ public class MainActivity extends Activity {
     private boolean splashFading;
     private boolean closing;
     private String shownDiagnostic = "";
-    private static final String UI_REVISION = "43";
+    // Every APK version updates the bundled UI, including existing installations.
+    private static final String UI_REVISION = "apk-" + BuildConfig.VERSION_CODE;
     private String loadedUrl = "";
 
     @Override public void onCreate(Bundle saved) {
@@ -347,6 +348,7 @@ public class MainActivity extends Activity {
             while ((entry = zip.getNextEntry()) != null) {
                 if (uiOnly && !entry.getName().startsWith("public/")
                         && !entry.getName().equals("engine/device/web/server/server_new_game.py")
+                        && !entry.getName().equals("engine/device/web/server/server_get.py")
                         && !entry.getName().equals("engine/device/web/server/server_files.py")
                         && !entry.getName().equals("engine/network/net_lib.py")
                         && !entry.getName().equals("engine/network/web_server.py")) {

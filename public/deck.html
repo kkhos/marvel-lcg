@@ -760,6 +760,30 @@ async function importDeck() {
 <script src="/public/js/lib/sortable.js"></script>
 
 <script>
+    let deckDragSnapshot = null;
+    function beginDeckDrag() {
+        deckDragSnapshot = {player_deck:[...hero_data.player_deck],side_deck:[...hero_data.side_deck]};
+    }
+    function finishDeckDrag() {
+        const snapshot = deckDragSnapshot;
+        deckDragSnapshot = null;
+        if (!snapshot) return;
+        const read = id => Array.from(document.getElementById(id).children)
+            .filter(el=>el.matches('.image-div[data-card-id]')).map(el=>el.dataset.cardId);
+        const before = [...snapshot.player_deck,...snapshot.side_deck].sort();
+        const after = [...read('player_deck_images'),...read('side_deck_images')].sort();
+        // Drag may change order or zone, never the card multiset. Reject clones,
+        // invalid IDs and missing cards rather than silently persisting corruption.
+        if (after.length !== before.length || after.some((id,i)=>!validDeckCardId(id)||id!==before[i])) {
+            Object.assign(hero_data,snapshot);
+            const name=document.getElementById('deck-name').value;
+            showDeckCards();
+            document.getElementById('deck-name').value=name;
+            document.getElementById('deck-cleanup-status').textContent='잘못된 드래그를 취소했습니다. 카드 수량은 유지됩니다.';
+            return;
+        }
+        updatePeekedCardsString();
+    }
     function updatePeekedCardsString() {
         for (const [key,container,field] of [['player_deck','player_deck_images','slots'],['side_deck','side_deck_images','side_deck']]) {
             const zone=document.getElementById(container);
@@ -781,7 +805,8 @@ async function importDeck() {
             ...(mobile ? {handle:'.deck-drag-handle',delay:100,delayOnTouchOnly:true,touchStartThreshold:4} : {}),
             // Sortable fires onAdd and onEnd for a cross-zone move. Commit once,
             // after the original node has moved, without rebuilding the DOM.
-            onEnd:function(){updatePeekedCardsString();}
+            onStart:beginDeckDrag,
+            onEnd:finishDeckDrag
         };
         Sortable.create(document.getElementById('player_deck_images'),config);
         Sortable.create(document.getElementById('side_deck_images'),config);

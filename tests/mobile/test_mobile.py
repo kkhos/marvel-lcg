@@ -407,6 +407,15 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["titles"], ["천둥강타","강화하다!","길을 비켜라"])
         self.assertEqual(result["names"], ["Wrecker","Thunderball","Piledriver","Bulldozer"])
 
+    def test_apk_update_refreshes_ui_and_deck_server(self):
+        root=Path(__file__).resolve().parents[2]
+        source=(root/'mobile/android/app/src/main/java/io/github/kkhos/marvellcg/MainActivity.java').read_text(encoding='utf-8')
+        gradle=(root/'mobile/android/app/build.gradle').read_text(encoding='utf-8')
+        self.assertIn('UI_REVISION = "apk-" + BuildConfig.VERSION_CODE',source)
+        self.assertIn('buildConfig true',gradle)
+        self.assertIn('engine/device/web/server/server_get.py',source)
+        self.assertIn('!entry.getName().startsWith("public/")',source)
+
     def test_deck_editor_no_null_growth(self):
         self.goto("/deck")
         self.assertEqual(self.page.evaluate("document.characterSet"), "UTF-8")
@@ -432,6 +441,40 @@ class MobileRegression(unittest.TestCase):
             }""")
         expect(main).to_have_count(25)
         expect(side).to_have_count(0)
+        # Exercise the real touch Sortable path, not just DOM moves.
+        self.page.locator('#main-deck-section').evaluate(
+            "(el) => { el.scrollIntoView({block:'start'}); window.scrollBy(0,-90); }")
+        before = self.page.evaluate("hero_data.player_deck.slice()")
+        handle = main.first.locator('.deck-drag-handle')
+        handle.scroll_into_view_if_needed()
+        source = handle.bounding_box()
+        target = main.nth(2).bounding_box()
+        self.assertIsNotNone(source)
+        self.assertIsNotNone(target)
+        sx, sy = source['x']+source['width']/2, source['y']+source['height']/2
+        tx, ty = target['x']+target['width']*.8, target['y']+target['height']/2
+        cdp = self.context.new_cdp_session(self.page)
+        try:
+            cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':sx,'y':sy}]})
+            self.page.wait_for_timeout(180)
+            for i in range(1,13):
+                cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':sx+(tx-sx)*i/12,'y':sy+(ty-sy)*i/12}]})
+                self.page.wait_for_timeout(25)
+            cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
+        finally:
+            cdp.detach()
+        self.page.wait_for_function("before => JSON.stringify(hero_data.player_deck) !== JSON.stringify(before)", arg=before)
+        self.assertCountEqual(self.page.evaluate("hero_data.player_deck"),before)
+        expect(main).to_have_count(25)
+        # Simulate an unexpected duplicate left by a drag implementation.
+        self.page.evaluate("""() => {
+            beginDeckDrag();
+            const zone=document.getElementById('player_deck_images');
+            zone.append(zone.firstElementChild.cloneNode(true));
+            finishDeckDrag();
+        }""")
+        expect(main).to_have_count(25)
+        self.assertCountEqual(self.page.evaluate("hero_data.player_deck"),before)
         main.first.locator('[data-deck-action=move]').tap()
         expect(main).to_have_count(24)
         expect(side).to_have_count(1)
