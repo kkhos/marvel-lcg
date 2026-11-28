@@ -38,8 +38,11 @@ export class CardImages {
     static setBackground(element: HTMLElement, property: string, source: string, detectOrientation = false): void {
         this.bind(element, property, source, url => {
             const value = url ? `url("${url}")` : 'none';
-            const unchanged = element.style.getPropertyValue(property) === value;
+            const previous = element.style.getPropertyValue(property);
             element.style.setProperty(property, value);
+            // Compare the browser's serialized CSS value, which may normalize quotes.
+            const applied = element.style.getPropertyValue(property);
+            const unchanged = previous === applied;
             if (!detectOrientation) return;
             if (unchanged && element.hasAttribute('data-art-orientation') && url) return;
             element.removeAttribute('data-art-orientation');
@@ -59,7 +62,7 @@ export class CardImages {
                 this.orientations.set(url, orientation);
             }
             void orientation.then(result => {
-                if (element.style.getPropertyValue(property) === value)
+                if (element.style.getPropertyValue(property) === applied && element.dataset.artOrientation === 'pending')
                     element.dataset.artOrientation = result;
             });
         });

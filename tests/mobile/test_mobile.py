@@ -146,8 +146,9 @@ class MobileRegression(unittest.TestCase):
         self.start_game()
         self.page.evaluate("""async () => {
             const {CardImages}=await import('/public/js/module/card_images.js');
-            const {HoverCard}=await import('/public/js/marvel/hover.js');
-            const {CardAnimation}=await import('/public/js/marvel/card_animation.js');
+            // Use the live application's center reveal entry point, not an
+            // imported animation module's mutable static state.
+            const HoverCard=window.HoverCard;
             const make=(w,h)=>{
                 const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
                 const ctx=canvas.getContext('2d');ctx.fillStyle='#c4a97e';ctx.fillRect(0,0,w,h);
@@ -158,11 +159,15 @@ class MobileRegression(unittest.TestCase):
             if(!scheme)throw new Error('No main scheme');
             const face=scheme.querySelector('.face');
             CardImages.setBackground(face,'--bg-image-true',art,true);
-            const old=CardAnimation.animation_name;
-            CardAnimation.animation_name='center_flip';
-            HoverCard.center_preview.preview_container.classList.remove('display-none');
-            HoverCard.show('url("'+art+'")','Test Scheme','EncounterSideScheme','', '1','',false);
-            CardAnimation.animation_name=old;
+            const showCenter=(source)=>{
+                const old=scheme.style.getPropertyValue('--bg-image-true');
+                scheme.style.setProperty('--bg-image-true','url("'+source+'")');
+                try {
+                    HoverCard.center_preview.preview_container.classList.remove('display-none');
+                    HoverCard.center_preview.set(scheme);
+                } finally { scheme.style.setProperty('--bg-image-true',old); }
+            };
+            showCenter(art);
             const unit=document.querySelector('#area-villain .card:not(.hide)');
             const info=unit.querySelector('.info');
             const keyword=document.createElement('div');keyword.id='test-quickstrike';
@@ -170,11 +175,7 @@ class MobileRegression(unittest.TestCase):
             const counter=document.createElement('div');counter.id='test-keyword-counter';
             counter.innerHTML='<span>2x</span><span class="quickstrike counter">test</span>';
             info.append(keyword,counter);
-            window.orientationTest={face,scheme,portrait,showPortrait:()=>{
-                const prev=CardAnimation.animation_name;CardAnimation.animation_name='center_flip';
-                HoverCard.show('url("'+portrait+'")','Test Scheme','EncounterSideScheme','', '1','',false);
-                CardAnimation.animation_name=prev;
-            }};
+            window.orientationTest={face,scheme,portrait,showPortrait:()=>showCenter(portrait)};
         }""")
         preview=self.page.locator("#image-preview-div-center .image-preview")
         expect(preview).to_have_attribute("data-art-orientation","landscape")
@@ -194,8 +195,10 @@ class MobileRegression(unittest.TestCase):
         expect(preview).to_have_attribute("data-art-orientation","portrait")
         self.page.wait_for_function("""() => {
             const p=document.querySelector('#image-preview-div-center .image-preview');
-            return getComputedStyle(p).rotate==='90deg';
+            return getComputedStyle(p).rotate==='90deg' &&
+                p.getBoundingClientRect().width>p.getBoundingClientRect().height;
         }""")
+        self.bounds(preview)
         self.assertEqual(self.errors, [])
 
     def test_mobile_dynamic_card_focus(self):

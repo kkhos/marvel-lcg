@@ -65,7 +65,7 @@ export class HoverCard{
             CenterPreview.has_image = true
             let bg_image = card_div.style.getPropertyValue('--bg-image-true')
             // HoverCard.setTilt(card_div, false, true)
-            HoverCard.set2(card_div, bg_image)
+            HoverCard.set2(card_div, bg_image, CenterPreview.preview_center)
         }
 
         static hide() {
@@ -260,13 +260,13 @@ export class HoverCard{
         }
     }
 
-    static set2(card_div: HTMLElement, bg_image: string) {
+    static set2(card_div: HTMLElement, bg_image: string, target?: HTMLElement) {
         const card_id = /url\((.*?)\)$/.exec(bg_image)![1].replace(/"/g, '')
 
-        HoverCard.set3(card_div, card_id)
+        HoverCard.set3(card_div, card_id, target)
     }
 
-    static set3(card_div: HTMLElement, card_id: string) {
+    static set3(card_div: HTMLElement, card_id: string, target?: HTMLElement) {
         let rotate_times = ""
         let debug_text = ""
         let is_new = false
@@ -292,7 +292,7 @@ export class HoverCard{
             text = Lib.game.cleanResText(text)
             type = card.card_type
         }
-        HoverCard.show(`url("${card_id}")`, name, type, text, rotate_times, debug_text, is_new)
+        HoverCard.show(`url("${card_id}")`, name, type, text, rotate_times, debug_text, is_new, target)
     }
 
     static set(card_div: HTMLElement|null, is_log=false, forced_bg_image='') {
@@ -382,8 +382,8 @@ export class HoverCard{
         HoverCard.show("", "", "", "", "", "", false)
     }
 
-    static show(bg_image: string, name: string, type: string, text: string, rotate_times: string, debug_text: string, is_new: boolean) {
-        const preview_div = HoverCard.getPreview()
+    static show(bg_image: string, name: string, type: string, text: string, rotate_times: string, debug_text: string, is_new: boolean, target?: HTMLElement) {
+        const preview_div = target ?? HoverCard.getPreview()
         preview_div.classList.remove('opacity')
         HoverCard.is_overlay = false
         if( bg_image ) {
