@@ -356,6 +356,8 @@ export class TouchControls {
                 if (settings.open) { settings.close(); return true; }
                 if (dialog.open) { dialog.close(); return true; }
                 if (pile.open) { pile.close(); return true; }
+                const prompt=document.getElementById('mobile-prompt-dialog') as HTMLDialogElement|null;
+                if(prompt?.open){prompt.close();return true;}
                 const forecast=document.getElementById('mobile-forecast-dialog') as HTMLDialogElement|null;
                 if(forecast?.open){forecast.close();return true;}
                 const result = document.querySelector('#game-over-box-container');

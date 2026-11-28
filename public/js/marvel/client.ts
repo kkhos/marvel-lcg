@@ -16,6 +16,7 @@ import { ErrorDialog } from './error_dialog.js'
 import { MouseSync } from './mouse.js'
 import { FullSearchPresentation } from './full_search_presentation.js'
 import { MobileForecast } from './mobile-forecast.js'
+import { askSummary } from './mobile-prompt.js'
 
 function showRes() {
     let resource_div = ""
@@ -655,9 +656,10 @@ export class Client {
 
                     // effect
                     const div_prompt_text = Effect.response_json_ask.prompt_text
-                    UI.prompt.setPromptText(Client.clean_render_info(div_prompt_text))
                     UI.event_name = Effect.response_json_ask.event_name
                     UI.is_in_play_turn = UI.event_name == "WhenPlayerInTurn"
+                    const promptHtml=Client.clean_render_info(div_prompt_text);
+                    UI.prompt.setPromptText(promptHtml,askSummary(Effect.response_json_ask,Game.world_descriptor.phase,promptHtml),true)
                     Effect.setOptions()
 
                     // CardEffect.updateButtons(options)

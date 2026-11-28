@@ -1,4 +1,5 @@
 import { koText, koHtml, koLabel } from "./ko-game.js";
+import { MobilePrompt, progressSummary, type PromptSummary } from "./mobile-prompt.js";
 import { ButtonSetting, Setting } from './settings.js'
 import { Game } from './game.js'
 import { Effect } from './effect.js'
@@ -148,6 +149,7 @@ class PromptBox {
     private static prompt_box_lock = document.getElementById('prompt-box-lock') as HTMLElement
     private static game_over_text = "<div class='game-over'>--- Game Over ---</div>"
     private static prompt_text     = ""
+    private static mobile_base_summary: PromptSummary|undefined;
 
     static {
         document.querySelector<HTMLElement>('#prompt-box-close')!.onclick = () => {
@@ -187,7 +189,13 @@ class PromptBox {
         // }
     }
 
-    static setPromptText(text: string) {
+    static setPromptText(text: string, summary?: PromptSummary, isAsk=false) {
+        if (document.body.classList.contains("mobile-layout")) {
+            PromptBox.prompt_text=text;
+            PromptBox.mobile_base_summary=summary ?? (isAsk?undefined:progressSummary(Game.world_descriptor?.phase||"",text));
+            PromptBox.setTempPromptText(text,false,PromptBox.mobile_base_summary);
+            return;
+        }
         if( text ) {
             PromptBox.prompt_text = text
             PromptBox.setTempPromptText(text, false)
@@ -196,17 +204,16 @@ class PromptBox {
         }
     }
 
-    static setTempPromptText(text: string, add_on_event=true) {
-        // PromptBox.prompt_text_div.classList.remove('none-events')
+    static setTempPromptText(text: string, add_on_event=true, summary?: PromptSummary) {
+        if(document.body.classList.contains('mobile-layout')) {
+            const full=add_on_event && PromptBox.prompt_text && PromptBox.prompt_text!==text
+                ? PromptBox.prompt_text+"<hr/>"+text : text;
+            MobilePrompt.render(PromptBox.prompt_box_div,PromptBox.prompt_text_div,full,summary,
+                Game.world_descriptor?.phase||'',Game.world_descriptor?.round_id||0);
+            PromptBox.prompt_box_div.classList.remove('hide');
+            return;
+        }
         if( text ) {
-            // Preserve original prompts except for the recognizable mulligan instruction.
-            if(document.body.classList.contains('mobile-layout')) {
-                const translated=koHtml(text);
-                if(/멀리건 처리|resolves mulligans/i.test(translated) && /목표\s*0\s*[~–-]\s*\d+개/.test(translated)) {
-                    const count=translated.match(/목표\s*0\s*[~–-]\s*(\d+)개/)?.[1];
-                    if(count) {text='준비 단계 · 교체할 카드 선택 (0~'+count+'장)';add_on_event=false;}
-                }
-            }
             // add_on_event = false
             const is_in_play_turn = UI.is_in_play_turn
             if( add_on_event && is_in_play_turn ) {
@@ -234,6 +241,10 @@ class PromptBox {
     }
 
     static resetPromptText(hide=false) {
+        if(document.body.classList.contains("mobile-layout") && !hide) {
+            PromptBox.setTempPromptText(PromptBox.prompt_text,false,PromptBox.mobile_base_summary);
+            return;
+        }
         if( UI.is_in_play_turn || hide ) {
             PromptBox.prompt_box_div.classList.add('hide')
         } else {

@@ -594,3 +594,21 @@ body.mobile-layout #mobile-action-confirm #btn-ok {background:#2e6b57;color:#e8f
 body.mobile-layout #mobile-action-confirm #btn-ok.overpay {background:#66552b;color:#f9df95;border-color:#b4a26e}
 body.mobile-layout #mobile-progress-bar #prompt-text {font-weight:600}
 body.mobile-layout #mobile-forecast {flex-basis:clamp(136px,30vw,270px);font-size:11px}
+
+/* Mobile action-first header: fixed existing height, details on demand. */
+body.mobile-layout #mobile-progress-bar #prompt-box-container {padding-right:53px}
+body.mobile-layout #mobile-progress-bar #prompt-text:has(.mobile-prompt-summary) {height:100%;display:flex;align-items:center;overflow:hidden}
+body.mobile-layout .mobile-prompt-summary {display:flex;align-items:center;gap:7px;width:100%;min-width:0;line-height:1.25;text-align:left}
+body.mobile-layout .mp-phase {color:#a5e5c6;background:#294838;border-radius:4px;padding:3px 5px;flex:none;white-space:nowrap;font-weight:750;font-size:11px}
+body.mobile-layout .mp-action {font-size:12px;font-weight:750;color:#e8f1eb;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.mobile-layout .mp-context {font-size:10px;color:#afc8b9;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body.mobile-layout .mp-count {color:#f5d681;font-weight:800;flex:none;margin-left:auto;white-space:nowrap;font-variant-numeric:tabular-nums}
+#mobile-prompt-more {position:absolute;top:3px;right:26px;width:25px;height:28px;padding:0;border:1px solid #537764;border-radius:5px;background:#203a2e;color:#dceee4;font:800 17px/1 system-ui;pointer-events:auto}
+#mobile-prompt-more[hidden]{display:none!important}
+#mobile-prompt-dialog {position:fixed;inset:0;margin:auto;width:min(620px,90vw);max-height:85dvh;box-sizing:border-box;background:#172a23;color:#e8f1eb;border:1px solid #83b79a;border-radius:12px;padding:14px;overflow:auto;font:14px/1.5 system-ui,sans-serif}
+#mobile-prompt-dialog::backdrop {background:#0009}
+#mobile-prompt-dialog h2 {font-size:18px;margin:0 0 10px}
+#mobile-prompt-dialog button {background:#30493e;color:#fff;border:1px solid #83b79a;border-radius:7px;padding:8px 18px;min-height:38px;margin-top:12px}
+#mobile-prompt-original {overflow-wrap:anywhere;white-space:normal}
+#mobile-prompt-original img {max-width:100px;max-height:100px}
+body.mobile-layout:has(#game-over-box.active) #mobile-prompt-more {display:none}

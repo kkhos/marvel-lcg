@@ -3,6 +3,7 @@ import { Effect } from './effect.js'
 import { Cards } from './cards.js'
 import { UI } from './ui.js'
 import { BtnOk } from './btn_ok.js'
+import { targetSummary, paymentSummary } from './mobile-prompt.js'
 
 export type SelectStepValue = 'cost' | 'target' | 'effect' | 'card'
 
@@ -75,7 +76,7 @@ export class SelectStep {
             let name = Cards.getSpanText(object_id)
             let effect_name = `${Effect.select_effect_obj.name_with_space}`
             // Select target [
-            UI.prompt.setTempPromptText(`${name} <span class='effect-text'>${effect_name}</span> (목표 ${Effect.select_effect_obj.target_num_range[0]}~${Effect.select_effect_obj.target_num_range[1]}개)<br/>${names.join(", ")}`)
+            UI.prompt.setTempPromptText(`${name} <span class='effect-text'>${effect_name}</span> (목표 ${Effect.select_effect_obj.target_num_range[0]}~${Effect.select_effect_obj.target_num_range[1]}개)<br/>${names.join(", ")}`,true,targetSummary(Effect.select_effect_obj))
         } else {
             BtnOk.setOk('Targets')
             // UI.resetPromptText()
@@ -211,7 +212,7 @@ export class SelectStep {
 
             let cost_text = cost_options.map(cost => cover_res(cost.split(''))).join(" or ")
             let paid_text = cover_res(paid_list_copy)
-            UI.prompt.setTempPromptText(`<span class='cost-text'>Cost</span> [${Cards.getSpanText(object_id)}]<br/>(${paid_text}) / (${cost_text})`)
+            UI.prompt.setTempPromptText(`<span class='cost-text'>Cost</span> [${Cards.getSpanText(object_id)}]<br/>(${paid_text}) / (${cost_text})`,true,paymentSummary(Effect.select_effect_obj,has_cost.length,cost_options,ok,over_pay))
             // console.log(text)
         }
         if( ok ) {

@@ -160,6 +160,28 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["events"], ["효과 처리", "효과 처리 완료", "플레이 영역에 들어옴", "자원으로 사용", "격파"])
         self.assertEqual(result["html"], '<span data-id="Resolved">효과 처리 완료 2회</span>')
 
+    def test_mobile_prompt_summary(self):
+        self.goto("/main")
+        result=self.page.evaluate("""async () => {
+            const {phaseLabel,askSummary,targetSummary,paymentSummary,progressSummary}=await import('/public/js/marvel/mobile-prompt.js');
+            const {EffectDescriptor}=await import('/public/js/marvel/data.js');
+            const e=new EffectDescriptor({name:'Resolve Mulligans',target_num_range:[0,6],all_legal_targets:[1,2,3,4,5,6]});
+            e.selected_targets=[1,2];
+            const custom=new EffectDescriptor({name:'Choose a card with a printed energy resource',target_num_range:[1,1]});
+            const cost=new EffectDescriptor({name:'Play',target_num_range:[0,0]});
+            return {phase:phaseLabel('Player 1 Turn',2),target:targetSummary(e),custom:targetSummary(custom),
+                cost:paymentSummary(cost,2,['3'],false,false),
+                unknown:progressSummary('Enemy Activation','Custom scenario: do not discard this card')===undefined,
+                customAsk:askSummary({event_name:'WhenPlayerChooseAbility',ability_type:'Normal',show_cancel:false,options:[custom]},'Player 1 Turn','Choose a card with a printed energy resource')===undefined};
+        }""")
+        self.assertEqual(result["phase"],"R2 · 플레이어")
+        self.assertEqual(result["target"]["action"],"교체할 카드 선택")
+        self.assertIn("0~6",result["target"]["count"])
+        self.assertEqual(result["cost"]["count"],"2/3")
+        self.assertEqual(result["custom"]["context"],"Choose a card with a printed energy resource")
+        self.assertTrue(result["unknown"])
+        self.assertTrue(result["customAsk"])
+
     def test_ko_dynamic_choices(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
