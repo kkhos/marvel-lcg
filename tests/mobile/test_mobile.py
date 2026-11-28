@@ -418,6 +418,30 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["surge"],"쇄도 · 추가 조우 카드 공개")
         self.assertEqual(self.errors,[])
 
+    def test_mobile_forecast_encounter_total(self):
+        self.goto("/main")
+        result=self.page.evaluate("""async () => {
+            const {forecastText}=await import('/public/js/marvel/mobile-forecast.js');
+            const player={is_eliminated:false,area_hero:[],engaged_enemies:[]};
+            const scheme=(hazard,visible=true)=>({card_type:'EncounterSideScheme',
+                is_face_up:true,isVisible:()=>visible,info:{hazard}});
+            const world={players:[player],area_villain:[],area_schemes_main:[],area_schemes_side:[]};
+            const forecast=()=>forecastText(world);
+            const base=forecast();
+            world.area_schemes_side=[scheme(1)];
+            const one=forecast();
+            world.players=[player,player,{...player,is_eliminated:true}];
+            world.area_schemes_side=[scheme(1),scheme(2),scheme(5,false)];
+            const multiple=forecast();
+            return {base,one,multiple};
+        }""")
+        self.assertTrue(result["base"]["summary"].endswith("조우 1"))
+        self.assertTrue(result["one"]["summary"].endswith("조우 2"))
+        self.assertIn("조우 카드 기본 1장 · 공개된 위험 아이콘 1개 · 총 2장",result["one"]["details"])
+        self.assertTrue(result["multiple"]["summary"].endswith("조우 5"))
+        self.assertIn("조우 카드 기본 2장 · 공개된 위험 아이콘 3개 · 총 5장",result["multiple"]["details"])
+        self.assertEqual(self.errors,[])
+
     def test_mobile_prompt_summary(self):
         self.goto("/main")
         result=self.page.evaluate("""async () => {
