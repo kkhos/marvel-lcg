@@ -383,6 +383,22 @@ class MobileRegression(unittest.TestCase):
         self.assertAlmostEqual(result["ih"], result["h"], delta=1)
         self.assertEqual(result["animation"], "none")
 
+    def test_ko_generated_drone(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {koGeneratedCard}=await import('/public/js/marvel/ko-status.js');
+            const {koTraitLabel}=await import('/public/js/marvel/ko-traits.js');
+            return {drone:koGeneratedCard('Minion','ultron_facedown_drone','Drone Minion',true),
+                notInPlay:koGeneratedCard('Minion','ultron_facedown_drone','Drone Minion',false)===undefined,
+                other:koGeneratedCard('Minion','01143','Advanced Ultron Drone',true)===undefined,
+                trait:koTraitLabel('DRONE')};
+        }""")
+        self.assertEqual(result["drone"]["name"], "드론 하수인")
+        self.assertIn("버린 카드 더미", result["drone"]["text"])
+        self.assertTrue(result["notInPlay"])
+        self.assertTrue(result["other"])
+        self.assertEqual(result["trait"], "드론")
+
     def test_ko_obligation_form_choice(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

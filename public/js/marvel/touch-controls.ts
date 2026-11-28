@@ -1,5 +1,5 @@
 import { koCard, koCardSource } from './ko-cards.js';
-import { koStatusCard } from './ko-status.js';
+import { koStatusCard, koGeneratedCard } from './ko-status.js';
 import { koTraitLabel } from './ko-traits.js';
 import { MobileCardFocus } from './mobile-card-focus.js';
 import { Cards } from './cards.js';
@@ -122,19 +122,21 @@ export class TouchControls {
         let previewId = '', previewName = '', previewType = '';
         let liveDescription = '';
         let previewInfo:Record<string,number>={};
+        let previewGenerated: ReturnType<typeof koGeneratedCard>;
         function updateDescription() {
             const id = showingBack ? previewBack : previewId;
             live.textContent=showingBack?'':liveDescription;
             // Never infer or reveal a hidden card's name from its object ID.
             const status = showingBack ? undefined : koStatusCard(previewType, previewName);
-            const translated = status ?? koCard(id);
+            const generated = showingBack ? undefined : previewGenerated;
+            const translated = status ?? generated ?? koCard(id);
             name.textContent = translated?.name ?? (showingBack ? '뒷면' : previewName);
             const raw = translated?.text ?? (showingBack ? '' : Cards.getText(id));
             const plain = raw.replace(/<hr\s*\/?\s*>/gi,'\n────\n').replace(/<br\s*\/?\s*>/gi,'\n').replace(/<[^>]*>/g,'');
             text.textContent = plain || (translated ? '추가 능력 설명 없음' : '표시할 설명 없음');
             renderRelatedRules(rules,showingBack?[]:relatedRules(Cards.getText(id)||'',plain,previewInfo));
             description.scrollTop=0;
-            source.textContent = status ? '부가 상태 카드 · 정발판 규칙서 대조 완료' : translated?.text !== undefined ? (koCardSource(id) === 'verified' ? '정발판 효과 대조 완료 · 자원 기호는 문자로 표시' : koCardSource(id) === 'imported' ? '추가 한글팩 · 정발판 실물 대조 권장' : koCardSource(id) === 'community' ? 'MarvelCDB 한국어 데이터 · 실물 대조 권장' : koCardSource(id) === 'reprint' ? '재수록 카드 · 원본 번역 적용' : '한국어 번역 초안 · 원본 카드와 대조 권장') : '원문 / 미번역';
+            source.textContent = generated ? '시나리오 특수 카드 · 규칙 안내' : status ? '부가 상태 카드 · 정발판 규칙서 대조 완료' : translated?.text !== undefined ? (koCardSource(id) === 'verified' ? '정발판 효과 대조 완료 · 자원 기호는 문자로 표시' : koCardSource(id) === 'imported' ? '추가 한글팩 · 정발판 실물 대조 권장' : koCardSource(id) === 'community' ? 'MarvelCDB 한국어 데이터 · 실물 대조 권장' : koCardSource(id) === 'reprint' ? '재수록 카드 · 원본 번역 적용' : '한국어 번역 초안 · 원본 카드와 대조 권장') : '원문 / 미번역';
         }
         close.onclick = () => dialog.close();
         dialog.onclick = e => { if (e.target === dialog) dialog.close(); };
@@ -154,10 +156,11 @@ export class TouchControls {
             previewId = data.card_id;
             previewName = data.name;
             previewType = data.card_type;
-            previewFront = data.pic_id;
+            previewGenerated = koGeneratedCard(data.card_type, data.card_id, data.name, data.is_in_play);
+            previewFront = previewGenerated ? (data.down_card_id || data.pic_id) : data.pic_id;
             previewBack = data.down_card_id;
             showingBack = false;
-            flip.hidden = previewType === 'StatusCard' || !previewBack || previewBack === previewFront;
+            flip.hidden = !!previewGenerated || previewType === 'StatusCard' || !previewBack || previewBack === previewFront;
             flip.disabled = flip.hidden;
             window.getSelection()?.removeAllRanges();
             if (!dialog.open) dialog.showModal();
