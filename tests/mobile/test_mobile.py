@@ -951,6 +951,23 @@ class MobileRegression(unittest.TestCase):
                 t.scrollTop = t.scrollHeight;
                 if (t.scrollTop <= 0) throw new Error('Prompt cannot scroll');
                 t.scrollTop = 0;
+                // The same production prompt must center short raw messages,
+                // including inline card links, without clipping long messages.
+                const original = t.innerHTML;
+                try {
+                    t.innerHTML = '<span class="log-card">Rhino</span> 공격 예정';
+                    const short = t.getBoundingClientRect();
+                    const center = r => (r.top+r.bottom)/2;
+                    if (t.scrollHeight > t.clientHeight + 1 || Math.abs(center(short)-center(pr)) > 1)
+                        throw new Error('One-line raw prompt is not vertically centered');
+                    t.innerHTML = '첫 번째 안내<br>두 번째 안내';
+                    const two = t.getBoundingClientRect();
+                    if (t.scrollHeight <= t.clientHeight + 1 && Math.abs(center(two)-center(pr)) > 1)
+                        throw new Error('Two-line prompt that fits is not vertically centered');
+                } finally {
+                    t.innerHTML = original;
+                    t.scrollTop = 0;
+                }
             }""")
             p, o, c = prompt.bounding_box(), options.bounding_box(), ok.bounding_box()
             self.assertLessEqual(p["y"] + p["height"], o["y"] + 1)

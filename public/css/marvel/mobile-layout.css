@@ -289,14 +289,17 @@ body.mobile-layout #mobile-progress-bar #prompt-box-close {
     height: 26px; width: 24px; line-height: 26px;
 }
 
-/* Larger physical cards and a top-aligned, independently scrollable prompt. */
+/* Larger physical cards and a vertically centered, independently scrollable prompt. */
 :root:has(body.mobile-layout) {
     --card-width: 155px;
     --card-height: 214px;
     --scene-height: 1120;
 }
 body.mobile-layout #mobile-progress-bar #prompt-box-container {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
     overflow: hidden;
     padding: 3px 26px 3px 8px;
     cursor: default;
@@ -306,6 +309,8 @@ body.mobile-layout #mobile-progress-bar #prompt-box-container:has(#prompt-box-lo
     pointer-events: auto;
 }
 body.mobile-layout #mobile-progress-bar #prompt-text {
+    flex: 0 1 auto;
+    min-height: 0;
     max-height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
