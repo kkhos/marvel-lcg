@@ -24,125 +24,7 @@ _KO_ZIP = None
 _KO_STAT = None
 _KO_INDEX = {}
 _KO_LIMIT = 256 * 1024 * 1024
-_KO_ID = re.compile(r'^[0-9]{5}[a-z]?
-
-class GameServerFiles(GameServerBase):
-
-    def ImageResponse(self, card_id: str, image_bytes: bytes) -> web.Response:
-        headers = dict(self.HeaderCache)
-        retry_seconds = Cache.GetImageRetrySeconds(card_id)
-        image_state = Cache.GetImageState(card_id)
-        headers['X-Card-Image-State'] = image_state
-        if image_state == 'pending':
-            retry_seconds = 1
-        if retry_seconds is not None:
-            # A valid placeholder is still a failed download. Let the client
-            # replace it automatically, and never cache it as finished artwork.
-            headers['X-Card-Image-Retry-After'] = str(retry_seconds)
-            headers['Cache-Control'] = 'no-store'
-        return web.Response(
-            body=image_bytes,
-            content_type=ImageLib.GetContentType(image_bytes),
-            headers=headers,
-        )
-
-    async def handle_marvel(self, request: web.Request) -> web.StreamResponse:
-        if request.query_string == '':
-            return self.ReadFile('./public/main.html')
-        else:
-            return self.ReadFile('./public/marvel.html')
-
-    async def handle_players_404(self, request: web.Request) -> web.StreamResponse:
-        player = request.match_info.get('player')
-        return web.Response(text=f"Please visiting /?p={player}", status=404)
-
-    def handle_sets_image(self, request: web.Request) -> web.StreamResponse:
-        file_path = request.path
-
-        image_bytes = Cache.LoadImage(file_path)
-
-        return self.ImageResponse(file_path, image_bytes)
-
-    async def get_ko_pack(self, request: web.Request) -> web.Response:
-        try:
-            with _KO_LOCK:
-                return web.json_response(_ko_response(_ko_open()), headers={'Cache-Control': 'no-store'})
-        except (OSError, ValueError, KeyError, zipfile.BadZipFile):
-            return web.json_response({'error': '한글팩을 다시 설치해 주세요.'}, status=400)
-
-    async def import_ko_pack(self, request: web.Request) -> web.Response:
-        origin = urlsplit(request.headers.get('Origin', ''))
-        if origin.scheme not in ('http', 'https') or origin.netloc != request.host or origin.hostname not in ('127.0.0.1', 'localhost', '::1') or request.remote not in ('127.0.0.1', '::1'):
-            return web.json_response({'error': '기기에서 직접 설치해 주세요.'}, status=403)
-        if request.content_length is not None and request.content_length > _KO_LIMIT:
-            return web.json_response({'error': '한글팩이 너무 큽니다.'}, status=413)
-        _KO_PACK.parent.mkdir(parents=True, exist_ok=True)
-        temporary = None
-        try:
-            with tempfile.NamedTemporaryFile(dir=_KO_PACK.parent, suffix='.tmp', delete=False) as file:
-                temporary = file.name
-                size = 0
-                async for chunk in request.content.iter_chunked(256 * 1024):
-                    size += len(chunk)
-                    if size > _KO_LIMIT:
-                        raise ValueError('한글팩이 너무 큽니다.')
-                    file.write(chunk)
-            index = await asyncio.to_thread(_ko_install, temporary)
-            return web.json_response(_ko_response(index), headers={'Cache-Control': 'no-store'})
-        except (OSError, ValueError, KeyError, TypeError, AttributeError, zipfile.BadZipFile) as exc:
-            return web.json_response({'error': str(exc)}, status=400)
-        finally:
-            if temporary and os.path.exists(temporary):
-                os.unlink(temporary)
-
-    def handle_image_request(self, request: web.Request) -> web.StreamResponse:
-        # file_path = request.match_info['path']
-        file_path = request.path
-        file_path = file_path.split("/")[-1]
-
-        # The installed Korean pack overrides only exact card faces; existing
-        # managed images and original engine card definitions remain untouched.
-        korean = _ko_image(file_path)
-        if korean is not None:
-            return web.Response(body=korean, content_type='image/avif', headers={'Cache-Control': 'no-store', 'X-Card-Image-State': 'ready'})
-        image_bytes = Cache.LoadImage(file_path)
-        image_size = len(image_bytes)
-
-        self.device_manager.AddSize("Image", image_size)
-
-        return self.ImageResponse(file_path, image_bytes)
-
-    @override
-    def __init__(self) -> None:
-        super().__init__()
-
-        self.AddDefaultGet()
-        self.AddAwaitGetSecurity('/get_ko_pack', self.get_ko_pack)
-        self.AddPostSecurity('/import_ko_pack', self.import_ko_pack)
-
-        # Home branding is bundled artwork, not a card ID. Register exact
-        # paths before the catch-all card image handler.
-        async def home_logo(request: web.Request) -> web.StreamResponse:
-            response = self.ReadFile('./public/images/home/champions.png')
-            response.headers['Cache-Control'] = 'no-store'
-            return response
-
-        async def home_backdrop(request: web.Request) -> web.StreamResponse:
-            response = self.ReadFile('./public/images/home/doom.webp')
-            response.headers['Cache-Control'] = 'no-store'
-            return response
-
-        self.AddAwaitGetSecurity('/public/images/home/champions.png', home_logo)
-        self.AddAwaitGetSecurity('/public/images/home/doom.webp', home_backdrop)
-
-        self.AddAwaitGetSecurity('/', self.handle_marvel)
-        self.AddAwaitGetSecurity(r'/p={player:\d+}', self.handle_players_404)
-        self.AddAwaitGetSecurity('/watch', self.handle_marvel)
-
-        self.AddNonAwaitGetSecurity(r'/sets/{path:.+}', self.handle_sets_image)
-        self.AddNonAwaitGetSecurity(r'/{path:.+}', self.handle_image_request)
-
-)
+_KO_ID = re.compile(r'^[0-9]{5}[a-z]?$')
 
 def _ko_open():
     """Call with the lock held. Only read the locally validated index."""
@@ -290,11 +172,48 @@ class GameServerFiles(GameServerBase):
 
         return self.ImageResponse(file_path, image_bytes)
 
+    async def get_ko_pack(self, request: web.Request) -> web.Response:
+        try:
+            with _KO_LOCK:
+                return web.json_response(_ko_response(_ko_open()), headers={'Cache-Control': 'no-store'})
+        except (OSError, ValueError, KeyError, zipfile.BadZipFile):
+            return web.json_response({'error': '한글팩을 다시 설치해 주세요.'}, status=400)
+
+    async def import_ko_pack(self, request: web.Request) -> web.Response:
+        origin = urlsplit(request.headers.get('Origin', ''))
+        if origin.scheme not in ('http', 'https') or origin.netloc != request.host or origin.hostname not in ('127.0.0.1', 'localhost', '::1') or request.remote not in ('127.0.0.1', '::1'):
+            return web.json_response({'error': '기기에서 직접 설치해 주세요.'}, status=403)
+        if request.content_length is not None and request.content_length > _KO_LIMIT:
+            return web.json_response({'error': '한글팩이 너무 큽니다.'}, status=413)
+        _KO_PACK.parent.mkdir(parents=True, exist_ok=True)
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=_KO_PACK.parent, suffix='.tmp', delete=False) as file:
+                temporary = file.name
+                size = 0
+                async for chunk in request.content.iter_chunked(256 * 1024):
+                    size += len(chunk)
+                    if size > _KO_LIMIT:
+                        raise ValueError('한글팩이 너무 큽니다.')
+                    file.write(chunk)
+            index = await asyncio.to_thread(_ko_install, temporary)
+            return web.json_response(_ko_response(index), headers={'Cache-Control': 'no-store'})
+        except (OSError, ValueError, KeyError, TypeError, AttributeError, zipfile.BadZipFile) as exc:
+            return web.json_response({'error': str(exc)}, status=400)
+        finally:
+            if temporary and os.path.exists(temporary):
+                os.unlink(temporary)
+
     def handle_image_request(self, request: web.Request) -> web.StreamResponse:
         # file_path = request.match_info['path']
         file_path = request.path
         file_path = file_path.split("/")[-1]
 
+        # The installed Korean pack overrides only exact card faces; existing
+        # managed images and original engine card definitions remain untouched.
+        korean = _ko_image(file_path)
+        if korean is not None:
+            return web.Response(body=korean, content_type='image/avif', headers={'Cache-Control': 'no-store', 'X-Card-Image-State': 'ready'})
         image_bytes = Cache.LoadImage(file_path)
         image_size = len(image_bytes)
 
@@ -307,6 +226,8 @@ class GameServerFiles(GameServerBase):
         super().__init__()
 
         self.AddDefaultGet()
+        self.AddAwaitGetSecurity('/get_ko_pack', self.get_ko_pack)
+        self.AddPostSecurity('/import_ko_pack', self.import_ko_pack)
 
         # Home branding is bundled artwork, not a card ID. Register exact
         # paths before the catch-all card image handler.
