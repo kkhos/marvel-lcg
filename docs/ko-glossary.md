@@ -220,3 +220,65 @@ MarvelCDB 고정 리비전의 twc_encounter.json 카드 면 60개를 비교했�
 ### 추가 한글팩 인물명 교정 1차
 
 추가 한글팩은 비공식 팬 번역 자료로 취급한다. 효과 설명에서 Spider-Man, Peter Parker, Doctor Strange, Stephen Strange, Ghost-Spider, Gwen Stacy, Black Cat, Nick Fury의 명시적인 한글 음역만 영문으로 정규화한다. 미검수 영문 표기 원칙에 따른 표시 교정이며 정발 효과 검수로 승격하지 않는다. 카드 제목, 실물 검증 번역, 카드 이미지, 저장된 원본 ZIP, 게임 엔진은 변경하지 않는다. 기존 용어 정규화와 함께 적용한다.
+
+
+### 추가 한글팩 인물명 교정 2차
+
+히어로/일상 인물명 54종 추가 (1차 포함 62종). 기존 표시 정규화에만 적용한다. 정발 인쇄 확인이 아니라 원문 영문 표기 원칙에 따른 교정이다. 비전, 폭풍, 로그, 헐크, 피닉스 등 일반 단어와 겹치거나 다른 인물명에 포함될 수 있는 짧은 이름은 자동 치환하지 않고 후속 카드별 검수 대상으로 둔다. 실물 검증 카드, 카드 제목, 이미지 및 원본 ZIP은 유지한다.
+
+| 한글 음역 예 | 영문 표기 |
+|---|---|
+| 캡틴 아메리카 | Captain America |
+| 스티브 로저스 | Steve Rogers |
+| 캡틴 마블 | Captain Marvel |
+| 캐럴 댄버스 | Carol Danvers |
+| 아이언맨 | Iron Man |
+| 토니 스타크 | Tony Stark |
+| 블랙 팬서 | Black Panther |
+| 트찰라 | T'Challa |
+| 쉬헐크 | She-Hulk |
+| 제니퍼 월터스 | Jennifer Walters |
+| 미즈 마블 | Ms. Marvel |
+| 카말라 칸 | Kamala Khan |
+| 브루스 배너 | Bruce Banner |
+| 오딘슨 | Odinson |
+| 블랙 위도우 | Black Widow |
+| 나타샤 로마노프 | Natasha Romanoff |
+| 호크아이 | Hawkeye |
+| 클린트 바튼 | Clint Barton |
+| 스파이더 우먼 | Spider-Woman |
+| 제시카 드루 | Jessica Drew |
+| 앤트맨 | Ant-Man |
+| 스콧 랭 | Scott Lang |
+| 와스프 | Wasp |
+| 나디아 반 다인 | Nadia Van Dyne |
+| 퀵실버 | Quicksilver |
+| 피에트로 막시모프 | Pietro Maximoff |
+| 스칼렛 위치 | Scarlet Witch |
+| 완다 막시모프 | Wanda Maximoff |
+| 스타로드 | Star-Lord |
+| 피터 퀼 | Peter Quill |
+| 로켓 라쿤 | Rocket Raccoon |
+| 가모라 | Gamora |
+| 드랙스 | Drax |
+| 그루트 | Groot |
+| 모니카 램보 | Monica Rambeau |
+| 워 머신 | War Machine |
+| 제임스 로즈 | James Rhodes |
+| 마일스 모랄레스 | Miles Morales |
+| 샘 알렉산더 | Sam Alexander |
+| 아이언하트 | Ironheart |
+| 리리 윌리엄스 | Riri Williams |
+| 사이클롭스 | Cyclops |
+| 스콧 서머스 | Scott Summers |
+| 진 그레이 | Jean Grey |
+| 울버린 | Wolverine |
+| 갬빗 | Gambit |
+| 레미 르보 | Remy LeBeau |
+| 키티 프라이드 | Kitty Pryde |
+| 섀도우 캣 | Shadowcat |
+| 오로로 먼로 | Ororo Munroe |
+| 피오트르 라스푸틴 | Piotr Rasputin |
+| 콜로서스 | Colossus |
+| 데드풀 | Deadpool |
+| 웨이드 윌슨 | Wade Wilson |

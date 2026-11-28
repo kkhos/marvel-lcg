@@ -441,6 +441,36 @@ class MobileRegression(unittest.TestCase):
         self.assertTrue(result["verified"])
         self.assertTrue(result["idempotent"])
 
+    def test_ko_imported_character_names_batch_two(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {normalizeImportedKoText}=await import('/public/js/marvel/ko-glossary.js');
+            const {KO_IMPORTED_KEY}=await import('/public/js/marvel/ko-local.js');
+            const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
+            const sample="캡틴 아메리카 · 스티브 로저스 · 캡틴 마블 · 캐럴 댄버스 · 아이언맨 · 토니 스타크 · 블랙 팬서 · 트찰라 · 쉬헐크 · 제니퍼 월터스 · 미즈 마블 · 카말라 칸 · 브루스 배너 · 오딘슨 · 블랙 위도우 · 나타샤 로마노프 · 호크아이 · 클린트 바튼 · 스파이더 우먼 · 제시카 드루 · 앤트맨 · 스콧 랭 · 와스프 · 나디아 반 다인 · 퀵실버 · 피에트로 막시모프 · 스칼렛 위치 · 완다 막시모프 · 스타로드 · 피터 퀼 · 로켓 라쿤 · 가모라 · 드랙스 · 그루트 · 모니카 램보 · 워 머신 · 제임스 로즈 · 마일스 모랄레스 · 샘 알렉산더 · 아이언하트 · 리리 윌리엄스 · 사이클롭스 · 스콧 서머스 · 진 그레이 · 울버린 · 갬빗 · 레미 르보 · 키티 프라이드 · 섀도우 캣 · 오로로 먼로 · 피오트르 라스푸틴 · 콜로서스 · 데드풀 · 웨이드 윌슨";
+            const unchanged='비전, 폭풍, 로그, 헐크, 레드 헐크, 피닉스, 스파이더센스, 기본 기능';
+            const normalized=normalizeImportedKoText(sample);
+            const saved=localStorage.getItem(KO_IMPORTED_KEY);
+            const before=koCard('01001a').text;
+            try {
+                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify({'09001b':{name:'Stephen Strange',text:sample},'01001a':{name:'오류',text:sample}}));
+                refreshKoCards();
+                return {text:koCard('09001b').text, source:koCardSource('09001b'),
+                    protected:koCard('01001a').text===before && koCardSource('01001a')==='verified',
+                    idempotent:normalizeImportedKoText(normalized)===normalized,
+                    unchanged:normalizeImportedKoText(unchanged)};
+            } finally {
+                if(saved===null)localStorage.removeItem(KO_IMPORTED_KEY);
+                else localStorage.setItem(KO_IMPORTED_KEY,saved);
+                refreshKoCards();
+            }
+        }""")
+        self.assertEqual(result["text"], "Captain America · Steve Rogers · Captain Marvel · Carol Danvers · Iron Man · Tony Stark · Black Panther · T'Challa · She-Hulk · Jennifer Walters · Ms. Marvel · Kamala Khan · Bruce Banner · Odinson · Black Widow · Natasha Romanoff · Hawkeye · Clint Barton · Spider-Woman · Jessica Drew · Ant-Man · Scott Lang · Wasp · Nadia Van Dyne · Quicksilver · Pietro Maximoff · Scarlet Witch · Wanda Maximoff · Star-Lord · Peter Quill · Rocket Raccoon · Gamora · Drax · Groot · Monica Rambeau · War Machine · James Rhodes · Miles Morales · Sam Alexander · Ironheart · Riri Williams · Cyclops · Scott Summers · Jean Grey · Wolverine · Gambit · Remy LeBeau · Kitty Pryde · Shadowcat · Ororo Munroe · Piotr Rasputin · Colossus · Deadpool · Wade Wilson")
+        self.assertEqual(result["source"], "imported")
+        self.assertTrue(result["protected"])
+        self.assertTrue(result["idempotent"])
+        self.assertEqual(result["unchanged"], "비전, 폭풍, 로그, 헐크, 레드 헐크, 피닉스, 스파이더센스, 기본 기능")
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {
