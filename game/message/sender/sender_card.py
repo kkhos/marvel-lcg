@@ -238,7 +238,7 @@ class SenderCard:
             super().__init__(trigger=face)
             if not ui_group:
                 text = TransText("{face} exhausted", face=face)
-                self.Present(text, "flip", face, by_effect.this)
+                self.Present(text, "exhaust_card", face, by_effect.this)
 
     class WhenCardWouldReady(TriggerFaceMessage, CanBeInstead, HasEndEventMessage):
         def __init__(self, face: 'CardFace', by_effect: 'Effect', *, ui_group: bool) -> None:
@@ -257,7 +257,7 @@ class SenderCard:
             super().__init__(trigger=face, pre_message=message)
             if not ui_group:
                 text = TransText("{face} readied", face=face)
-                self.Present(text, "flip", face, by_effect.this)
+                self.Present(text, "ready_card", face, by_effect.this)
 
     class WhenCardSetup(TriggerFaceMessage):
         def __init__(self, face: 'CardFace', before_put_setup_cards: bool) -> None:
@@ -943,7 +943,7 @@ class SenderCard:
             if len(faces) > 0:
                 super().__init__(world=faces[0].card.world)
                 text = TransText("{cards} exhausted ({by_effect})", cards=faces, by_effect=by_effect.this)
-                self.Present(text, "flip", *faces, by_effect.this)
+                self.Present(text, "exhaust_card", *faces, by_effect.this)
 
     class AfterCardsSwapDeck_Text(TextMessage):
         def __init__(self, face0: 'CardFace', face1: 'CardFace') -> None:
@@ -993,7 +993,7 @@ class SenderCard:
             super().__init__(world=by_effect.world)
             if len(faces) > 0:
                 text = TransText("{cards} readied ({by_effect})", cards=faces, by_effect=by_effect.this)
-                self.Present(text, "flip", *faces, by_effect.this)
+                self.Present(text, "ready_card", *faces, by_effect.this)
 
     class WhenCardUpdateTrait_Text(TextMessage):
         def __init__(self, face: 'CardFace', diff: int, traits: List["CardFace.TRAITS"], by_effect: 'Effect'):

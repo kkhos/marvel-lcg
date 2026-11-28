@@ -90,7 +90,7 @@ class SenderUnit:
                 text = TransText("{this} was defeated by {killer}", this=this, killer=killer)
             else:
                 text = TransText("{this} was defeated", this=this)
-            self.Present(text, "", *[x for x in [this, killer] if x and x.IsInPlay()])
+            self.Present(text, "destroyed", *[x for x in [this, killer] if x and x.IsInPlay()])
             self.AddRelatedFace(this, killer, would_defeated_message.by_effect)
 
         def IsByConsequential(self) -> bool:
@@ -142,7 +142,7 @@ class SenderUnit:
                 unit.GainForThisActive(by_effect, self.would_atk_message, defense=value)
             super().__init__(trigger=unit, attacker=being_atk_message.attacker, attacked=[unit], defender=unit, would_atk_message=self.would_atk_message, end_event=Message.AfterUnitDefenseInternal)
             text = TransText("{unit} defense against {attacker}", unit=unit, attacker=being_atk_message.attacker)
-            self.Present(text, "", unit, being_atk_message.trigger)
+            self.Present(text, "shield_block", unit, being_atk_message.trigger)
 
         def GainDEFForThisAttack(self, value: int, by_effect: 'Effect'):
             # Fix for "48018", "38016", "03033", "09015"
@@ -269,7 +269,7 @@ class SenderUnit:
             self.value: Final = value
             super().__init__(trigger=trigger, pre_message=pre_message)
             text = TransText("{trigger} lost {value}{symbol}", trigger=trigger, value=value, symbol=Symbol.health)
-            self.Present(text, "damage", trigger)
+            self.Present(text, "hit_heavy" if value >= 4 else "damage", trigger)
             # self.TriggerOnEvent(OnEvent.Health)
 
         @property
@@ -319,7 +319,7 @@ class SenderUnit:
             unit: Final = pre_message.trigger
             super().__init__(trigger=unit, pre_message=pre_message)
             text = TransText("{unit} gained {status} ({by_effect})", unit=unit, status=self.status.symbol_name, by_effect=self.by_effect.this)
-            self.Present(text, "set", unit, self.status, self.by_effect.this)
+            self.Present(text, "status_on", unit, self.status, self.by_effect.this)
             # self.TriggerOnEvent(OnEvent.Status)
 
     # No pre message
@@ -334,7 +334,7 @@ class SenderUnit:
             }[status.name]
             super().__init__(trigger=unit)
             text = TransText("{unit} lost {status} ({by_effect})", unit=unit, status=display_name, by_effect=by_effect.this)
-            self.Present(text, "", unit, status, by_effect.this)
+            self.Present(text, "status_off", unit, status, by_effect.this)
             # self.TriggerOnEvent(OnEvent.Status)
 
     ################################################################################

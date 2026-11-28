@@ -22,7 +22,7 @@ class SenderEnemy:
         def __init__(self, unit: 'Villain', by_effect: 'Effect', message: 'Message.WhenVillainAdvance') -> None:
             super().__init__(trigger=unit, pre_message=message)
             text = TransText("{unit} advanced", unit=unit)
-            self.Present(text, "set", unit)
+            self.Present(text, "villain_advance", unit)
 
     class WhenMinionWouldEngagePlayer(TriggerUnitMessage, HasEndEventMessage):
         def __init__(self, unit: 'Minion', player: 'Player', by_effect: 'Effect') -> None:
@@ -56,7 +56,7 @@ class SenderEnemy:
             self.player: Final = player
             super().__init__(trigger=unit, player=player, pre_message=message)
             text = TransText("{unit} engaged {player}", unit=unit, player=player)
-            self.Present(text, "", unit)
+            self.Present(text, "target", unit)
 
         @property
         def engaged_player(self) -> 'Player':

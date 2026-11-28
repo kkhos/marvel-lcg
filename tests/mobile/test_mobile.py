@@ -418,6 +418,16 @@ class MobileRegression(unittest.TestCase):
         self.assertEqual(result["surge"],"쇄도 · 추가 조우 카드 공개")
         self.assertEqual(self.errors,[])
 
+    def test_bundled_combat_sounds(self):
+        self.goto("/main")
+        for name in ["hit_heavy","shield_block","threat_up","threat_down","status_on","status_off","villain_phase","villain_advance","victory","defeat","ready_card","exhaust_card"]:
+            response = self.page.request.get(f"/{name}.wav")
+            self.assertTrue(response.ok, name)
+            data = response.body()
+            self.assertEqual(data[:4], b"RIFF", name)
+            self.assertEqual(data[8:12], b"WAVE", name)
+            self.assertGreater(len(data), 1000, name)
+
     def test_mobile_forecast_encounter_total(self):
         self.goto("/main")
         result=self.page.evaluate("""async () => {

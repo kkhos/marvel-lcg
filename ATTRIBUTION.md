@@ -33,3 +33,7 @@ Core encounter drafts use English card rules and the owner-provided Korean Learn
 ## Background music
 
 Crown of Embers (Orchestral Version), by [gtherond](https://github.com/gtherond/crown-of-embers), is released under CC0 1.0. Android CI stages the original MP3 from commit `06c4583f2ac7f36ddd5eb244e567e7caa0cfbf83` and verifies Git blob `29ccc3d211295b4475dafae5d39c04a997905ac3` before packaging it as `public/audio/hero-theme.mp3`. The track is optional in the game settings and is not the official Avengers score. For a local build, place the same verified MP3 at that path before packaging.
+
+## Additional combat sound effects
+
+The twelve additional WAV effects (heavy hit, shield, threat up/down, status on/off, villain phase/advance, victory/defeat, card ready/exhaust) are original procedural audio synthesized for this build, not recordings from a Marvel movie or another game. They are provided under CC0 1.0. Existing upstream sounds are retained. The heavy hit threshold (4 health lost) is a presentation choice only, not a game rule.

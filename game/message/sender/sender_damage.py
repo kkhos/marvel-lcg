@@ -710,7 +710,7 @@ class SenderDamage:
             self.prevent_damage: Final = damage
             super().__init__(trigger=who_not_take_damage)
             text = TransText("Prevented {damage} of this damage ({effect})", damage=damage, effect=effect.this)
-            self.Present(text, "banished", who_not_take_damage, effect.this)
+            self.Present(text, "shield_block", who_not_take_damage, effect.this)
 
         def IsFromAttack(self) -> bool:
             return self.would_atk_message != None

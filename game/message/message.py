@@ -14,7 +14,7 @@ CATEGORY_NAME = "MESSAGE"
 
 class Message2(Object):
 
-    SOUND_NAMES = Literal['', 'carddrop', 'activate', 'draw', 'damage', 'equip', 'set', 'negate', 'token', 'reveal', 'destroyed', 'flip', 'shuffle', 'addcounter', 'phase', 'nextturn', 'removecounter', 'gainlp', 'target', 'banished', 'directattack', 'cardpick']
+    SOUND_NAMES = Literal['', 'carddrop', 'activate', 'draw', 'damage', 'equip', 'set', 'negate', 'token', 'reveal', 'destroyed', 'flip', 'shuffle', 'addcounter', 'phase', 'nextturn', 'removecounter', 'gainlp', 'target', 'banished', 'directattack', 'cardpick', 'hit_heavy', 'shield_block', 'threat_up', 'threat_down', 'status_on', 'status_off', 'villain_phase', 'villain_advance', 'victory', 'defeat', 'ready_card', 'exhaust_card']
 
     class MessageKwargs(TypedDict):
         world: 'World'

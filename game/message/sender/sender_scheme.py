@@ -103,7 +103,7 @@ class SenderScheme:
             self.value: Final = value
             super().__init__(trigger=scheme, pre_message=would_message)
             text = TransText("{scheme} gained {value}{symbol}", scheme=scheme, value=value, symbol=Symbol.threat)
-            self.Present(text, "", scheme, by_effect.this)
+            self.Present(text, "threat_up" if value > 0 else "", scheme, by_effect.this)
             # self.TriggerOnEvent(OnEvent.Threat)
 
     class WhenSchemeWouldRemoveThreat(TriggerSchemeMessage, HasEndEventMessage, CanBeInstead):
@@ -133,7 +133,7 @@ class SenderScheme:
             super().__init__(trigger=scheme, pre_message=would_remove_message)
             if scheme.IsInPlay():
                 text = TransText("{scheme} removed {value}{symbol}", scheme=scheme, value=value, symbol=Symbol.threat)
-                self.Present(text, "", scheme, by_effect.this)
+                self.Present(text, "threat_down" if value > 0 else "", scheme, by_effect.this)
             # self.TriggerOnEvent(OnEvent.Threat)
 
         @property
@@ -196,7 +196,7 @@ class SenderScheme:
             self.killer: Final = by_effect.this
             super().__init__(trigger=this, pre_message=message)
             text = TransText("{this} was defeated", this=this)
-            self.Present(text, "", this, by_effect.this)
+            self.Present(text, "destroyed", this, by_effect.this)
 
     # TODO: Pre message
     class AfterUnitDefeatedScheme(TriggerFaceMessage, ThwarterMessage):

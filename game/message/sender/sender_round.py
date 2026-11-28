@@ -92,7 +92,7 @@ class SenderRound:
             if not by_effect.is_rule:
                 reason = f"{reason} ({by_effect.this.name})"
             text = TransText("\n--- Game Over ---\n{reason}\n{win}", reason=reason, win=players_won)
-            self.PresentGameOver(text, "", self.name)
+            self.PresentGameOver(text, "victory" if players_won else "defeat", self.name)
 
     class WhenRoundStart(Message2):
         def __init__(self, turn_cnt: int, world: 'World') -> None:
@@ -123,7 +123,7 @@ class SenderRound:
             self.phase_name = phase_name
             super().__init__(end_event=Message.AfterPhaseBegin, world=world)
             text = TransText("\n--- {phase_name} Phase ---", phase_name=phase_name)
-            self.Present(text, "")
+            self.Present(text, "villain_phase" if phase_name == "Villain" else "")
 
     class AfterPhaseBegin(HasPreEventMessage):
         def __init__(self, message: 'Message.WhenPhaseBegin') -> None:
