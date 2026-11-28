@@ -471,6 +471,36 @@ class MobileRegression(unittest.TestCase):
         self.assertTrue(result["idempotent"])
         self.assertEqual(result["unchanged"], "비전, 폭풍, 로그, 헐크, 레드 헐크, 피닉스, 스파이더센스, 기본 기능")
 
+    def test_ko_imported_character_names_batch_three(self):
+        self.goto("/main")
+        result = self.page.evaluate("""async () => {
+            const {normalizeImportedKoText}=await import('/public/js/marvel/ko-glossary.js');
+            const {KO_IMPORTED_KEY}=await import('/public/js/marvel/ko-local.js');
+            const {koCard,koCardSource,refreshKoCards}=await import('/public/js/marvel/ko-cards.js');
+            const sample="라이노 · 울트론 · 그린 고블린 · 노먼 오스본 · 썬더볼 · 파일 드라이버 · 레드 스컬 · 크로스본즈 · 태스크마스터 · 매그니토 · 타노스 · 마담 하이드라 · 닥터 옥토퍼스 · 미스테리오 · 벌처 · 쇼커 · 샌드맨 · 스콜피온 · 일렉트로 · 툼스톤 · 타이거 샤크 · 라디오액티브 맨 · 멜터 · 바론 제모 · 바론 모르도 · 도르마무 · 프록시마 미드나이트 · 컬 옵시디언 · 코르버스 글레이브 · 에보니 모 · 로난의 · 클로우 · 불도저의 · 렉커 · 휠윈드 · 모도크";
+            const unchanged="독, 전갈, 모래 인간, 클로, 캉, 칸, 로난드, 불도저로 길을 밀다, 고블린 글라이더, 하이드라 군인, 일렉트로닉";
+            const normalized=normalizeImportedKoText(sample);
+            const saved=localStorage.getItem(KO_IMPORTED_KEY);
+            const before=koCard('07004').text;
+            try {
+                localStorage.setItem(KO_IMPORTED_KEY,JSON.stringify({'09001b':{name:'Stephen Strange',text:sample},'07004':{name:'오류',text:sample}}));
+                refreshKoCards();
+                return {text:koCard('09001b').text,source:koCardSource('09001b'),
+                    protected:koCard('07004').text===before && koCardSource('07004')==='verified',
+                    idempotent:normalizeImportedKoText(normalized)===normalized,
+                    unchanged:normalizeImportedKoText(unchanged)};
+            } finally {
+                if(saved===null)localStorage.removeItem(KO_IMPORTED_KEY);
+                else localStorage.setItem(KO_IMPORTED_KEY,saved);
+                refreshKoCards();
+            }
+        }""")
+        self.assertEqual(result["text"], "Rhino · Ultron · Green Goblin · Norman Osborn · Thunderball · Piledriver · Red Skull · Crossbones · Taskmaster · Magneto · Thanos · Madame Hydra · Doctor Octopus · Mysterio · Vulture · Shocker · Sandman · Scorpion · Electro · Tombstone · Tiger Shark · Radioactive Man · Melter · Baron Zemo · Baron Mordo · Dormammu · Proxima Midnight · Cull Obsidian · Corvus Glaive · Ebony Maw · Ronan의 · Klaw · Bulldozer의 · Wrecker · Whirlwind · M.O.D.O.K.")
+        self.assertEqual(result["source"], "imported")
+        self.assertTrue(result["protected"])
+        self.assertTrue(result["idempotent"])
+        self.assertEqual(result["unchanged"], "독, 전갈, 모래 인간, 클로, 캉, 칸, 로난드, 불도저로 길을 밀다, 고블린 글라이더, 하이드라 군인, 일렉트로닉")
+
     def test_ko_bundled_module(self):
         self.goto("/main")
         result = self.page.evaluate("""async () => {

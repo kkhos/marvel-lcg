@@ -282,3 +282,47 @@ MarvelCDB 고정 리비전의 twc_encounter.json 카드 면 60개를 비교했�
 | 콜로서스 | Colossus |
 | 데드풀 | Deadpool |
 | 웨이드 윌슨 | Wade Wilson |
+
+
+### 추가 한글팩 인물명 교정 3차
+
+빌런/하수인 음역 36종 추가 (1~3차 누적 98종). 원문 영문 표기 원칙에 따른 표시 교정으로, 정발 실물 검수 완료를 의미하지 않는다. 일반 명사나 단체명과 충돌할 가능성이 있는 짧은 이름과 확실하지 않은 음역은 별도 카드별 검수 대상으로 남긴다. 일부 이름은 조사/카드 문맥에서만 치환한다. 카드 제목, 실물 검증 번역, 원본 ZIP, 이미지, 게임 엔진은 변경하지 않는다.
+
+| 한글 음역 예 | 영문 표기 |
+|---|---|
+| 라이노 | Rhino |
+| 울트론 | Ultron |
+| 그린 고블린 | Green Goblin |
+| 노먼 오스본 | Norman Osborn |
+| 썬더볼 | Thunderball |
+| 파일 드라이버 | Piledriver |
+| 레드 스컬 | Red Skull |
+| 크로스본즈 | Crossbones |
+| 태스크마스터 | Taskmaster |
+| 매그니토 | Magneto |
+| 타노스 | Thanos |
+| 마담 하이드라 | Madame Hydra |
+| 닥터 옥토퍼스 | Doctor Octopus |
+| 미스테리오 | Mysterio |
+| 벌처 | Vulture |
+| 쇼커 | Shocker |
+| 샌드맨 | Sandman |
+| 스콜피온 | Scorpion |
+| 일렉트로 | Electro |
+| 툼스톤 | Tombstone |
+| 타이거 샤크 | Tiger Shark |
+| 라디오액티브 맨 | Radioactive Man |
+| 멜터 | Melter |
+| 바론 제모 | Baron Zemo |
+| 바론 모르도 | Baron Mordo |
+| 도르마무 | Dormammu |
+| 프록시마 미드나이트 | Proxima Midnight |
+| 컬 옵시디언 | Cull Obsidian |
+| 코르버스 글레이브 | Corvus Glaive |
+| 에보니 모 | Ebony Maw |
+| 로난의 | Ronan |
+| 클로우 | Klaw |
+| 불도저의 | Bulldozer |
+| 렉커 | Wrecker |
+| 휠윈드 | Whirlwind |
+| 모도크 | M.O.D.O.K. |
